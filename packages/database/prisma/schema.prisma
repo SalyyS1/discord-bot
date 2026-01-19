@@ -1,0 +1,404 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============ CORE ============
+
+model Guild {
+  id        String   @id // Discord snowflake
+  name      String
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+
+  // Relations
+  settings        GuildSettings?
+  members         Member[]
+  warnings        Warning[]
+  modLogs         ModLog[]
+  giveaways       Giveaway[]
+  tickets         Ticket[]
+  invites         Invite[]
+  autoResponders  AutoResponder[]
+  tempVoiceConfig TempVoiceConfig?
+  levelRoles      LevelRole[]
+  suggestions     Suggestion[]
+  stickyMessages  StickyMessage[]
+  blacklist       Blacklist[]
+}
+
+model GuildSettings {
+  guildId String @id
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  // Channels
+  logChannelId         String?
+  modLogChannelId      String?
+  welcomeChannelId     String?
+  goodbyeChannelId     String?
+  suggestionsChannelId String?
+  ticketCategoryId     String?
+
+  // Roles
+  muteRoleId     String?
+  autoRoleIds    String[]  @default([])
+  verifiedRoleId String?
+
+  // Features
+  antiLinkEnabled   Boolean  @default(false)
+  antiSpamEnabled   Boolean  @default(false)
+  antiLinkWhitelist String[] @default([])
+  levelingEnabled   Boolean  @default(true)
+  xpCooldownSeconds Int      @default(60)
+  xpMin             Int      @default(15)
+  xpMax             Int      @default(25)
+
+  // Welcome/Goodbye
+  welcomeMessage      String?
+  welcomeImageEnabled Boolean @default(false)
+  goodbyeMessage      String?
+  goodbyeImageEnabled Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============ MEMBERS ============
+
+model Member {
+  id        String @id @default(cuid())
+  discordId String
+  guildId   String
+  guild     Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  // Leveling
+  xp            Int       @default(0)
+  level         Int       @default(0)
+  totalMessages Int       @default(0)
+  lastXpGain    DateTime?
+
+  // Tracking
+  invitedBy   String?
+  inviteCount Int     @default(0)
+  reputation  Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  warnings        Warning[]
+  giveawayEntries GiveawayEntry[]
+  tickets         Ticket[]
+
+  @@unique([discordId, guildId])
+  @@index([guildId, xp(sort: Desc)])
+}
+
+// ============ MODERATION ============
+
+model Warning {
+  id       String @id @default(cuid())
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  guildId  String
+  guild    Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  moderatorId String
+  reason      String
+  severity    Int       @default(1) // 1-3 scale
+  active      Boolean   @default(true)
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([guildId, memberId])
+}
+
+model ModLog {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  action      ModAction
+  targetId    String
+  moderatorId String
+  reason      String?
+  duration    Int?      // seconds, for timeouts
+  metadata    Json?     // Extra data (message content, etc.)
+
+  createdAt DateTime @default(now())
+
+  @@index([guildId, createdAt(sort: Desc)])
+}
+
+enum ModAction {
+  WARN
+  TIMEOUT
+  KICK
+  BAN
+  UNBAN
+  PURGE
+  MUTE
+  UNMUTE
+}
+
+// ============ GIVEAWAYS ============
+
+model Giveaway {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  channelId String
+  messageId String?
+  hostId    String
+
+  prize       String
+  prizeSecret String? // Hidden until win
+  winnerCount Int     @default(1)
+
+  // Requirements
+  requiredRoleIds    String[] @default([])
+  requiredInvites    Int      @default(0)
+  requiredLevel      Int      @default(0)
+  requiredReputation Int      @default(0)
+
+  // State
+  status  GiveawayStatus @default(ACTIVE)
+  endsAt  DateTime
+  endedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  entries GiveawayEntry[]
+  winners GiveawayWinner[]
+
+  @@index([guildId, status])
+  @@index([endsAt])
+}
+
+enum GiveawayStatus {
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+model GiveawayEntry {
+  id         String   @id @default(cuid())
+  giveawayId String
+  giveaway   Giveaway @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+  memberId   String
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  entries   Int      @default(1) // Bonus entries
+  createdAt DateTime @default(now())
+
+  @@unique([giveawayId, memberId])
+}
+
+model GiveawayWinner {
+  id         String   @id @default(cuid())
+  giveawayId String
+  giveaway   Giveaway @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+  userId     String
+
+  claimed  Boolean @default(false)
+  rerolled Boolean @default(false)
+  feedback String?
+
+  createdAt DateTime @default(now())
+}
+
+// ============ TICKETS ============
+
+model Ticket {
+  id       String @id @default(cuid())
+  guildId  String
+  guild    Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  channelId String       @unique
+  category  String       @default("general")
+  subject   String?
+  status    TicketStatus @default(OPEN)
+  claimedBy String?
+  closedBy  String?
+  closedAt  DateTime?
+
+  // Transcript
+  transcriptUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([guildId, status])
+}
+
+enum TicketStatus {
+  OPEN
+  CLAIMED
+  CLOSED
+}
+
+// ============ INVITES ============
+
+model Invite {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  code      String
+  inviterId String
+  uses      Int       @default(0)
+  maxUses   Int?
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guildId, code])
+}
+
+// ============ AUTO RESPONDER ============
+
+model AutoResponder {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  trigger         String
+  triggerType     TriggerType  @default(CONTAINS)
+  response        String
+  responseType    ResponseType @default(TEXT)
+  cooldownSeconds Int          @default(0)
+  enabled         Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@index([guildId, enabled])
+}
+
+enum TriggerType {
+  EXACT
+  CONTAINS
+  STARTS_WITH
+  ENDS_WITH
+  REGEX
+}
+
+enum ResponseType {
+  TEXT
+  EMBED
+  REACTION
+}
+
+// ============ TEMP VOICE ============
+
+model TempVoiceConfig {
+  guildId String @id
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  creatorChannelId String
+  categoryId       String
+  defaultName      String @default("{user}'s Channel")
+  defaultLimit     Int    @default(0)
+
+  createdAt DateTime @default(now())
+}
+
+model TempVoiceChannel {
+  id        String  @id @default(cuid())
+  channelId String  @unique
+  guildId   String
+  ownerId   String
+  name      String
+  userLimit Int     @default(0)
+  locked    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+// ============ LEVELING ============
+
+model LevelRole {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  level  Int
+  roleId String
+
+  @@unique([guildId, level])
+}
+
+// ============ SUGGESTIONS ============
+
+model Suggestion {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  messageId String           @unique
+  authorId  String
+  content   String
+  status    SuggestionStatus @default(PENDING)
+
+  upvotes   Int @default(0)
+  downvotes Int @default(0)
+
+  staffNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  DENIED
+  IMPLEMENTED
+}
+
+// ============ STICKY MESSAGES ============
+
+model StickyMessage {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  channelId        String  @unique
+  currentMessageId String?
+  content          String
+  embedJson        Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============ BLACKLIST ============
+
+model Blacklist {
+  id      String @id @default(cuid())
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  userId    String
+  type      BlacklistType
+  reason    String?
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId, type])
+}
+
+enum BlacklistType {
+  GIVEAWAY
+  TICKET
+  COMMAND
+}

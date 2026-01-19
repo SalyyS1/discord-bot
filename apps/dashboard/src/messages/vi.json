@@ -1,0 +1,123 @@
+{
+  "common": {
+    "title": "Bảng Điều Khiển Bot Discord",
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "add": "Thêm",
+    "search": "Tìm kiếm",
+    "settings": "Cài đặt",
+    "dashboard": "Bảng điều khiển",
+    "logout": "Đăng xuất",
+    "enabled": "Đã bật",
+    "disabled": "Đã tắt",
+    "success": "Thành công",
+    "error": "Lỗi",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "create": "Tạo mới",
+    "update": "Cập nhật"
+  },
+  "nav": {
+    "overview": "Tổng quan",
+    "guilds": "Máy chủ",
+    "settings": "Cài đặt",
+    "moderation": "Kiểm duyệt",
+    "welcome": "Chào mừng",
+    "leveling": "Cấp độ",
+    "giveaway": "Giveaway",
+    "tickets": "Phiếu hỗ trợ",
+    "autoresponder": "Tự động phản hồi",
+    "tempvoice": "Kênh thoại tạm"
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "username": "Email",
+    "password": "Mật khẩu",
+    "submit": "Đăng nhập",
+    "error": "Thông tin đăng nhập không hợp lệ",
+    "welcome": "Chào mừng trở lại"
+  },
+  "home": {
+    "welcome": "Chào mừng đến với Bảng Điều Khiển",
+    "description": "Quản lý tất cả cài đặt bot của bạn từ một nơi",
+    "stats": {
+      "members": "Tổng thành viên",
+      "messages": "Tin nhắn hôm nay",
+      "giveaways": "Giveaway đang chạy",
+      "modActions": "Hành động kiểm duyệt"
+    }
+  },
+  "welcome": {
+    "title": "Tin nhắn Chào mừng & Tạm biệt",
+    "description": "Cấu hình tin nhắn chào mừng và tạm biệt",
+    "welcomeChannel": "Kênh chào mừng",
+    "welcomeMessage": "Tin nhắn chào mừng",
+    "welcomeImage": "Bật ảnh chào mừng",
+    "goodbyeChannel": "Kênh tạm biệt",
+    "goodbyeMessage": "Tin nhắn tạm biệt",
+    "goodbyeImage": "Bật ảnh tạm biệt",
+    "variables": "Biến: {{user}}, {{server}}, {{memberCount}}"
+  },
+  "moderation": {
+    "title": "Cài đặt Kiểm duyệt",
+    "description": "Cấu hình tính năng tự động kiểm duyệt",
+    "antiSpam": "Chống Spam",
+    "antiSpamDesc": "Tự động phát hiện và xử lý tin nhắn spam",
+    "antiLink": "Chống Link",
+    "antiLinkDesc": "Tự động phát hiện và xóa link",
+    "threshold": "Ngưỡng tin nhắn",
+    "interval": "Khoảng thời gian (ms)"
+  },
+  "leveling": {
+    "title": "Hệ thống Cấp độ",
+    "description": "Cấu hình XP và cài đặt cấp độ",
+    "enable": "Bật Cấp độ",
+    "enableDesc": "Thành viên nhận XP khi gửi tin nhắn và lên cấp",
+    "xpSettings": "Cài đặt XP",
+    "xpMin": "XP tối thiểu mỗi tin nhắn",
+    "xpMax": "XP tối đa mỗi tin nhắn",
+    "cooldown": "Thời gian chờ (giây)"
+  },
+  "giveaways": {
+    "title": "Quản lý Giveaway",
+    "description": "Quản lý giveaway của máy chủ",
+    "active": "Đang chạy",
+    "ended": "Đã kết thúc",
+    "total": "Tổng cộng",
+    "noActive": "Không có giveaway đang chạy",
+    "noEnded": "Không có giveaway đã kết thúc"
+  },
+  "tickets": {
+    "title": "Hệ thống Phiếu hỗ trợ",
+    "description": "Quản lý phiếu hỗ trợ",
+    "open": "Đang mở",
+    "closed": "Đã đóng",
+    "categoryId": "ID Danh mục Phiếu",
+    "categoryDesc": "Phiếu sẽ được tạo trong danh mục này"
+  },
+  "autoresponder": {
+    "title": "Tự động Phản hồi",
+    "description": "Phản hồi tự động theo từ khóa",
+    "trigger": "Từ kích hoạt",
+    "triggerType": "Loại kích hoạt",
+    "response": "Phản hồi",
+    "responseType": "Loại phản hồi",
+    "cooldown": "Thời gian chờ (giây)",
+    "noResponders": "Chưa có phản hồi tự động nào"
+  },
+  "tempvoice": {
+    "title": "Kênh Thoại Tạm thời",
+    "description": "Kênh thoại tạo-khi-tham-gia",
+    "creatorChannel": "ID Kênh Tạo",
+    "creatorDesc": "Người dùng tham gia kênh này để tạo kênh riêng",
+    "category": "ID Danh mục",
+    "categoryDesc": "Kênh mới sẽ được tạo trong danh mục này",
+    "defaultName": "Tên kênh mặc định",
+    "defaultLimit": "Giới hạn người dùng mặc định",
+    "howItWorks": "Cách hoạt động"
+  }
+}

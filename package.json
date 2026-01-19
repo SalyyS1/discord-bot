@@ -1,0 +1,39 @@
+{
+  "name": "discord-bot-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Discord bot with web dashboard monorepo",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:generate": "turbo db:generate",
+    "db:push": "turbo db:push",
+    "db:migrate": "turbo db:migrate",
+    "db:studio": "pnpm --filter @repo/database db:studio",
+    "bot:dev": "turbo dev --filter=@repo/bot",
+    "bot:build": "turbo build --filter=@repo/bot",
+    "bot:start": "pnpm --filter @repo/bot start",
+    "bot:deploy": "pnpm --filter @repo/bot deploy",
+    "dashboard:dev": "turbo dev --filter=@repo/dashboard",
+    "dashboard:build": "turbo build --filter=@repo/dashboard",
+    "dashboard:start": "pnpm --filter @repo/dashboard start"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.0"
+  }
+}

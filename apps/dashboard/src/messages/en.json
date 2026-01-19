@@ -1,0 +1,123 @@
+{
+  "common": {
+    "title": "Discord Bot Dashboard",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "success": "Success",
+    "error": "Error",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "create": "Create",
+    "update": "Update"
+  },
+  "nav": {
+    "overview": "Overview",
+    "guilds": "Servers",
+    "settings": "Settings",
+    "moderation": "Moderation",
+    "welcome": "Welcome",
+    "leveling": "Leveling",
+    "giveaway": "Giveaway",
+    "tickets": "Tickets",
+    "autoresponder": "Auto Responder",
+    "tempvoice": "Temp Voice"
+  },
+  "login": {
+    "title": "Login",
+    "username": "Email",
+    "password": "Password",
+    "submit": "Sign In",
+    "error": "Invalid credentials",
+    "welcome": "Welcome back"
+  },
+  "home": {
+    "welcome": "Welcome to the Dashboard",
+    "description": "Manage all your bot settings from one place",
+    "stats": {
+      "members": "Total Members",
+      "messages": "Messages Today",
+      "giveaways": "Active Giveaways",
+      "modActions": "Mod Actions"
+    }
+  },
+  "welcome": {
+    "title": "Welcome & Goodbye Messages",
+    "description": "Configure welcome and goodbye messages",
+    "welcomeChannel": "Welcome Channel",
+    "welcomeMessage": "Welcome Message",
+    "welcomeImage": "Enable Welcome Image",
+    "goodbyeChannel": "Goodbye Channel",
+    "goodbyeMessage": "Goodbye Message",
+    "goodbyeImage": "Enable Goodbye Image",
+    "variables": "Variables: {{user}}, {{server}}, {{memberCount}}"
+  },
+  "moderation": {
+    "title": "Moderation Settings",
+    "description": "Configure auto-moderation features",
+    "antiSpam": "Anti-Spam",
+    "antiSpamDesc": "Automatically detect and handle spam messages",
+    "antiLink": "Anti-Link",
+    "antiLinkDesc": "Automatically detect and remove links",
+    "threshold": "Message Threshold",
+    "interval": "Time Window (ms)"
+  },
+  "leveling": {
+    "title": "Leveling System",
+    "description": "Configure XP and leveling settings",
+    "enable": "Enable Leveling",
+    "enableDesc": "Members earn XP for sending messages and level up",
+    "xpSettings": "XP Settings",
+    "xpMin": "Min XP per Message",
+    "xpMax": "Max XP per Message",
+    "cooldown": "Cooldown (seconds)"
+  },
+  "giveaways": {
+    "title": "Giveaway Management",
+    "description": "Manage server giveaways",
+    "active": "Active",
+    "ended": "Ended",
+    "total": "Total",
+    "noActive": "No active giveaways",
+    "noEnded": "No ended giveaways"
+  },
+  "tickets": {
+    "title": "Ticket System",
+    "description": "Manage support tickets",
+    "open": "Open",
+    "closed": "Closed",
+    "categoryId": "Ticket Category ID",
+    "categoryDesc": "Tickets will be created under this category"
+  },
+  "autoresponder": {
+    "title": "Auto Responders",
+    "description": "Automatic keyword responses",
+    "trigger": "Trigger",
+    "triggerType": "Trigger Type",
+    "response": "Response",
+    "responseType": "Response Type",
+    "cooldown": "Cooldown (seconds)",
+    "noResponders": "No auto-responders configured"
+  },
+  "tempvoice": {
+    "title": "Temp Voice Channels",
+    "description": "Join-to-create voice channels",
+    "creatorChannel": "Creator Channel ID",
+    "creatorDesc": "Users join this channel to create their own",
+    "category": "Category ID",
+    "categoryDesc": "New channels will be created in this category",
+    "defaultName": "Default Channel Name",
+    "defaultLimit": "Default User Limit",
+    "howItWorks": "How it works"
+  }
+}
