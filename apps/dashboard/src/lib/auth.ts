@@ -17,6 +17,7 @@ const appUrl = getAppUrl();
 // Trusted origins - include common dev ports
 const trustedOrigins = [
   appUrl,
+  'https://sylabot.site',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
