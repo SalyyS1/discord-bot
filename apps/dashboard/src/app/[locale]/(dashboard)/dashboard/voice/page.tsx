@@ -1,0 +1,495 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import {
+    Loader2, Save, Mic, AlertCircle, Server, Users, Volume2,
+    Settings, Lock, Eye, EyeOff, Hash, Trash2, Clock, Shield,
+    Play, Pause, UserPlus, UserMinus, Crown, Zap
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { ChannelSelector } from '@/components/selectors/channel-selector';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import { useGuildContext } from '@/context/guild-context';
+import { useGuilds } from '@/hooks';
+import { PanelSender } from '@/components/panels/panel-sender';
+
+// ═══════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════
+
+interface VoiceSettings {
+    tempVoiceEnabled: boolean;
+    tempVoiceCreatorId: string | null;
+    tempVoiceCategoryId: string | null;
+    voiceDefaultLimit: number;
+    voiceDefaultBitrate: number;
+    voiceDefaultRegion: string | null;
+    voiceLockByDefault: boolean;
+    voiceAutoDeleteEmpty: boolean;
+    activeSessions: number;
+}
+
+// ═══════════════════════════════════════════════
+// Constants
+// ═══════════════════════════════════════════════
+
+const BITRATE_OPTIONS = [
+    { value: 64, label: '64 kbps (Low)', description: 'Basic quality' },
+    { value: 96, label: '96 kbps (Normal)', description: 'Standard quality' },
+    { value: 128, label: '128 kbps (High)', description: 'High quality' },
+    { value: 256, label: '256 kbps (Best)', description: 'Premium quality' },
+    { value: 384, label: '384 kbps (Boost)', description: 'Requires Boost Lv3' },
+];
+
+const VOICE_REGIONS = [
+    { value: 'auto', label: '🌐 Automatic' },
+    { value: 'brazil', label: '🇧🇷 Brazil' },
+    { value: 'hongkong', label: '🇭🇰 Hong Kong' },
+    { value: 'india', label: '🇮🇳 India' },
+    { value: 'japan', label: '🇯🇵 Japan' },
+    { value: 'rotterdam', label: '🇳🇱 Rotterdam' },
+    { value: 'russia', label: '🇷🇺 Russia' },
+    { value: 'singapore', label: '🇸🇬 Singapore' },
+    { value: 'southafrica', label: '🇿🇦 South Africa' },
+    { value: 'sydney', label: '🇦🇺 Sydney' },
+    { value: 'us-central', label: '🇺🇸 US Central' },
+    { value: 'us-east', label: '🇺🇸 US East' },
+    { value: 'us-south', label: '🇺🇸 US South' },
+    { value: 'us-west', label: '🇺🇸 US West' },
+];
+
+// ═══════════════════════════════════════════════
+// Component
+// ═══════════════════════════════════════════════
+
+export default function VoicePage() {
+    const [activeTab, setActiveTab] = useState('settings');
+    const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const [settings, setSettings] = useState<VoiceSettings>({
+        tempVoiceEnabled: false,
+        tempVoiceCreatorId: null,
+        tempVoiceCategoryId: null,
+        voiceDefaultLimit: 0,
+        voiceDefaultBitrate: 64,
+        voiceDefaultRegion: null,
+        voiceLockByDefault: false,
+        voiceAutoDeleteEmpty: true,
+        activeSessions: 0,
+    });
+
+    const { selectedGuildId, setSelectedGuildId } = useGuildContext();
+    const { data: guilds, isLoading: guildsLoading, error: guildsError } = useGuilds();
+
+    // Fetch settings
+    const fetchSettings = useCallback(async () => {
+        if (!selectedGuildId) return;
+        setLoading(true);
+
+        try {
+            const res = await fetch(`/api/guilds/${selectedGuildId}/voice`);
+            if (res.ok) {
+                const { data } = await res.json();
+                if (data) {
+                    setSettings({
+                        tempVoiceEnabled: data.tempVoiceEnabled ?? false,
+                        tempVoiceCreatorId: data.tempVoiceCreatorId,
+                        tempVoiceCategoryId: data.tempVoiceCategoryId,
+                        voiceDefaultLimit: data.voiceDefaultLimit ?? 0,
+                        voiceDefaultBitrate: data.voiceDefaultBitrate ?? 64,
+                        voiceDefaultRegion: data.voiceDefaultRegion,
+                        voiceLockByDefault: data.voiceLockByDefault ?? false,
+                        voiceAutoDeleteEmpty: data.voiceAutoDeleteEmpty ?? true,
+                        activeSessions: data.activeSessions ?? 0,
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch voice settings:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedGuildId]);
+
+    useEffect(() => {
+        if (!selectedGuildId && guilds?.length) {
+            setSelectedGuildId(guilds[0].id);
+        }
+    }, [guilds, selectedGuildId, setSelectedGuildId]);
+
+    useEffect(() => {
+        fetchSettings();
+    }, [fetchSettings]);
+
+    const handleSave = async () => {
+        if (!selectedGuildId) return;
+        setSaving(true);
+
+        try {
+            const res = await fetch(`/api/guilds/${selectedGuildId}/voice`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings),
+            });
+
+            if (res.ok) {
+                toast.success('Voice settings saved!');
+            } else {
+                toast.error('Failed to save settings');
+            }
+        } catch {
+            toast.error('Failed to save settings');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (guildsLoading || loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+            </div>
+        );
+    }
+
+    if (guildsError || !guilds?.length) {
+        return (
+            <Alert variant="destructive" className="bg-red-500/10 border-red-500/30">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    {guildsError ? 'Failed to load servers' : 'No servers found.'}
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    return (
+        <div className="space-y-8 max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="icon-badge icon-badge-blue">
+                        <Mic className="h-7 w-7 text-blue-400" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-white">Voice Management</h1>
+                        <p className="text-gray-400 mt-1">Temp voice channels & user controls</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <Button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold"
+                    >
+                        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                    </Button>
+
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+                        <Server className="h-5 w-5 text-gray-400" />
+                        <Select value={selectedGuildId || ''} onValueChange={setSelectedGuildId}>
+                            <SelectTrigger className="w-[180px] bg-transparent border-0 text-white focus:ring-0">
+                                <SelectValue placeholder="Select server" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#1a1d26] border-white/10">
+                                {guilds.map((guild) => (
+                                    <SelectItem key={guild.id} value={guild.id} className="text-white hover:bg-white/10">
+                                        {guild.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="surface-card border-blue-500/20">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <Mic className="h-5 w-5 text-blue-400" />
+                            <div>
+                                <p className="text-xl font-bold text-white">{settings.activeSessions}</p>
+                                <p className="text-xs text-gray-500">Active Channels</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="surface-card border-emerald-500/20">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <Volume2 className="h-5 w-5 text-emerald-400" />
+                            <div>
+                                <p className="text-xl font-bold text-white">{settings.voiceDefaultBitrate} kbps</p>
+                                <p className="text-xs text-gray-500">Default Bitrate</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="surface-card border-purple-500/20">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <Users className="h-5 w-5 text-purple-400" />
+                            <div>
+                                <p className="text-xl font-bold text-white">
+                                    {settings.voiceDefaultLimit === 0 ? '∞' : settings.voiceDefaultLimit}
+                                </p>
+                                <p className="text-xs text-gray-500">Default Limit</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="surface-card border-amber-500/20">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            {settings.voiceLockByDefault ? (
+                                <Lock className="h-5 w-5 text-amber-400" />
+                            ) : (
+                                <Zap className="h-5 w-5 text-amber-400" />
+                            )}
+                            <div>
+                                <p className="text-xl font-bold text-white">
+                                    {settings.voiceLockByDefault ? 'Locked' : 'Open'}
+                                </p>
+                                <p className="text-xs text-gray-500">Default Mode</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="bg-[hsl(200_22%_16%)] border border-[hsl(200_20%_25%)] p-1">
+                    <TabsTrigger value="settings" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-md">
+                        <Settings className="w-4 h-4 mr-2" /> Settings
+                    </TabsTrigger>
+                    <TabsTrigger value="commands" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-md">
+                        <Crown className="w-4 h-4 mr-2" /> Commands
+                    </TabsTrigger>
+                    <TabsTrigger value="panel" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-md">
+                        <Mic className="w-4 h-4 mr-2" /> Send Panel
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Settings Tab */}
+                <TabsContent value="settings" className="space-y-6 mt-6">
+                    <div className="grid lg:grid-cols-2 gap-6">
+                        {/* Enable Toggle */}
+                        <Card className="surface-card overflow-hidden">
+                            <CardHeader className="bg-gradient-to-r from-blue-500/10 to-transparent border-b border-white/5 pb-4">
+                                <div className="flex items-center gap-3">
+                                    <Shield className="w-5 h-5 text-blue-400" />
+                                    <div>
+                                        <CardTitle className="text-white">System Status</CardTitle>
+                                        <CardDescription className="text-gray-400">Enable temp voice channels</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-6 space-y-4">
+                                <div className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <Mic className="h-5 w-5 text-blue-400" />
+                                        <div>
+                                            <p className="text-white font-medium">Enable Voice Management</p>
+                                            <p className="text-gray-400 text-sm">Users can create temp voice channels</p>
+                                        </div>
+                                    </div>
+                                    <Switch
+                                        checked={settings.tempVoiceEnabled}
+                                        onCheckedChange={(checked) => setSettings(s => ({ ...s, tempVoiceEnabled: checked }))}
+                                    />
+                                </div>
+
+                                {settings.tempVoiceEnabled && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label className="text-gray-300">Join-to-Create Channel</Label>
+                                            <ChannelSelector
+                                                guildId={selectedGuildId || ''}
+                                                value={settings.tempVoiceCreatorId || ''}
+                                                onChange={(value) => setSettings(s => ({ ...s, tempVoiceCreatorId: value }))}
+                                                types={['voice']}
+                                                placeholder="Select voice channel..."
+                                            />
+                                            <p className="text-xs text-gray-500">Users join this channel to create their own</p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-gray-300">Category for Temp Channels</Label>
+                                            <ChannelSelector
+                                                guildId={selectedGuildId || ''}
+                                                value={settings.tempVoiceCategoryId || ''}
+                                                onChange={(value) => setSettings(s => ({ ...s, tempVoiceCategoryId: value }))}
+                                                types={['category']}
+                                                placeholder="Select category..."
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Defaults */}
+                        <Card className="surface-card overflow-hidden">
+                            <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-transparent border-b border-white/5 pb-4">
+                                <div className="flex items-center gap-3">
+                                    <Settings className="w-5 h-5 text-emerald-400" />
+                                    <div>
+                                        <CardTitle className="text-white">Default Settings</CardTitle>
+                                        <CardDescription className="text-gray-400">Applied to new channels</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4 pt-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-gray-300">User Limit</Label>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={settings.voiceDefaultLimit}
+                                            onChange={e => setSettings(s => ({ ...s, voiceDefaultLimit: parseInt(e.target.value) || 0 }))}
+                                            className="bg-[#1a1d26] border-white/10 text-white"
+                                        />
+                                        <p className="text-xs text-gray-500">0 = unlimited</p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-gray-300">Bitrate</Label>
+                                        <Select
+                                            value={settings.voiceDefaultBitrate.toString()}
+                                            onValueChange={(v) => setSettings(s => ({ ...s, voiceDefaultBitrate: parseInt(v) }))}
+                                        >
+                                            <SelectTrigger className="bg-[#1a1d26] border-white/10 text-white">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-[#1a1d26] border-white/10">
+                                                {BITRATE_OPTIONS.map((opt) => (
+                                                    <SelectItem key={opt.value} value={opt.value.toString()} className="text-white">
+                                                        {opt.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Voice Region</Label>
+                                    <Select
+                                        value={settings.voiceDefaultRegion || 'auto'}
+                                        onValueChange={(v) => setSettings(s => ({ ...s, voiceDefaultRegion: v === 'auto' ? null : v }))}
+                                    >
+                                        <SelectTrigger className="bg-[#1a1d26] border-white/10 text-white">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#1a1d26] border-white/10">
+                                            {VOICE_REGIONS.map((opt) => (
+                                                <SelectItem key={opt.value} value={opt.value} className="text-white">
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-3 pt-2">
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                                        <div className="flex items-center gap-2">
+                                            <Lock className="h-4 w-4 text-amber-400" />
+                                            <span className="text-sm text-gray-300">Lock by default</span>
+                                        </div>
+                                        <Switch
+                                            checked={settings.voiceLockByDefault}
+                                            onCheckedChange={(checked) => setSettings(s => ({ ...s, voiceLockByDefault: checked }))}
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                                        <div className="flex items-center gap-2">
+                                            <Trash2 className="h-4 w-4 text-red-400" />
+                                            <span className="text-sm text-gray-300">Auto-delete when empty</span>
+                                        </div>
+                                        <Switch
+                                            checked={settings.voiceAutoDeleteEmpty}
+                                            onCheckedChange={(checked) => setSettings(s => ({ ...s, voiceAutoDeleteEmpty: checked }))}
+                                        />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                {/* Commands Tab */}
+                <TabsContent value="commands" className="space-y-6 mt-6">
+                    <Card className="surface-card">
+                        <CardHeader>
+                            <CardTitle className="text-white flex items-center gap-2">
+                                <Crown className="h-5 w-5 text-purple-400" />
+                                Available Commands
+                            </CardTitle>
+                            <CardDescription>Commands users can use to control their voice channels</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {[
+                                    { cmd: '/voice settings', desc: 'Open control panel with buttons', icon: Settings },
+                                    { cmd: '/voice bitrate', desc: 'Set audio quality (64-384 kbps)', icon: Volume2 },
+                                    { cmd: '/voice limit', desc: 'Set user limit (0-99)', icon: Users },
+                                    { cmd: '/voice permit @user', desc: 'Allow user to join locked channel', icon: UserPlus },
+                                    { cmd: '/voice reject @user', desc: 'Kick and block user', icon: UserMinus },
+                                    { cmd: '/voice claim', desc: 'Claim ownership if owner left', icon: Crown },
+                                    { cmd: '/voice transfer @user', desc: 'Transfer ownership', icon: Zap },
+                                    { cmd: '/voice hide', desc: 'Hide channel from others', icon: EyeOff },
+                                    { cmd: '/voice show', desc: 'Make channel visible', icon: Eye },
+                                    { cmd: '/lock', desc: 'Lock the channel', icon: Lock },
+                                    { cmd: '/unlock', desc: 'Unlock the channel', icon: Lock },
+                                    { cmd: '/rename', desc: 'Rename the channel', icon: Hash },
+                                ].map(({ cmd, desc, icon: Icon }) => (
+                                    <div key={cmd} className="flex items-start gap-3 p-3 rounded-lg bg-white/5">
+                                        <Icon className="h-5 w-5 text-purple-400 mt-0.5" />
+                                        <div>
+                                            <code className="text-sm text-white font-mono bg-purple-500/20 px-2 py-0.5 rounded">
+                                                {cmd}
+                                            </code>
+                                            <p className="text-xs text-gray-400 mt-1">{desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Panel Tab */}
+                <TabsContent value="panel" className="space-y-6 mt-6">
+                    <PanelSender guildId={selectedGuildId || ''} type="voice" />
+                </TabsContent>
+            </Tabs>
+        </div>
+    );
+}
