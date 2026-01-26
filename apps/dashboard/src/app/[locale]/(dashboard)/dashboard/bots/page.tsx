@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BotCard } from '@/components/bots/bot-card';
-import { 
-  Plus, 
-  Bot, 
-  Loader2, 
+import {
+  Plus,
+  Bot,
+  Loader2,
   Sparkles,
   Shield,
   Zap,
@@ -113,9 +111,9 @@ export default function BotsPage() {
             Manage your custom Discord bots
           </p>
         </div>
-        
+
         <Link href="/dashboard/bots/new">
-          <Button 
+          <Button
             className="bg-indigo-600 hover:bg-indigo-700"
             disabled={!canCreateBot}
           >
@@ -169,7 +167,7 @@ export default function BotsPage() {
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">No bots yet</h3>
             <p className="text-gray-400 mb-6 max-w-md mx-auto">
-              Create your first custom Discord bot by providing your own bot token. 
+              Create your first custom Discord bot by providing your own bot token.
               Your data stays isolated and secure.
             </p>
             <Link href="/dashboard/bots/new">

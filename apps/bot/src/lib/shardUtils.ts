@@ -20,7 +20,7 @@ export async function broadcastEval<T>(
   }
 
   // Cast to string for shard.broadcastEval
-  return client.shard.broadcastEval(fn);
+  return client.shard.broadcastEval(fn) as Promise<T[]>;
 }
 
 /**

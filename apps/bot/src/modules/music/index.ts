@@ -4,9 +4,15 @@
  */
 
 import { Player, GuildQueue, Track, useMainPlayer } from 'discord-player';
-import { Client, EmbedBuilder, TextChannel, VoiceChannel } from 'discord.js';
+import { Client, EmbedBuilder, TextChannel, VoiceChannel, User } from 'discord.js';
 import { prisma } from '../../lib/prisma.js';
 import { logger } from '../../utils/logger.js';
+
+// Define metadata interface for type safety
+interface QueueMetadata {
+    channel?: TextChannel;
+    requestedBy?: User;
+}
 
 let player: Player | null = null;
 
@@ -27,7 +33,7 @@ export async function initMusicPlayer(client: Client): Promise<Player> {
         if (!settings?.announceTrackChange) return;
 
         const embed = createNowPlayingEmbed(track, queue);
-        const channel = queue.metadata?.channel as TextChannel;
+        const channel = (queue.metadata as QueueMetadata)?.channel;
 
         if (channel) {
             try {
@@ -42,7 +48,7 @@ export async function initMusicPlayer(client: Client): Promise<Player> {
     });
 
     player.events.on('audioTrackAdd', (queue: GuildQueue, track: Track) => {
-        const channel = queue.metadata?.channel as TextChannel;
+        const channel = (queue.metadata as QueueMetadata)?.channel;
         if (channel) {
             channel.send({
                 embeds: [
@@ -57,7 +63,7 @@ export async function initMusicPlayer(client: Client): Promise<Player> {
     });
 
     player.events.on('emptyQueue', (queue: GuildQueue) => {
-        const channel = queue.metadata?.channel as TextChannel;
+        const channel = (queue.metadata as QueueMetadata)?.channel;
         if (channel) {
             channel.send({
                 embeds: [
@@ -73,7 +79,7 @@ export async function initMusicPlayer(client: Client): Promise<Player> {
         const settings = await getMusicSettings(queue.guild.id);
         if (settings?.stay24_7) return; // Don't disconnect if 24/7 mode
 
-        const channel = queue.metadata?.channel as TextChannel;
+        const channel = (queue.metadata as QueueMetadata)?.channel;
         if (channel) {
             channel.send({
                 embeds: [
@@ -87,7 +93,7 @@ export async function initMusicPlayer(client: Client): Promise<Player> {
 
     player.events.on('playerError', (queue: GuildQueue, error: Error) => {
         logger.error(`Player error in ${queue.guild.id}:`, error);
-        const channel = queue.metadata?.channel as TextChannel;
+        const channel = (queue.metadata as QueueMetadata)?.channel;
         if (channel) {
             channel.send({
                 embeds: [

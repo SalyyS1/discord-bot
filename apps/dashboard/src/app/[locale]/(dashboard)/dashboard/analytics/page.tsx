@@ -8,7 +8,6 @@ import {
   MessageSquare,
   Ticket,
   Star,
-  Gift,
   TrendingUp,
   TrendingDown,
   BarChart3,
@@ -31,7 +30,7 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, change, changePercent, icon: Icon, loading }: MetricCardProps) {
   const isPositive = change !== undefined && change >= 0;
-  
+
   return (
     <Card className="bg-surface-1 border-white/10">
       <CardContent className="pt-6">
@@ -60,7 +59,7 @@ function MetricCard({ title, value, change, changePercent, icon: Icon, loading }
   );
 }
 
-function SimpleLineChart({ data, dataKey, label }: { data: any[]; dataKey: string; label: string }) {
+function SimpleLineChart({ data, dataKey, label }: { data: Record<string, unknown>[]; dataKey: string; label: string }) {
   if (!data || data.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-muted-foreground">
@@ -69,8 +68,8 @@ function SimpleLineChart({ data, dataKey, label }: { data: any[]; dataKey: strin
     );
   }
 
-  const maxValue = Math.max(...data.map(d => d[dataKey]));
-  const minValue = Math.min(...data.map(d => d[dataKey]));
+  const maxValue = Math.max(...data.map(d => Number(d[dataKey]) || 0));
+  const minValue = Math.min(...data.map(d => Number(d[dataKey]) || 0));
   const range = maxValue - minValue || 1;
 
   return (
@@ -81,11 +80,11 @@ function SimpleLineChart({ data, dataKey, label }: { data: any[]; dataKey: strin
         <span>{Math.round((maxValue + minValue) / 2)}</span>
         <span>{minValue}</span>
       </div>
-      
+
       {/* Chart area */}
       <div className="ml-14 h-full flex items-end gap-1 pb-6">
         {data.map((item, index) => {
-          const height = ((item[dataKey] - minValue) / range) * 100 || 5;
+          const height = ((Number(item[dataKey]) - minValue) / range) * 100 || 5;
           return (
             <div
               key={index}
@@ -96,12 +95,12 @@ function SimpleLineChart({ data, dataKey, label }: { data: any[]; dataKey: strin
           );
         })}
       </div>
-      
+
       {/* X-axis labels */}
       <div className="ml-14 flex justify-between text-xs text-muted-foreground">
-        <span>{data[0]?.date?.slice(5)}</span>
-        <span>{data[Math.floor(data.length / 2)]?.date?.slice(5)}</span>
-        <span>{data[data.length - 1]?.date?.slice(5)}</span>
+        <span>{String(data[0]?.date || '').slice(5)}</span>
+        <span>{String(data[Math.floor(data.length / 2)]?.date || '').slice(5)}</span>
+        <span>{String(data[data.length - 1]?.date || '').slice(5)}</span>
       </div>
     </div>
   );
@@ -120,7 +119,7 @@ function PieChart({ data }: { data: { name: string; value: number }[] }) {
             const percentage = (item.value / total) * 100;
             const dashArray = `${percentage} ${100 - percentage}`;
             const dashOffset = -prevTotal / total * 100;
-            
+
             return (
               <circle
                 key={item.name}
@@ -140,7 +139,7 @@ function PieChart({ data }: { data: { name: string; value: number }[] }) {
           <span className="text-2xl font-bold">{total}</span>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         {data.map((item, index) => (
           <div key={item.name} className="flex items-center gap-2">
@@ -160,7 +159,7 @@ export default function AnalyticsPage() {
   const [period, setPeriod] = useState<Period>('30d');
 
   // In a real implementation, get guildId from context
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error: _error } = useSWR(
     guildId ? `/api/guilds/${guildId}/analytics?period=${period}` : null,
     fetcher
   );
@@ -191,7 +190,7 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-bold">Analytics</h1>
           <p className="text-muted-foreground">Track your server's growth and engagement</p>
         </div>
-        
+
         {/* Period Selector */}
         <div className="flex gap-2 p-1 rounded-lg bg-surface-1 border border-white/10">
           {(['7d', '30d', '90d'] as Period[]).map((p) => (
@@ -247,9 +246,9 @@ export default function AnalyticsPage() {
           {isLoading ? (
             <div className="h-64 bg-white/5 rounded animate-pulse" />
           ) : (
-            <SimpleLineChart 
-              data={analytics?.memberGrowth || []} 
-              dataKey="members" 
+            <SimpleLineChart
+              data={analytics?.memberGrowth || []}
+              dataKey="members"
               label="members"
             />
           )}
@@ -268,9 +267,9 @@ export default function AnalyticsPage() {
             {isLoading ? (
               <div className="h-64 bg-white/5 rounded animate-pulse" />
             ) : (
-              <SimpleLineChart 
-                data={analytics?.ticketVolume || []} 
-                dataKey="opened" 
+              <SimpleLineChart
+                data={analytics?.ticketVolume || []}
+                dataKey="opened"
                 label="tickets"
               />
             )}

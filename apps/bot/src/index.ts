@@ -14,7 +14,7 @@ import { initIPC, sendReady, sendError, isChildProcess } from './lib/ipc.js';
 async function main() {
   const tenantId = getCurrentTenantId();
   const tenantLabel = tenantId ? `[Tenant: ${tenantId}]` : '[Main]';
-  
+
   logger.info(`${tenantLabel} Starting Discord bot...`);
 
   // Initialize IPC if running as child process
@@ -50,7 +50,7 @@ async function main() {
   // Start health check HTTP server (skip if HEALTH_PORT is 0)
   const healthPort = parseInt(process.env.HEALTH_PORT || '8080', 10);
   if (healthPort > 0) {
-    startHealthServer(healthPort);
+    startHealthServer(client, healthPort);
   }
 
   try {
@@ -69,7 +69,7 @@ async function main() {
 async function shutdown() {
   const tenantId = getCurrentTenantId();
   const tenantLabel = tenantId ? `[Tenant: ${tenantId}]` : '[Main]';
-  
+
   logger.info(`${tenantLabel} Shutting down...`);
 
   // Stop health check server

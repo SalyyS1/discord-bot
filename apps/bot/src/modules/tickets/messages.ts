@@ -267,14 +267,7 @@ export async function getProductMessageConfig(
 
   if (!product) return null;
 
-  switch (messageType) {
-    case 'welcome':
-      return product.welcomeMessage as MessageConfig | null;
-    case 'close':
-      return product.closeMessage as MessageConfig | null;
-    case 'panel':
-      return product.panelMessage as MessageConfig | null;
-    default:
-      return null;
-  }
+  // Note: TicketProduct schema does not include message config fields
+  // Message configs should be stored in GuildSettings or TicketCategory
+  return null;
 }

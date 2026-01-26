@@ -38,3 +38,4 @@ transcripts/
 # Generated
 *.tsbuildinfo
 next-env.d.ts
+apps/dashboard.zip

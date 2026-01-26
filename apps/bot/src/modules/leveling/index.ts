@@ -169,6 +169,7 @@ export class LevelingModule {
     // Assign role rewards
     const assignedRoles: string[] = [];
     for (const reward of roleRewards) {
+      if (!reward.roleId) continue;
       const role = member.guild.roles.cache.get(reward.roleId);
       if (role && !member.roles.cache.has(role.id)) {
         try {

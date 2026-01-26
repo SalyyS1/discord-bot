@@ -9,11 +9,11 @@ import { getXpProgress, getTotalXpForLevel } from '../../modules/leveling/xpCalc
 function generateProgressBar(percentage: number, length: number = 20): string {
   const filled = Math.round((percentage / 100) * length);
   const empty = length - filled;
-  
+
   // Use different characters for filled/empty
   const filledChar = '▰';
   const emptyChar = '▱';
-  
+
   return filledChar.repeat(filled) + emptyChar.repeat(empty);
 }
 
@@ -59,7 +59,7 @@ export default new Command({
       // Calculate progress
       const progress = getXpProgress(totalXp);
       const progressBar = generateProgressBar(progress.percentage, 15);
-      
+
       // XP needed for current level total
       const currentLevelTotalXp = getTotalXpForLevel(level);
       const nextLevelTotalXp = getTotalXpForLevel(level + 1);
@@ -132,7 +132,7 @@ async function getNextRoleReward(
 ): Promise<{ roleId: string; level: number } | null> {
   try {
     const { prisma } = await import('@repo/database');
-    
+
     const nextReward = await prisma.levelRole.findFirst({
       where: {
         guildId,
@@ -145,7 +145,7 @@ async function getNextRoleReward(
       },
     });
 
-    if (nextReward) {
+    if (nextReward && nextReward.roleId) {
       return {
         roleId: nextReward.roleId,
         level: nextReward.level,

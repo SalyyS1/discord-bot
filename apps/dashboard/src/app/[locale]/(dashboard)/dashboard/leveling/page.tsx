@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Loader2, Save, Zap, AlertCircle, Server, Trophy, Users, MessageSquare, Volume2, 
-  Settings, Sparkles, Star, TrendingUp, Shield, Clock, Hash, ChevronRight, Eye, Gauge,
-  Plus, Trash2, Edit2, Crown, Target, Gift, Calendar, CheckCircle2, Award, Medal,
-  Layers, Calculator, BarChart3, Percent, ArrowUpRight, RefreshCw, Table
+  Loader2, Save, Zap, AlertCircle, Server, Trophy, Users, MessageSquare, Volume2,
+  Sparkles, Star, TrendingUp, Shield, Clock, Hash, ChevronRight, Eye, Gauge,
+  Plus, Trash2, Edit2, Crown, Target, CheckCircle2,
+  Layers, Calculator, BarChart3, Percent, Table
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { ChannelSelector } from '@/components/selectors/channel-selector';
+import { ChannelSelector, Channel } from '@/components/selectors/channel-selector';
 import { RoleSelector } from '@/components/selectors/role-selector';
 import {
   Select,
@@ -35,7 +35,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useGuildContext } from '@/context/guild-context';
-import { useGuilds, useGuildChannels } from '@/hooks';
+import { useGuilds } from '@/hooks';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -131,7 +131,7 @@ function calculateXpForLevel(level: number, formula: string, baseXp: number, mul
   // Check custom levels first
   const custom = customLevels.find(c => c.level === level);
   if (custom) return custom.xp;
-  
+
   switch (formula) {
     case 'linear':
       return level * baseXp;
@@ -139,7 +139,7 @@ function calculateXpForLevel(level: number, formula: string, baseXp: number, mul
       return Math.floor(baseXp * Math.pow(multiplier, level - 1));
     case 'mee6':
       return 5 * level * level + 50 * level + 100;
-    case 'custom':
+    case 'custom': {
       // Interpolate if level not found
       const sorted = [...customLevels].sort((a, b) => a.level - b.level);
       if (sorted.length === 0) return level * 100;
@@ -149,6 +149,7 @@ function calculateXpForLevel(level: number, formula: string, baseXp: number, mul
       if (!upper) return lower.xp + (level - lower.level) * 50;
       const ratio = (level - lower.level) / (upper.level - lower.level);
       return Math.floor(lower.xp + ratio * (upper.xp - lower.xp));
+    }
     default:
       return level * 100;
   }
@@ -162,10 +163,10 @@ export default function LevelingPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   // Guild data
   const [roles, setRoles] = useState<Role[]>([]);
-  const [channels, setChannels] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [channels, setChannels] = useState<Channel[]>([]);
   const [stats, setStats] = useState<GuildStats>({
     totalMembers: 0,
     totalXp: 0,
@@ -217,7 +218,7 @@ export default function LevelingPage() {
   const [dailyQuests, setDailyQuests] = useState<DailyQuest[]>(DEFAULT_DAILY_QUESTS);
   const [showQuestDialog, setShowQuestDialog] = useState(false);
   const [editingQuest, setEditingQuest] = useState<DailyQuest | null>(null);
-  
+
   const { selectedGuildId, setSelectedGuildId } = useGuildContext();
   const { data: guilds, isLoading: guildsLoading, error: guildsError } = useGuilds();
 
@@ -225,24 +226,28 @@ export default function LevelingPage() {
   const fetchGuildData = useCallback(async () => {
     if (!selectedGuildId) return;
     setLoading(true);
-    
+
     try {
       const [rolesRes, channelsRes, statsRes] = await Promise.all([
         fetch(`/api/guilds/${selectedGuildId}/roles`),
         fetch(`/api/guilds/${selectedGuildId}/channels`),
         fetch(`/api/guilds/${selectedGuildId}/stats`),
       ]);
-      
+
       if (rolesRes.ok) {
         const { data } = await rolesRes.json();
         setRoles(data || []);
       }
-      
+
       if (channelsRes.ok) {
         const { data } = await channelsRes.json();
-        setChannels(data?.filter((c: { type: string }) => c.type === 'text') || []);
+        const textChannels = (data || []).filter((c: { type: string }) => c.type === 'text').map((c: { id: string; name: string; type: string; parentId?: string; parentName?: string }) => ({
+          ...c,
+          type: c.type as Channel['type']
+        }));
+        setChannels(textChannels);
       }
-      
+
       if (statsRes.ok) {
         const { data } = await statsRes.json();
         if (data) {
@@ -298,7 +303,7 @@ export default function LevelingPage() {
   const handleSave = async () => {
     if (!selectedGuildId) return;
     setSaving(true);
-    
+
     try {
       const res = await fetch(`/api/guilds/${selectedGuildId}/leveling`, {
         method: 'PATCH',
@@ -311,7 +316,7 @@ export default function LevelingPage() {
           customLevelXp: settings.xpFormula === 'custom' ? customLevelXp : undefined,
         }),
       });
-      
+
       if (res.ok) {
         toast.success('Settings saved successfully!');
       } else {
@@ -332,10 +337,10 @@ export default function LevelingPage() {
 
   const saveMultiplier = () => {
     if (!editingMultiplier || !editingMultiplier.roleId) return;
-    
+
     const role = roles.find(r => r.id === editingMultiplier.roleId);
     const newMultiplier = { ...editingMultiplier, roleName: role?.name };
-    
+
     const existingIndex = roleMultipliers.findIndex(m => m.roleId === editingMultiplier.roleId);
     if (existingIndex >= 0) {
       setRoleMultipliers(prev => prev.map((m, i) => i === existingIndex ? newMultiplier : m));
@@ -384,7 +389,7 @@ export default function LevelingPage() {
 
   const saveLevelRole = () => {
     if (!editingLevelRole) return;
-    
+
     const existingIndex = levelRoles.findIndex(r => r.level === editingLevelRole.level && r.id === editingLevelRole.id);
     if (existingIndex >= 0) {
       setLevelRoles(prev => prev.map((r, i) => i === existingIndex ? editingLevelRole : r));
@@ -421,7 +426,7 @@ export default function LevelingPage() {
 
   const saveQuest = () => {
     if (!editingQuest) return;
-    
+
     const existingIndex = dailyQuests.findIndex(q => q.id === editingQuest.id);
     if (existingIndex >= 0) {
       setDailyQuests(prev => prev.map((q, i) => i === existingIndex ? editingQuest : q));
@@ -480,8 +485,8 @@ export default function LevelingPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={saving}
             className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold"
           >
@@ -489,7 +494,7 @@ export default function LevelingPage() {
             <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
-          
+
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
             <Server className="h-5 w-5 text-gray-400" />
             <Select value={selectedGuildId || ''} onValueChange={setSelectedGuildId}>
@@ -521,7 +526,7 @@ export default function LevelingPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-yellow-500/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -533,7 +538,7 @@ export default function LevelingPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-emerald-500/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -545,7 +550,7 @@ export default function LevelingPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-purple-500/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -557,7 +562,7 @@ export default function LevelingPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-amber-500/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -569,7 +574,7 @@ export default function LevelingPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-cyan-500/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -700,7 +705,7 @@ export default function LevelingPage() {
                     <div className="flex items-center gap-3">
                       <Gauge className="h-5 w-5 text-yellow-400" />
                       <p className="text-sm text-gray-300">
-                        Users will earn <span className="text-yellow-400 font-bold">{settings.xpMin} - {settings.xpMax} XP</span> per message, 
+                        Users will earn <span className="text-yellow-400 font-bold">{settings.xpMin} - {settings.xpMax} XP</span> per message,
                         with a <span className="text-orange-400 font-bold">{settings.xpCooldownSeconds}s</span> cooldown.
                       </p>
                     </div>
@@ -787,9 +792,9 @@ export default function LevelingPage() {
                       </Badge>
                     </div>
                   ))}
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="w-full text-gray-400 hover:text-white"
                     onClick={() => setActiveTab('roles')}
                   >
@@ -821,11 +826,10 @@ export default function LevelingPage() {
                       <button
                         key={preset.id}
                         onClick={() => setSettings(s => ({ ...s, xpFormula: preset.id }))}
-                        className={`p-4 rounded-xl border text-left transition-all ${
-                          settings.xpFormula === preset.id
-                            ? 'bg-purple-500/10 border-purple-500/30'
-                            : 'bg-white/5 border-white/10 hover:bg-white/10'
-                        }`}
+                        className={`p-4 rounded-xl border text-left transition-all ${settings.xpFormula === preset.id
+                          ? 'bg-purple-500/10 border-purple-500/30'
+                          : 'bg-white/5 border-white/10 hover:bg-white/10'
+                          }`}
                       >
                         <p className="text-white font-medium mb-1">{preset.name}</p>
                         <p className="text-xs text-gray-500 font-mono">{preset.formula}</p>
@@ -879,7 +883,7 @@ export default function LevelingPage() {
                           <Plus className="h-4 w-4 mr-2" /> Add Level
                         </Button>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[300px] overflow-y-auto p-2">
                         {customLevelXp.sort((a, b) => a.level - b.level).map(({ level, xp }) => (
                           <div key={level} className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
@@ -936,7 +940,7 @@ export default function LevelingPage() {
                           const avgXp = (settings.xpMin + settings.xpMax) / 2;
                           const messages = Math.ceil(row.xp / avgXp);
                           const levelRole = levelRoles.find(r => r.level === row.level);
-                          
+
                           return (
                             <tr key={row.level} className="border-b border-white/5 hover:bg-white/5">
                               <td className="py-3 px-2">
@@ -1022,10 +1026,10 @@ export default function LevelingPage() {
                           </div>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => deleteMultiplier(mult.roleId)} 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteMultiplier(mult.roleId)}
                         className="h-8 w-8 hover:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="h-4 w-4 text-red-400" />
@@ -1076,7 +1080,7 @@ export default function LevelingPage() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
-                      <div 
+                      <div
                         className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
                         style={{ backgroundColor: `${role.roleColor}20` }}
                       >
@@ -1085,8 +1089,8 @@ export default function LevelingPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-white">{role.roleName}</h3>
-                          <div 
-                            className="w-3 h-3 rounded-full" 
+                          <div
+                            className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: role.roleColor }}
                           />
                         </div>
@@ -1293,7 +1297,7 @@ export default function LevelingPage() {
               Select a role and set the XP multiplier for members with that role
             </DialogDescription>
           </DialogHeader>
-          
+
           {editingMultiplier && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -1309,8 +1313,8 @@ export default function LevelingPage() {
                     {roles.filter(r => r.name !== '@everyone').map(role => (
                       <SelectItem key={role.id} value={role.id} className="text-white hover:bg-white/10">
                         <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
+                          <div
+                            className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: role.color ? `#${role.color.toString(16).padStart(6, '0')}` : '#99aab5' }}
                           />
                           {role.name}
@@ -1320,7 +1324,7 @@ export default function LevelingPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Multiplier</Label>
                 <div className="flex items-center gap-4">
@@ -1341,7 +1345,7 @@ export default function LevelingPage() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowMultiplierDialog(false)} className="border-white/10">
               Cancel
@@ -1365,7 +1369,7 @@ export default function LevelingPage() {
               Configure the role that will be given at this level
             </DialogDescription>
           </DialogHeader>
-          
+
           {editingLevelRole && (
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1387,7 +1391,7 @@ export default function LevelingPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Emoji</Label>
@@ -1414,7 +1418,7 @@ export default function LevelingPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/5">
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-5 w-5 text-emerald-400" />
@@ -1428,13 +1432,13 @@ export default function LevelingPage() {
                   onCheckedChange={c => setEditingLevelRole({ ...editingLevelRole, autoCreate: c })}
                 />
               </div>
-              
+
               {/* Preview */}
               <div className="p-4 rounded-lg bg-[#0f1218] border border-white/10">
                 <Label className="text-gray-400 text-xs mb-2 block">Preview</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{editingLevelRole.roleEmoji}</span>
-                  <span 
+                  <span
                     className="font-medium px-2 py-1 rounded"
                     style={{ backgroundColor: `${editingLevelRole.roleColor}20`, color: editingLevelRole.roleColor }}
                   >
@@ -1445,7 +1449,7 @@ export default function LevelingPage() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowLevelRoleDialog(false)} className="border-white/10">
               Cancel
@@ -1469,7 +1473,7 @@ export default function LevelingPage() {
               Configure a daily quest for your members
             </DialogDescription>
           </DialogHeader>
-          
+
           {editingQuest && (
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1492,7 +1496,7 @@ export default function LevelingPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Input
@@ -1584,7 +1588,7 @@ export default function LevelingPage() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuestDialog(false)} className="border-white/10">
               Cancel

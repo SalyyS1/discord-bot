@@ -3,21 +3,23 @@ import {
   SlashCommandOptionsOnlyBuilder,
   SlashCommandSubcommandsOnlyBuilder,
   ChatInputCommandInteraction,
+  AutocompleteInteraction,
   PermissionResolvable,
 } from 'discord.js';
 
 export interface CommandOptions {
   data:
-    | SlashCommandBuilder
-    | SlashCommandOptionsOnlyBuilder
-    | SlashCommandSubcommandsOnlyBuilder
-    | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+  | SlashCommandBuilder
+  | SlashCommandOptionsOnlyBuilder
+  | SlashCommandSubcommandsOnlyBuilder
+  | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
   category?: string;
   cooldown?: number;
   permissions?: PermissionResolvable[];
   botPermissions?: PermissionResolvable[];
   devOnly?: boolean;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+  autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 }
 
 export class Command {
@@ -28,6 +30,7 @@ export class Command {
   botPermissions: PermissionResolvable[];
   devOnly: boolean;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+  autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 
   constructor(options: CommandOptions) {
     this.data = options.data;
@@ -37,5 +40,6 @@ export class Command {
     this.botPermissions = options.botPermissions ?? [];
     this.devOnly = options.devOnly ?? false;
     this.execute = options.execute;
+    this.autocomplete = options.autocomplete;
   }
 }

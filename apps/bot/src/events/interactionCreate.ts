@@ -3,6 +3,7 @@ import {
   ChatInputCommandInteraction,
   ButtonInteraction,
   StringSelectMenuInteraction,
+  UserSelectMenuInteraction,
   ModalSubmitInteraction,
   EmbedBuilder,
   TextChannel,
@@ -285,6 +286,32 @@ async function handleSelectMenu(interaction: StringSelectMenuInteraction) {
     }
   } catch (error) {
     logger.error('SelectMenu handler error:', error);
+    try {
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: '❌ An error occurred while processing your selection.',
+          ephemeral: true,
+        });
+      }
+    } catch {
+      // Ignore reply errors
+    }
+  }
+}
+
+async function handleUserSelectMenu(interaction: UserSelectMenuInteraction) {
+  try {
+    const customId = interaction.customId;
+    logger.debug(`User select menu: ${customId} - ${interaction.values[0]}`);
+
+    // Handle voice user select menus (permit/block user)
+    if (await VoiceButtonHandler.handleSelect(interaction)) {
+      return;
+    }
+
+    // Add more user select menu handlers here as needed
+  } catch (error) {
+    logger.error('UserSelectMenu handler error:', error);
     try {
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({

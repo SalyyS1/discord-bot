@@ -8,11 +8,10 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
-  Calendar,
   Shield,
   FileText,
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -29,8 +28,8 @@ interface AuditEntry {
   action: string;
   category: string;
   target?: string;
-  before?: any;
-  after?: any;
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -53,7 +52,7 @@ function formatRelativeTime(dateStr: string): string {
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
-  
+
   return date.toLocaleDateString();
 }
 
@@ -79,7 +78,7 @@ function AuditLogEntryCard({ entry }: { entry: AuditEntry }) {
   const hasDetails = entry.before || entry.after;
 
   return (
-    <Card 
+    <Card
       className={`bg-surface-1 border-white/10 ${hasDetails ? 'cursor-pointer' : ''}`}
       onClick={() => hasDetails && setExpanded(!expanded)}
     >
@@ -147,7 +146,7 @@ function AuditLogEntryCard({ entry }: { entry: AuditEntry }) {
 export default function AuditLogPage() {
   const params = useParams();
   const guildId = params?.guildId as string;
-  
+
   const [filters, setFilters] = useState({
     category: 'all',
     search: '',
@@ -162,7 +161,7 @@ export default function AuditLogPage() {
   if (filters.category !== 'all') queryParams.set('category', filters.category);
   if (filters.search) queryParams.set('search', filters.search);
 
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error: _error } = useSWR(
     guildId ? `/api/guilds/${guildId}/audit?${queryParams.toString()}` : null,
     fetcher
   );
@@ -201,7 +200,7 @@ export default function AuditLogPage() {
           <h1 className="text-2xl font-bold">Audit Log</h1>
           <p className="text-muted-foreground">Track all changes made to your server settings</p>
         </div>
-        
+
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
             <Download className="w-4 h-4 mr-2" />
@@ -225,7 +224,7 @@ export default function AuditLogPage() {
             className="w-64 pl-10 bg-surface-1 border-white/10"
           />
         </div>
-        
+
         <select
           value={filters.category}
           onChange={(e) => setFilters(f => ({ ...f, category: e.target.value, offset: 0 }))}

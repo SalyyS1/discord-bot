@@ -99,7 +99,7 @@ function buildEmbedFromConfig(
   }
 
   const embed = new EmbedBuilder();
-  
+
   // Color
   if (config.embed.color) {
     const colorInt = parseInt(config.embed.color.replace('#', ''), 16);
@@ -343,7 +343,7 @@ export class TicketModule {
         productId: options.productId,
         platformUsername: options.platformUsername,
         issueDetails: options.issueDetails,
-        formResponses: options.formResponses || null,
+        formResponses: options.formResponses ?? undefined,
       },
     });
 
@@ -373,24 +373,24 @@ export class TicketModule {
 
     // Add form responses as fields
     const embedFields = [];
-    
+
     if (options.issueDetails) {
       embedFields.push({ name: '📝 Issue Details', value: options.issueDetails, inline: false });
     }
     if (options.platformUsername) {
       embedFields.push({ name: '👤 Platform Username', value: options.platformUsername, inline: true });
     }
-    
+
     // Add form responses with emoji labels
     if (options.formResponses) {
       for (const [label, value] of Object.entries(options.formResponses)) {
         if (value) {
           // Add emoji if not present
           const displayLabel = label.match(/^[\p{Emoji}]/u) ? label : `📝 ${label}`;
-          embedFields.push({ 
-            name: displayLabel.substring(0, 256), 
-            value: value.substring(0, 1024), 
-            inline: false 
+          embedFields.push({
+            name: displayLabel.substring(0, 256),
+            value: value.substring(0, 1024),
+            inline: false
           });
         }
       }
@@ -399,7 +399,7 @@ export class TicketModule {
     if (embedFields.length > 0) {
       embed.addFields(embedFields);
     }
-    
+
     // Ensure footer includes ticket number
     if (!embed.data.footer?.text) {
       embed.setFooter({ text: `Ticket #${ticketNumber} | ID: ${ticket.id.slice(0, 8)}` });
@@ -501,7 +501,7 @@ export class TicketModule {
    */
   static async handleCategorySelect(interaction: StringSelectMenuInteraction): Promise<void> {
     const categoryId = interaction.values[0];
-    
+
     // Fetch category with form questions
     const category = await prisma.ticketCategory.findUnique({
       where: { id: categoryId },
@@ -513,7 +513,7 @@ export class TicketModule {
     }
 
     const formQuestions = category.formQuestions as FormQuestion[] | null;
-    
+
     // Check if there are select-type questions
     const selectQuestions = formQuestions?.filter(q => q.type === 'select' && q.options && q.options.length > 0) || [];
     const textQuestions = formQuestions?.filter(q => q.type !== 'select') || [];
@@ -538,7 +538,7 @@ export class TicketModule {
   ): Promise<void> {
     // Create unique key for this user's pending ticket
     const pendingKey = `${interaction.user.id}_${categoryId}`;
-    
+
     // Store pending data
     pendingTicketSelects.set(pendingKey, {
       categoryId,
@@ -550,18 +550,18 @@ export class TicketModule {
 
     // Build select menus (max 5 per message, and max 25 options per select)
     const rows: ActionRowBuilder<StringSelectMenuBuilder>[] = [];
-    
+
     for (let i = 0; i < Math.min(selectQuestions.length, 5); i++) {
       const q = selectQuestions[i];
       const options = q.options?.slice(0, 25) || [];
-      
+
       if (options.length === 0) continue;
 
       const select = new StringSelectMenuBuilder()
         .setCustomId(`ticket_form_select_${i}_${pendingKey}`)
         .setPlaceholder(`${q.required ? '* ' : ''}${q.label}`)
         .addOptions(
-          options.map((opt, idx) => 
+          options.map((opt, idx) =>
             new StringSelectMenuOptionBuilder()
               .setLabel(opt.substring(0, 100))
               .setValue(`opt_${idx}_${opt.substring(0, 80)}`)
@@ -591,7 +591,7 @@ export class TicketModule {
       .setColor(0x5865f2)
       .setTitle('📋 Please fill out the form')
       .setDescription(
-        selectQuestions.map((q, i) => 
+        selectQuestions.map((q, i) =>
           `**${i + 1}. ${q.label}**${q.required ? ' *(required)*' : ''}`
         ).join('\n\n')
       )
@@ -637,7 +637,7 @@ export class TicketModule {
 
     const formQuestions = category.formQuestions as FormQuestion[] | null;
     const selectQuestions = formQuestions?.filter(q => q.type === 'select' && q.options && q.options.length > 0) || [];
-    
+
     if (selectIndex >= selectQuestions.length) {
       await interaction.reply({ content: '❌ Invalid selection.', ephemeral: true });
       return;
@@ -647,7 +647,7 @@ export class TicketModule {
     // Extract the actual option text from the value (format: opt_{idx}_{text})
     const selectedValue = interaction.values[0];
     const optionText = selectedValue.split('_').slice(2).join('_');
-    
+
     // Store the response
     pendingData.selectResponses[question.label] = optionText;
     pendingTicketSelects.set(pendingKey, pendingData);
@@ -687,13 +687,13 @@ export class TicketModule {
 
     const formQuestions = category.formQuestions as FormQuestion[] | null;
     const selectQuestions = formQuestions?.filter(q => q.type === 'select' && q.options && q.options.length > 0) || [];
-    
+
     // Check required fields
     for (const q of selectQuestions) {
       if (q.required && !pendingData.selectResponses[q.label]) {
-        await interaction.reply({ 
-          content: `❌ Please select a value for: **${q.label}**`, 
-          ephemeral: true 
+        await interaction.reply({
+          content: `❌ Please select a value for: **${q.label}**`,
+          ephemeral: true
         });
         return;
       }
@@ -875,7 +875,7 @@ export class TicketModule {
       categoryId = parts[0];
       const userId = parts[1];
       const pendingKey = `${userId}_${categoryId}`;
-      
+
       // Get pending select responses
       const pendingData = pendingTicketSelects.get(pendingKey);
       if (pendingData) {
@@ -897,6 +897,7 @@ export class TicketModule {
     let issueDetails = '';
 
     for (const row of interaction.components) {
+      if (!('components' in row)) continue;
       for (const component of row.components) {
         if (component.customId === 'issue_details') {
           issueDetails = component.value;
@@ -1068,8 +1069,8 @@ export class TicketModule {
 
     // Determine transcript display
     const isLocalTranscript = transcriptUrl?.startsWith('local://');
-    const transcriptPath = isLocalTranscript ? transcriptUrl.replace('local://', '') : null;
-    const transcriptDisplay = transcriptUrl 
+    const transcriptPath = isLocalTranscript && transcriptUrl ? transcriptUrl.replace('local://', '') : null;
+    const transcriptDisplay = transcriptUrl
       ? (isLocalTranscript ? '📎 Attached below' : `[View](${transcriptUrl})`)
       : 'Not available';
 
@@ -1095,7 +1096,7 @@ export class TicketModule {
     }
 
     const thankYouEmbed = buildEmbedFromConfig(thankYouConfig, closePlaceholders, defaultThankYouEmbed);
-    
+
     // Always add transcript info
     if (!thankYouEmbed.data.fields?.some(f => f.name.includes('Transcript'))) {
       thankYouEmbed.addFields(
@@ -1115,7 +1116,7 @@ export class TicketModule {
 
     // Reopen button (only if enabled and no auto-delete)
     const actionRow = new ActionRowBuilder<ButtonBuilder>();
-    
+
     if (settings?.ticketReopenEnabled !== false) {
       actionRow.addComponents(
         new ButtonBuilder()
@@ -1178,7 +1179,7 @@ export class TicketModule {
    */
   static async handleRating(interaction: ButtonInteraction): Promise<void> {
     const rating = parseInt(interaction.customId.replace('ticket_rate_', ''));
-    
+
     const ticket = await prisma.ticket.findUnique({
       where: { channelId: interaction.channel!.id },
       include: { member: true },
@@ -1279,11 +1280,11 @@ export class TicketModule {
       try {
         const guild = interaction.guild!;
         const ratingChannel = await guild.channels.fetch(settings.ratingChannelId) as TextChannel;
-        
+
         if (ratingChannel && 'send' in ratingChannel) {
           const starsDisplay = '⭐'.repeat(stars) + '☆'.repeat(5 - stars);
           const member = await guild.members.fetch(ticket.member.discordId).catch(() => null);
-          const staffMember = ticket.claimedBy 
+          const staffMember = ticket.claimedBy
             ? await guild.members.fetch(ticket.claimedBy).catch(() => null)
             : null;
 
@@ -1333,7 +1334,7 @@ export class TicketModule {
               .setEmoji('🔓')
           );
 
-          await ratingChannel.send({ 
+          await ratingChannel.send({
             embeds: [reviewEmbed],
             components: [actionRow],
           });
@@ -1380,7 +1381,7 @@ export class TicketModule {
                 .setTimestamp()
             ]
           });
-          
+
           // Delete after short delay
           setTimeout(async () => {
             try {
@@ -1421,9 +1422,9 @@ export class TicketModule {
     const hasPermission = member.permissions.has(PermissionFlagsBits.ManageChannels);
 
     if (!isCreator && !hasPermission) {
-      await interaction.reply({ 
-        content: '❌ Only the ticket creator or staff can reopen this ticket.', 
-        ephemeral: true 
+      await interaction.reply({
+        content: '❌ Only the ticket creator or staff can reopen this ticket.',
+        ephemeral: true
       });
       return;
     }
@@ -1459,7 +1460,7 @@ export class TicketModule {
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed], components: [buttons] });
-    
+
     logger.info(`Ticket #${ticket.number} reopened by ${member.user.tag}`);
   }
 
@@ -1468,7 +1469,7 @@ export class TicketModule {
    */
   static async handleRerateButton(interaction: ButtonInteraction): Promise<void> {
     const ticketId = interaction.customId.replace('rating_rerate_', '');
-    
+
     const ticket = await prisma.ticket.findUnique({
       where: { id: ticketId },
       include: { member: true },
@@ -1576,7 +1577,7 @@ export class TicketModule {
 
         const guild = interaction.guild!;
         const member = await guild.members.fetch(ticket.member.discordId).catch(() => null);
-        const staffMember = ticket.claimedBy 
+        const staffMember = ticket.claimedBy
           ? await guild.members.fetch(ticket.claimedBy).catch(() => null)
           : null;
 
@@ -1628,7 +1629,7 @@ export class TicketModule {
    */
   static async handleReopenFromRatingButton(interaction: ButtonInteraction): Promise<void> {
     const ticketId = interaction.customId.replace('rating_reopen_', '');
-    
+
     const ticket = await prisma.ticket.findUnique({
       where: { id: ticketId },
       include: { member: true },
@@ -1645,9 +1646,9 @@ export class TicketModule {
     const hasPermission = member.permissions.has(PermissionFlagsBits.ManageChannels);
 
     if (!isCreator && !hasPermission) {
-      await interaction.reply({ 
-        content: '❌ Chỉ người tạo ticket hoặc staff mới có thể mở lại ticket.', 
-        ephemeral: true 
+      await interaction.reply({
+        content: '❌ Chỉ người tạo ticket hoặc staff mới có thể mở lại ticket.',
+        ephemeral: true
       });
       return;
     }
@@ -1694,7 +1695,7 @@ export class TicketModule {
     // Try to find the ticket channel
     const guild = interaction.guild!;
     let ticketChannel: TextChannel | null = null;
-    
+
     try {
       ticketChannel = await guild.channels.fetch(ticket.channelId) as TextChannel;
     } catch {
@@ -1766,7 +1767,7 @@ export class TicketModule {
     }
 
     await interaction.editReply(`✅ Đã mở lại ticket <#${ticketChannel.id}>!`);
-    
+
     logger.info(`Ticket #${ticket.number} reopened from rating channel by ${member.user.tag}`);
   }
 

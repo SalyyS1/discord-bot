@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { 
-  Loader2, Gift, Sliders, History, Server, Save, ChevronRight, Palette, MousePointer2, 
+import {
+  Loader2, Gift, History, Server, Save, ChevronRight, Palette, MousePointer2,
   Sparkles, PartyPopper, Clock, Plus, Trash2, Users, Shield, Crown, Trophy, Medal,
-  Star, Zap, MessageSquare, Calendar, Bell, Settings2, Copy, Eye, Play, Pause,
-  RotateCcw, Check, X, AlertTriangle, Target, Award, Percent, Hash, Timer, 
-  UserCheck, CalendarClock, DollarSign, ListChecks, Layers, FileText, Send
+  Star, Zap, Calendar, Bell, Settings2, Play, Pause,
+  RotateCcw, Check, X, AlertTriangle, Percent, Hash,
+  CalendarClock, Layers, FileText, Send
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -45,7 +45,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useSelectedGuild } from '@/hooks/use-selected-guild';
 import { useGuildContext } from '@/context/guild-context';
-import { ChannelSelector } from '@/components/selectors/channel-selector';
+import { ChannelSelector, Channel } from '@/components/selectors/channel-selector';
 import { RoleSelector } from '@/components/selectors/role-selector';
 
 interface PrizeTier {
@@ -117,9 +117,9 @@ export default function GiveawayPage() {
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Guild data
-  const [channels, setChannels] = useState<Array<{ id: string; name: string; type: string; parentId?: string; parentName?: string }>>([]);
+  const [channels, setChannels] = useState<Channel[]>([]);
   const [roles, setRoles] = useState<Array<{ id: string; name: string; color: number }>>([]);
-  
+
   // Giveaways
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [stats, setStats] = useState<GuildStats>({
@@ -129,7 +129,7 @@ export default function GiveawayPage() {
     completedGiveaways: 0,
     averageEntries: 0,
   });
-  
+
   // Settings
   const [settings, setSettings] = useState({
     giveawayButtonText: '🎉 Enter Giveaway',
@@ -192,18 +192,22 @@ export default function GiveawayPage() {
         fetch(`/api/guilds/${guildId}/giveaways`),
         fetch(`/api/guilds/${guildId}/giveaways/settings`),
       ]);
-      
+
       if (channelsRes.ok) {
         const { data } = await channelsRes.json();
-        // Filter for text channels only (type === 'text' from API)
-        setChannels(data?.filter((c: { type: string }) => c.type === 'text') || []);
+        // Filter for text channels only and cast type
+        const textChannels = (data || []).filter((c: { type: string }) => c.type === 'text').map((c: { id: string; name: string; type: string; parentId?: string; parentName?: string }) => ({
+          ...c,
+          type: c.type as Channel['type']
+        }));
+        setChannels(textChannels);
       }
-      
+
       if (rolesRes.ok) {
         const { data } = await rolesRes.json();
         setRoles(data || []);
       }
-      
+
       if (giveawaysRes.ok) {
         const { data } = await giveawaysRes.json();
         setGiveaways(data?.giveaways || []);
@@ -215,7 +219,7 @@ export default function GiveawayPage() {
           averageEntries: 0,
         });
       }
-      
+
       if (settingsRes.ok) {
         const { data } = await settingsRes.json();
         if (data) {
@@ -261,7 +265,7 @@ export default function GiveawayPage() {
       toast.error('Please fill in required fields');
       return;
     }
-    
+
     setCreating(true);
     try {
       const payload = {
@@ -269,13 +273,13 @@ export default function GiveawayPage() {
         duration: newGiveaway.duration,
         prizeTiers: newGiveaway.usePrizeTiers ? newGiveaway.prizeTiers : undefined,
       };
-      
+
       const res = await fetch(`/api/guilds/${guildId}/giveaways`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      
+
       if (res.ok) {
         toast.success('Giveaway created successfully!');
         setShowCreateDialog(false);
@@ -319,12 +323,12 @@ export default function GiveawayPage() {
 
   const handleDeleteGiveaway = async () => {
     if (!guildId || !deleteId) return;
-    
+
     try {
       const res = await fetch(`/api/guilds/${guildId}/giveaways/${deleteId}`, {
         method: 'DELETE',
       });
-      
+
       if (res.ok) {
         toast.success('Giveaway deleted');
         setGiveaways(prev => prev.filter(g => g.id !== deleteId));
@@ -340,12 +344,12 @@ export default function GiveawayPage() {
 
   const handleEndGiveaway = async (id: string) => {
     if (!guildId) return;
-    
+
     try {
       const res = await fetch(`/api/guilds/${guildId}/giveaways/${id}/end`, {
         method: 'POST',
       });
-      
+
       if (res.ok) {
         toast.success('Giveaway ended!');
         fetchGuildData();
@@ -359,12 +363,12 @@ export default function GiveawayPage() {
 
   const handleRerollGiveaway = async (id: string) => {
     if (!guildId) return;
-    
+
     try {
       const res = await fetch(`/api/guilds/${guildId}/giveaways/${id}/reroll`, {
         method: 'POST',
       });
-      
+
       if (res.ok) {
         toast.success('Winner re-rolled!');
         fetchGuildData();
@@ -376,7 +380,7 @@ export default function GiveawayPage() {
     }
   };
 
-  const formatDuration = (seconds: number) => {
+  const _formatDuration = (seconds: number) => {
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
     return `${Math.floor(seconds / 86400)}d`;
@@ -386,13 +390,13 @@ export default function GiveawayPage() {
     const end = new Date(endsAt);
     const now = new Date();
     const diff = end.getTime() - now.getTime();
-    
+
     if (diff <= 0) return 'Ended';
-    
+
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (days > 0) return `${days}d ${hours}h`;
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
@@ -422,16 +426,16 @@ export default function GiveawayPage() {
             <p className="text-gray-400 mt-1">Create viral campaigns and engage your community</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <Button 
+          <Button
             onClick={() => setShowCreateDialog(true)}
             className="bg-gradient-to-r from-[hsl(174_72%_45%)] to-[hsl(180_70%_35%)] hover:from-[hsl(174_72%_40%)] hover:to-[hsl(180_70%_30%)] text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Giveaway
           </Button>
-          
+
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
             <Server className="h-5 w-5 text-gray-400" />
             <Select value={guildId || ''} onValueChange={setSelectedGuildId}>
@@ -463,7 +467,7 @@ export default function GiveawayPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-blue-500/20">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 rounded-xl bg-blue-500/10">
@@ -475,7 +479,7 @@ export default function GiveawayPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-purple-500/20">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 rounded-xl bg-purple-500/10">
@@ -487,7 +491,7 @@ export default function GiveawayPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-amber-500/20">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 rounded-xl bg-amber-500/10">
@@ -499,7 +503,7 @@ export default function GiveawayPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="surface-card border-pink-500/20">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 rounded-xl bg-pink-500/10">
@@ -571,7 +575,7 @@ export default function GiveawayPage() {
                           <div key={giveaway.id} className="p-4 hover:bg-white/[0.02] transition-colors">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex items-start gap-3 flex-1 min-w-0">
-                                <div 
+                                <div
                                   className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                                   style={{ backgroundColor: `${giveaway.embedColor}20` }}
                                 >
@@ -635,8 +639,8 @@ export default function GiveawayPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
-                    onClick={() => setShowCreateDialog(true)} 
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
                     className="w-full bg-gradient-to-r from-[hsl(174_72%_45%)] to-[hsl(180_70%_35%)] hover:from-[hsl(174_72%_40%)] hover:to-[hsl(180_70%_30%)] text-white shadow-lg"
                   >
                     <Plus className="mr-2 h-4 w-4" />
@@ -725,7 +729,7 @@ export default function GiveawayPage() {
                       <div key={giveaway.id} className="p-6">
                         <div className="flex items-start justify-between gap-6">
                           <div className="flex items-start gap-4 flex-1">
-                            <div 
+                            <div
                               className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
                               style={{ backgroundColor: `${giveaway.embedColor}20` }}
                             >
@@ -830,7 +834,7 @@ export default function GiveawayPage() {
                       <div key={giveaway.id} className="p-4 hover:bg-white/[0.02] transition-colors">
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div 
+                            <div
                               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 opacity-60"
                               style={{ backgroundColor: `${giveaway.embedColor}20` }}
                             >
@@ -932,7 +936,7 @@ export default function GiveawayPage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="p-6 bg-[#1a1d26] rounded-xl border border-white/10 border-dashed flex flex-col items-center gap-3">
                     <span className="text-xs text-gray-500 uppercase tracking-wider">Preview</span>
                     <Button className="bg-[#5865F2] hover:bg-[#4752C4] text-white px-6 py-3 text-base">
@@ -967,7 +971,7 @@ export default function GiveawayPage() {
                       onCheckedChange={(v) => setSettings(s => ({ ...s, dmWinners: v }))}
                     />
                   </div>
-                  
+
                   {settings.dmWinners && (
                     <div className="space-y-2">
                       <Label className="text-gray-300">Winner DM Message</Label>
@@ -980,7 +984,7 @@ export default function GiveawayPage() {
                       <p className="text-xs text-gray-500">Variables: {'{prize}'}, {'{server}'}, {'{host}'}</p>
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between p-4 rounded-lg bg-white/5">
                     <div className="flex items-center gap-3">
                       <RotateCcw className="h-5 w-5 text-purple-400" />
@@ -1016,9 +1020,9 @@ export default function GiveawayPage() {
                   <CardTitle className="text-white">Save Changes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    onClick={handleSaveSettings} 
-                    disabled={savingSettings} 
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={savingSettings}
                     className="w-full bg-gradient-to-r from-[hsl(174_72%_45%)] to-[hsl(180_70%_35%)] hover:from-[hsl(174_72%_40%)] hover:to-[hsl(180_70%_30%)] text-white shadow-lg"
                   >
                     {savingSettings && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
@@ -1071,7 +1075,7 @@ export default function GiveawayPage() {
               Set up your giveaway with all the bells and whistles
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-6 py-4">
             {/* Basic Info */}
             <div className="space-y-4">
@@ -1079,7 +1083,7 @@ export default function GiveawayPage() {
                 <Trophy className="h-4 w-4 text-amber-400" />
                 Prize Details
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-2">
                   <Label>Prize Name *</Label>
@@ -1090,7 +1094,7 @@ export default function GiveawayPage() {
                     className="bg-[#0f1218] border-white/10 text-white"
                   />
                 </div>
-                
+
                 <div className="col-span-2 space-y-2">
                   <Label>Description (optional)</Label>
                   <Textarea
@@ -1100,7 +1104,7 @@ export default function GiveawayPage() {
                     className="bg-[#0f1218] border-white/10 text-white min-h-[60px]"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Channel *</Label>
                   <ChannelSelector
@@ -1110,7 +1114,7 @@ export default function GiveawayPage() {
                     placeholder="Select channel"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Number of Winners</Label>
                   <Input
@@ -1123,7 +1127,7 @@ export default function GiveawayPage() {
                   />
                 </div>
               </div>
-              
+
               {/* Prize Tiers Toggle */}
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                 <div className="flex items-center gap-3">
@@ -1138,7 +1142,7 @@ export default function GiveawayPage() {
                   onCheckedChange={(v) => setNewGiveaway(g => ({ ...g, usePrizeTiers: v }))}
                 />
               </div>
-              
+
               {newGiveaway.usePrizeTiers && (
                 <div className="space-y-3 p-4 rounded-lg bg-white/5">
                   {newGiveaway.prizeTiers.map((tier, idx) => (
@@ -1209,7 +1213,7 @@ export default function GiveawayPage() {
                 <Clock className="h-4 w-4 text-blue-400" />
                 Duration & Timing
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Duration</Label>
@@ -1233,7 +1237,7 @@ export default function GiveawayPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                   <div className="flex items-center gap-3">
                     <CalendarClock className="h-5 w-5 text-purple-400" />
@@ -1248,7 +1252,7 @@ export default function GiveawayPage() {
                   />
                 </div>
               </div>
-              
+
               {newGiveaway.scheduleStart && (
                 <div className="space-y-2">
                   <Label>Start Time</Label>
@@ -1268,30 +1272,30 @@ export default function GiveawayPage() {
                 <Shield className="h-4 w-4 text-emerald-400" />
                 Entry Requirements
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Required Roles (any)</Label>
                   <RoleSelector
                     roles={roles}
                     value={newGiveaway.requiredRoleIds}
-                    onChange={(v) => setNewGiveaway(g => ({ ...g, requiredRoleIds: v }))}
+                    onChange={(v) => setNewGiveaway(g => ({ ...g, requiredRoleIds: Array.isArray(v) ? v : [v] }))}
                     placeholder="Select required roles"
                     multiple
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Blacklisted Roles</Label>
                   <RoleSelector
                     roles={roles}
                     value={newGiveaway.blacklistRoleIds}
-                    onChange={(v) => setNewGiveaway(g => ({ ...g, blacklistRoleIds: v }))}
+                    onChange={(v) => setNewGiveaway(g => ({ ...g, blacklistRoleIds: Array.isArray(v) ? v : [v] }))}
                     placeholder="Select blacklisted roles"
                     multiple
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Minimum Level</Label>
                   <Input
@@ -1302,7 +1306,7 @@ export default function GiveawayPage() {
                     className="bg-[#0f1218] border-white/10 text-white"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Minimum Messages</Label>
                   <Input
@@ -1313,7 +1317,7 @@ export default function GiveawayPage() {
                     className="bg-[#0f1218] border-white/10 text-white"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Account Age (days)</Label>
                   <Input
@@ -1324,7 +1328,7 @@ export default function GiveawayPage() {
                     className="bg-[#0f1218] border-white/10 text-white"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Server Age (days)</Label>
                   <Input
@@ -1344,7 +1348,7 @@ export default function GiveawayPage() {
                 <Star className="h-4 w-4 text-yellow-400" />
                 Bonus Entries
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
                   <div className="flex items-center gap-3">
@@ -1364,7 +1368,7 @@ export default function GiveawayPage() {
                     placeholder="0"
                   />
                 </div>
-                
+
                 <div className="space-y-3 p-4 rounded-lg bg-white/5">
                   <Label className="text-sm font-medium">Role Bonus Entries</Label>
                   {newGiveaway.bonusEntryRoles.map((role, idx) => (
@@ -1436,7 +1440,7 @@ export default function GiveawayPage() {
                 <Palette className="h-4 w-4 text-cyan-400" />
                 Appearance
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Embed Color</Label>
@@ -1454,7 +1458,7 @@ export default function GiveawayPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Button Text</Label>
                   <Input
@@ -1464,7 +1468,7 @@ export default function GiveawayPage() {
                     className="bg-[#0f1218] border-white/10 text-white"
                   />
                 </div>
-                
+
                 <div className="col-span-2 space-y-2">
                   <Label>Image URL (optional)</Label>
                   <Input
@@ -1477,13 +1481,13 @@ export default function GiveawayPage() {
               </div>
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button variant="ghost" onClick={() => setShowCreateDialog(false)} className="text-gray-400">
               Cancel
             </Button>
-            <Button 
-              onClick={handleCreateGiveaway} 
+            <Button
+              onClick={handleCreateGiveaway}
               disabled={creating || !newGiveaway.prize || !newGiveaway.channelId}
               className="bg-gradient-to-r from-[hsl(174_72%_45%)] to-[hsl(180_70%_35%)]"
             >

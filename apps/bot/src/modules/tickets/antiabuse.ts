@@ -54,8 +54,8 @@ export async function checkTicketAbuse(
   const openTickets = await prisma.ticket.count({
     where: {
       guildId,
-      creatorId: userId,
-      status: { in: ['OPEN', 'IN_PROGRESS', 'WAITING_RESPONSE'] },
+      member: { discordId: userId },
+      status: { in: ['OPEN', 'CLAIMED'] },
     },
   });
 

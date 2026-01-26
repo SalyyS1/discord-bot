@@ -18,13 +18,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  Bot, 
-  ArrowLeft, 
-  Play, 
+import {
+  Bot,
+  ArrowLeft,
+  Play,
   Square,
   RefreshCw,
-  Settings,
   Server,
   Activity,
   Clock,
@@ -159,7 +158,7 @@ export default function BotDashboardPage({ params }: { params: Promise<{ id: str
 
   const handleUpdateToken = async () => {
     if (!newToken.trim()) return;
-    
+
     setActionLoading(true);
     try {
       const res = await fetch(`/api/tenants/${id}`, {
@@ -205,7 +204,7 @@ export default function BotDashboardPage({ params }: { params: Promise<{ id: str
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Bots
         </Link>
-        
+
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -315,8 +314,8 @@ export default function BotDashboardPage({ params }: { params: Promise<{ id: str
               <div>
                 <p className="text-sm text-gray-400">Last Started</p>
                 <p className="text-xl font-bold text-white">
-                  {tenant.lastStartedAt 
-                    ? new Date(tenant.lastStartedAt).toLocaleDateString() 
+                  {tenant.lastStartedAt
+                    ? new Date(tenant.lastStartedAt).toLocaleDateString()
                     : 'Never'}
                 </p>
               </div>

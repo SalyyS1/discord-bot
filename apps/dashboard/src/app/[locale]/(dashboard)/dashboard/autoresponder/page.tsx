@@ -3,11 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Plus, Trash2, Edit2, Zap, Save, Server, Search, AlertCircle, Loader2, AtSign, Reply, Eye,
-  Shield, Users, User, Crown, MessageSquare, Settings2, Layers, Hash, Clock, ToggleLeft,
-  Smile, Frown, Meh, Heart, Sparkles, Volume2, Ban, Check, X, Copy, ChevronRight,
-  Filter, SortAsc, Target, Globe, Lock, Mic, FileText, Bot
+  Shield, User, Crown, MessageSquare, Settings2, Hash, Clock, ToggleLeft,
+  Smile, Heart, Sparkles, Check, X, ChevronRight,
+  Filter, Target, Lock, FileText, Mic, Ban
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -126,7 +126,7 @@ export default function AutoResponderPage() {
   const [responders, setResponders] = useState<AutoResponder[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterEnabled, setFilterEnabled] = useState<'all' | 'enabled' | 'disabled'>('all');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [_activeTab, _setActiveTab] = useState('overview');
 
   // Guild data
   const [roles, setRoles] = useState<Role[]>([]);
