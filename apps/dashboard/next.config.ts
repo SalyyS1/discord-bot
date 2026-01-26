@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import path from 'path';
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -21,6 +22,19 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+
+  // Include Prisma engine in output
+  outputFileTracingIncludes: {
+    '/*': ['./node_modules/.prisma/**/*'],
+  },
+
+  // Ensure Prisma client works in serverless
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...(config.externals || []), '@prisma/client'];
+    }
+    return config;
   },
 };
 
