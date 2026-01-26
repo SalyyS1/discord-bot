@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Crown, User, Calendar, Loader2, CheckCircle, XCircle, Sparkles } from 'lucide-react';
-import { useSession } from '@/hooks/use-session';
 
 interface Subscription {
     tier: 'FREE' | 'PREMIUM';
@@ -16,7 +15,6 @@ interface Subscription {
 }
 
 export default function ProfilePage() {
-    const { session } = useSession();
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [loading, setLoading] = useState(true);
     const [redeemCode, setRedeemCode] = useState('');
@@ -101,16 +99,12 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
-                        {session?.user?.image && (
-                            <img
-                                src={session.user.image}
-                                alt="Avatar"
-                                className="w-16 h-16 rounded-full border-2 border-cyan-500/30"
-                            />
-                        )}
+                        <div className="w-16 h-16 rounded-full border-2 border-cyan-500/30 bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                            <User className="h-8 w-8 text-white" />
+                        </div>
                         <div>
-                            <p className="text-xl font-semibold text-white">{session?.user?.name || 'User'}</p>
-                            <p className="text-gray-400">{session?.user?.email}</p>
+                            <p className="text-xl font-semibold text-white">Premium User</p>
+                            <p className="text-gray-400">Manage your subscription below</p>
                         </div>
                     </div>
                 </CardContent>
