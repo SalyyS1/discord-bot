@@ -33,8 +33,11 @@ export async function middleware(request: NextRequest) {
   );
   const isDashboardRoute = pathname.includes('/dashboard');
 
-  // Check for session cookie
-  const sessionCookie = request.cookies.get('better-auth.session_token');
+  // Check for session cookie (better-auth uses different names in secure/non-secure contexts)
+  const sessionCookie =
+    request.cookies.get('__Secure-better-auth.session_data') ||
+    request.cookies.get('better-auth.session_data') ||
+    request.cookies.get('better-auth.session_token');
 
   // Check auth for protected API routes (guild-related endpoints)
   if (isProtectedApiRoute && !sessionCookie) {
