@@ -24,11 +24,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
-  Ticket, 
-  Settings, 
-  Save, 
-  Loader2, 
+import {
+  Ticket,
+  Settings,
+  Save,
+  Loader2,
   Server,
   FolderOpen,
   Hash,
@@ -169,7 +169,7 @@ interface MessageConfig {
   enabled: boolean;
   content?: string;
   embed?: {
-    enabled: boolean;
+    enabled?: boolean;
     title?: string;
     description?: string;
     color?: string;
@@ -350,13 +350,13 @@ export default function TicketsPage() {
   const [dataLoading, setDataLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sendingPanel, setSendingPanel] = useState(false);
-  
+
   // Data
   const [channels, setChannels] = useState<Channel[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [panels, setPanels] = useState<TicketPanel[]>([]);
   const [openTickets, setOpenTickets] = useState<OpenTicket[]>([]);
-  
+
   // Global settings
   const [globalSettings, setGlobalSettings] = useState({
     ticketsEnabled: true,
@@ -373,20 +373,20 @@ export default function TicketsPage() {
   // Message configs (separate state for better management)
   const [messageConfigs, setMessageConfigs] = useState<Record<string, MessageConfig>>(DEFAULT_MESSAGE_CONFIGS);
   const [selectedMessageType, setSelectedMessageType] = useState<string>('welcome');
-  
+
   // Dialog states
   const [editPanelOpen, setEditPanelOpen] = useState(false);
   const [editCategoryOpen, setEditCategoryOpen] = useState(false);
   const [selectedPanel, setSelectedPanel] = useState<TicketPanel | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<TicketCategory | null>(null);
   const [selectedPanelForCategory, setSelectedPanelForCategory] = useState<string | null>(null);
-  
+
   // Close ticket dialog
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [selectedTicketToClose, setSelectedTicketToClose] = useState<OpenTicket | null>(null);
   const [closeReason, setCloseReason] = useState('');
   const [closingTicket, setClosingTicket] = useState<string | null>(null);
-  
+
   // Send panel states
   const [sendPanelDialogOpen, setSendPanelDialogOpen] = useState(false);
   const [selectedPanelToSend, setSelectedPanelToSend] = useState<TicketPanel | null>(null);
@@ -398,7 +398,7 @@ export default function TicketsPage() {
   // Fetch data
   const fetchData = useCallback(async () => {
     if (!guildId) return;
-    
+
     setDataLoading(true);
     try {
       const [channelsRes, rolesRes, panelsRes, settingsRes, ticketsRes] = await Promise.all([
@@ -413,17 +413,17 @@ export default function TicketsPage() {
         const { data } = await channelsRes.json();
         setChannels(data || []);
       }
-      
+
       if (rolesRes.ok) {
         const { data } = await rolesRes.json();
         setRoles(data || []);
       }
-      
+
       if (panelsRes.ok) {
         const { data } = await panelsRes.json();
         setPanels(data || []);
       }
-      
+
       if (settingsRes.ok) {
         const { data } = await settingsRes.json();
         if (data) {
@@ -434,7 +434,7 @@ export default function TicketsPage() {
           }
         }
       }
-      
+
       if (ticketsRes.ok) {
         const { data } = await ticketsRes.json();
         setOpenTickets(data || []);
@@ -453,7 +453,7 @@ export default function TicketsPage() {
   // Save global settings (including message configs)
   const handleSaveSettings = async () => {
     if (!guildId) return;
-    
+
     setSaving(true);
     try {
       const res = await fetch(`/api/guilds/${guildId}/tickets/settings`, {
@@ -464,7 +464,7 @@ export default function TicketsPage() {
           messageConfigs, // Include message configs
         }),
       });
-      
+
       if (res.ok) {
         toast.success('Settings saved!');
       } else {
@@ -480,21 +480,21 @@ export default function TicketsPage() {
   // Save panel
   const handleSavePanel = async (panel: TicketPanel) => {
     if (!guildId) return;
-    
+
     setSaving(true);
     try {
       const isNew = !panels.find(p => p.id === panel.id);
       const method = isNew ? 'POST' : 'PATCH';
-      const url = isNew 
+      const url = isNew
         ? `/api/guilds/${guildId}/tickets/panels`
         : `/api/guilds/${guildId}/tickets/panels/${panel.id}`;
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(panel),
       });
-      
+
       if (res.ok) {
         const { data } = await res.json();
         if (isNew) {
@@ -518,12 +518,12 @@ export default function TicketsPage() {
   // Delete panel
   const handleDeletePanel = async (panelId: string) => {
     if (!guildId || !confirm('Are you sure you want to delete this panel?')) return;
-    
+
     try {
       const res = await fetch(`/api/guilds/${guildId}/tickets/panels/${panelId}`, {
         method: 'DELETE',
       });
-      
+
       if (res.ok) {
         setPanels(prev => prev.filter(p => p.id !== panelId));
         toast.success('Panel deleted');
@@ -538,24 +538,24 @@ export default function TicketsPage() {
   // Save category
   const handleSaveCategory = async (category: TicketCategory, panelId: string) => {
     if (!guildId) return;
-    
+
     setSaving(true);
     try {
       const panel = panels.find(p => p.id === panelId);
       if (!panel) return;
-      
+
       const isNew = !panel.categories.find(c => c.id === category.id);
-      
+
       const updatedCategories = isNew
         ? [...panel.categories, category]
         : panel.categories.map(c => c.id === category.id ? category : c);
-      
+
       const res = await fetch(`/api/guilds/${guildId}/tickets/panels/${panelId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ categories: updatedCategories }),
       });
-      
+
       if (res.ok) {
         const { data } = await res.json();
         setPanels(prev => prev.map(p => p.id === panelId ? data : p));
@@ -576,19 +576,19 @@ export default function TicketsPage() {
   // Delete category
   const handleDeleteCategory = async (categoryId: string, panelId: string) => {
     if (!guildId || !confirm('Are you sure you want to delete this category?')) return;
-    
+
     try {
       const panel = panels.find(p => p.id === panelId);
       if (!panel) return;
-      
+
       const updatedCategories = panel.categories.filter(c => c.id !== categoryId);
-      
+
       const res = await fetch(`/api/guilds/${guildId}/tickets/panels/${panelId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ categories: updatedCategories }),
       });
-      
+
       if (res.ok) {
         const { data } = await res.json();
         setPanels(prev => prev.map(p => p.id === panelId ? data : p));
@@ -604,7 +604,7 @@ export default function TicketsPage() {
   // Send panel
   const handleSendPanel = async () => {
     if (sendingPanel || !selectedPanelToSend || !sendToChannelId || !guildId) return;
-    
+
     setSendingPanel(true);
     try {
       const res = await fetch(`/api/guilds/${guildId}/tickets/panels/${selectedPanelToSend.id}/send`, {
@@ -612,7 +612,7 @@ export default function TicketsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channelId: sendToChannelId }),
       });
-      
+
       if (res.ok) {
         toast.success('Panel sent successfully!');
         setSendPanelDialogOpen(false);
@@ -717,7 +717,7 @@ export default function TicketsPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black/30 backdrop-blur border border-white/10">
               <div className={`w-2.5 h-2.5 rounded-full ${globalSettings.ticketsEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
               <span className="text-sm text-gray-300">
@@ -726,7 +726,7 @@ export default function TicketsPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Quick Stats */}
         <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
           <div className="p-4 rounded-xl bg-white/5 backdrop-blur border border-white/10">
@@ -779,27 +779,27 @@ export default function TicketsPage() {
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-[hsl(220_20%_14%)] border border-white/10 p-1.5 h-auto flex-wrap">
-          <TabsTrigger 
-            value="panels" 
+          <TabsTrigger
+            value="panels"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-white rounded-lg px-4 py-2.5"
           >
             <LayoutGrid className="w-4 h-4 mr-2" /> Panels & Categories
           </TabsTrigger>
-          <TabsTrigger 
-            value="messages" 
+          <TabsTrigger
+            value="messages"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white rounded-lg px-4 py-2.5"
           >
             <MessageSquare className="w-4 h-4 mr-2" /> Messages
             <Badge className="ml-2 bg-pink-500/20 text-pink-400 border-0 text-xs">Pro</Badge>
           </TabsTrigger>
-          <TabsTrigger 
-            value="settings" 
+          <TabsTrigger
+            value="settings"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-white rounded-lg px-4 py-2.5"
           >
             <Settings className="w-4 h-4 mr-2" /> Settings
           </TabsTrigger>
-          <TabsTrigger 
-            value="tickets" 
+          <TabsTrigger
+            value="tickets"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-white rounded-lg px-4 py-2.5"
           >
             <List className="w-4 h-4 mr-2" /> Open Tickets
@@ -854,7 +854,7 @@ export default function TicketsPage() {
                   <div className="p-6 border-b border-white/10 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div 
+                        <div
                           className="w-12 h-12 rounded-xl flex items-center justify-center"
                           style={{ backgroundColor: `${panel.color}20` }}
                         >
@@ -975,9 +975,8 @@ export default function TicketsPage() {
                             {panel.categories.map((cat) => (
                               <button
                                 key={cat.id}
-                                className={`w-full px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${
-                                  BUTTON_STYLES.find(s => s.value === panel.buttonStyle)?.className
-                                }`}
+                                className={`w-full px-4 py-2 rounded text-sm font-medium flex items-center gap-2 ${BUTTON_STYLES.find(s => s.value === panel.buttonStyle)?.className
+                                  }`}
                               >
                                 {cat.emoji && <span>{cat.emoji}</span>}
                                 {cat.name}
@@ -1015,7 +1014,7 @@ export default function TicketsPage() {
                     ) : (
                       <div className="grid gap-3">
                         {panel.categories.map((category, idx) => (
-                          <div 
+                          <div
                             key={category.id}
                             className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
                           >
@@ -1108,11 +1107,10 @@ export default function TicketsPage() {
                 <button
                   key={type.key}
                   onClick={() => setSelectedMessageType(type.key)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
-                    selectedMessageType === type.key
-                      ? `bg-${type.color}-500/20 border border-${type.color}-500/30 text-white`
-                      : 'bg-white/5 border border-transparent text-gray-400 hover:bg-white/10 hover:text-white'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${selectedMessageType === type.key
+                    ? `bg-${type.color}-500/20 border border-${type.color}-500/30 text-white`
+                    : 'bg-white/5 border border-transparent text-gray-400 hover:bg-white/10 hover:text-white'
+                    }`}
                 >
                   <span className="text-xl">{type.icon}</span>
                   <div className="flex-1 min-w-0">
@@ -1234,7 +1232,7 @@ export default function TicketsPage() {
                             ...prev,
                             [selectedMessageType]: {
                               ...prev[selectedMessageType],
-                              embed: { ...prev[selectedMessageType]?.embed, title: e.target.value }
+                              embed: { ...prev[selectedMessageType]?.embed, enabled: prev[selectedMessageType]?.embed?.enabled ?? true, title: e.target.value }
                             }
                           }))}
                           placeholder="Embed title..."
@@ -1389,9 +1387,9 @@ export default function TicketsPage() {
               </Card>
 
               {/* Save Button */}
-              <Button 
-                onClick={handleSaveSettings} 
-                disabled={saving} 
+              <Button
+                onClick={handleSaveSettings}
+                disabled={saving}
                 className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-lg"
               >
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -1426,9 +1424,9 @@ export default function TicketsPage() {
                         <div className="flex items-center gap-2">
                           <span className="text-white font-medium">Support Bot</span>
                           <span className="px-1.5 py-0.5 bg-[#5865f2] text-white text-[10px] font-medium rounded">BOT</span>
-                          <span className="text-gray-500 text-xs">Today at {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                          <span className="text-gray-500 text-xs">Today at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        
+
                         {/* Content */}
                         {messageConfigs[selectedMessageType]?.content && (
                           <p className="text-[#dbdee1] text-sm mt-1">
@@ -1445,9 +1443,9 @@ export default function TicketsPage() {
                         {messageConfigs[selectedMessageType]?.embed?.enabled && (
                           <div className="mt-2 rounded overflow-hidden bg-[#2b2d31] max-w-md">
                             <div className="flex">
-                              <div 
-                                className="w-1 flex-shrink-0" 
-                                style={{ backgroundColor: messageConfigs[selectedMessageType]?.embed?.color || '#5865F2' }} 
+                              <div
+                                className="w-1 flex-shrink-0"
+                                style={{ backgroundColor: messageConfigs[selectedMessageType]?.embed?.color || '#5865F2' }}
                               />
                               <div className="flex-1 p-3">
                                 {messageConfigs[selectedMessageType]?.embed?.title && (
@@ -1482,7 +1480,7 @@ export default function TicketsPage() {
                                       <span>•</span>
                                     )}
                                     {messageConfigs[selectedMessageType]?.embed?.timestamp && (
-                                      <span>Today at {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                      <span>Today at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     )}
                                   </div>
                                 )}
@@ -1566,8 +1564,8 @@ export default function TicketsPage() {
                         <FolderOpen className="h-4 w-4 text-yellow-400" />
                         Default Category
                       </Label>
-                      <Select 
-                        value={globalSettings.defaultCategoryId} 
+                      <Select
+                        value={globalSettings.defaultCategoryId}
                         onValueChange={(v) => setGlobalSettings(s => ({ ...s, defaultCategoryId: v }))}
                       >
                         <SelectTrigger className="bg-[hsl(220_20%_10%)] border-white/10 text-white">
@@ -1764,9 +1762,9 @@ export default function TicketsPage() {
               {/* Save Button */}
               <Card className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-purple-500/30">
                 <CardContent className="p-6">
-                  <Button 
-                    onClick={handleSaveSettings} 
-                    disabled={saving} 
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={saving}
                     className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white shadow-lg"
                   >
                     {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -1908,7 +1906,7 @@ export default function TicketsPage() {
               Configure your ticket panel appearance and settings
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedPanel && (
             <div className="space-y-6 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1963,11 +1961,10 @@ export default function TicketsPage() {
                       key={type.value}
                       type="button"
                       onClick={() => setSelectedPanel({ ...selectedPanel, componentType: type.value as TicketPanel['componentType'] })}
-                      className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        selectedPanel.componentType === type.value
-                          ? 'border-blue-500 bg-blue-500/10'
-                          : 'border-white/10 bg-white/5 hover:border-white/20'
-                      }`}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${selectedPanel.componentType === type.value
+                        ? 'border-blue-500 bg-blue-500/10'
+                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{type.icon}</span>
@@ -2022,8 +2019,8 @@ export default function TicketsPage() {
                 {selectedPanel.componentType === 'BUTTONS' && (
                   <div className="space-y-2">
                     <Label className="text-gray-300">Button Style</Label>
-                    <Select 
-                      value={selectedPanel.buttonStyle} 
+                    <Select
+                      value={selectedPanel.buttonStyle}
                       onValueChange={(v: TicketPanel['buttonStyle']) => setSelectedPanel({ ...selectedPanel, buttonStyle: v })}
                     >
                       <SelectTrigger className="bg-[hsl(220_20%_10%)] border-white/10 text-white">
@@ -2096,7 +2093,7 @@ export default function TicketsPage() {
               Configure category appearance, role pings, and custom forms
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedCategory && (
             <div className="space-y-6 py-4">
               {/* Basic Info */}
@@ -2151,15 +2148,14 @@ export default function TicketsPage() {
                             : [...selectedCategory.pingRoleIds, role.id];
                           setSelectedCategory({ ...selectedCategory, pingRoleIds: newRoles });
                         }}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                          isSelected
-                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                            : 'bg-white/5 text-gray-400 border border-white/10 hover:border-white/20'
-                        }`}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${isSelected
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          : 'bg-white/5 text-gray-400 border border-white/10 hover:border-white/20'
+                          }`}
                       >
-                        <span 
-                          className="inline-block w-2 h-2 rounded-full mr-2" 
-                          style={{ backgroundColor: role.color ? `#${role.color.toString(16).padStart(6, '0')}` : '#99AAB5' }} 
+                        <span
+                          className="inline-block w-2 h-2 rounded-full mr-2"
+                          style={{ backgroundColor: role.color ? `#${role.color.toString(16).padStart(6, '0')}` : '#99AAB5' }}
                         />
                         {role.name}
                         {isSelected && <Check className="inline h-3 w-3 ml-1" />}
@@ -2200,14 +2196,14 @@ export default function TicketsPage() {
                   />
                 </div>
                 <p className="text-sm text-gray-400">Collect information from users when they create a ticket (Discord Modal - max 5 fields)</p>
-                
+
                 {selectedCategory.formEnabled && (
                   <div className="space-y-4">
                     {/* Form Questions List */}
                     {selectedCategory.formQuestions.length > 0 && (
                       <div className="space-y-3">
                         {selectedCategory.formQuestions.map((question, idx) => (
-                          <div 
+                          <div
                             key={question.id}
                             className="p-4 rounded-lg bg-[hsl(220_20%_10%)] border border-white/10"
                           >
@@ -2242,7 +2238,7 @@ export default function TicketsPage() {
                                     <ChevronDown className="h-4 w-4" />
                                   </Button>
                                 </div>
-                                
+
                                 <div className="flex-1 space-y-3">
                                   {/* Question Label */}
                                   <div className="flex items-center gap-2">
@@ -2257,20 +2253,19 @@ export default function TicketsPage() {
                                       placeholder="Question label"
                                       className="bg-transparent border-white/10 text-white flex-1"
                                     />
-                                    <Badge className={`${
-                                      question.type === 'short' ? 'bg-blue-500/20 text-blue-400' :
+                                    <Badge className={`${question.type === 'short' ? 'bg-blue-500/20 text-blue-400' :
                                       question.type === 'paragraph' ? 'bg-purple-500/20 text-purple-400' :
-                                      question.type === 'select' ? 'bg-cyan-500/20 text-cyan-400' :
-                                      'bg-orange-500/20 text-orange-400'
-                                    } border-0 text-xs`}>
+                                        question.type === 'select' ? 'bg-cyan-500/20 text-cyan-400' :
+                                          'bg-orange-500/20 text-orange-400'
+                                      } border-0 text-xs`}>
                                       {FORM_QUESTION_TYPES.find(t => t.value === question.type)?.icon} {question.type}
                                     </Badge>
                                   </div>
-                                  
+
                                   {/* Question Settings */}
                                   <div className="flex flex-wrap items-center gap-3">
                                     {/* Type */}
-                                    <Select 
+                                    <Select
                                       value={question.type}
                                       onValueChange={(value: FormQuestion['type']) => {
                                         const newQuestions = selectedCategory.formQuestions.map(q =>
@@ -2290,7 +2285,7 @@ export default function TicketsPage() {
                                         ))}
                                       </SelectContent>
                                     </Select>
-                                    
+
                                     {/* Placeholder */}
                                     <Input
                                       value={question.placeholder || ''}
@@ -2303,7 +2298,7 @@ export default function TicketsPage() {
                                       placeholder="Placeholder text..."
                                       className="flex-1 min-w-[120px] bg-transparent border-white/10 text-white h-8 text-xs"
                                     />
-                                    
+
                                     {/* Required Toggle */}
                                     <button
                                       onClick={() => {
@@ -2312,17 +2307,16 @@ export default function TicketsPage() {
                                         );
                                         setSelectedCategory({ ...selectedCategory, formQuestions: newQuestions });
                                       }}
-                                      className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all ${
-                                        question.required
-                                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                          : 'bg-white/5 text-gray-400 border border-white/10 hover:border-white/20'
-                                      }`}
+                                      className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all ${question.required
+                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        : 'bg-white/5 text-gray-400 border border-white/10 hover:border-white/20'
+                                        }`}
                                     >
                                       <ToggleLeft className="h-3 w-3" />
                                       {question.required ? 'Required' : 'Optional'}
                                     </button>
                                   </div>
-                                  
+
                                   {/* Select Options (only for select type) */}
                                   {question.type === 'select' && (
                                     <div className="space-y-2 pt-2 border-t border-white/5">
@@ -2376,7 +2370,7 @@ export default function TicketsPage() {
                                   )}
                                 </div>
                               </div>
-                              
+
                               {/* Delete Button */}
                               <Button
                                 variant="ghost"
@@ -2394,7 +2388,7 @@ export default function TicketsPage() {
                         ))}
                       </div>
                     )}
-                    
+
                     {/* Add Question Button */}
                     {selectedCategory.formQuestions.length < 5 ? (
                       <Button
@@ -2421,7 +2415,7 @@ export default function TicketsPage() {
                         </AlertDescription>
                       </Alert>
                     )}
-                    
+
                     {/* Form Preview */}
                     {selectedCategory.formQuestions.length > 0 && (
                       <div className="pt-4 border-t border-white/10">
@@ -2504,7 +2498,7 @@ export default function TicketsPage() {
               Choose a channel to send the ticket panel to
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label className="text-gray-300">Channel</Label>
