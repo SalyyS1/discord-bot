@@ -21,6 +21,7 @@ import {
   Sparkles,
   Mic,
   Music,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ServerSelector } from '@/components/server-selector';
@@ -83,6 +84,7 @@ export function SidebarV2() {
       items: [
         { href: '/dashboard', label: t('overview'), icon: LayoutDashboard },
         { href: '/dashboard/settings', label: t('settings'), icon: Settings },
+        { href: '/profile', label: 'Profile', icon: User },
       ],
     },
     {

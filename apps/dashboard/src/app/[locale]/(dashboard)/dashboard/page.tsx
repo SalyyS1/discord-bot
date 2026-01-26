@@ -51,17 +51,17 @@ interface GuildStats {
   recentActivity: Array<{ id: string; action: string; reason: string | null; time: string }>;
 }
 
-function StatCard({ 
-  title, 
-  value, 
-  icon: Icon, 
-  description, 
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  description,
   trend,
   color = 'cyan'
-}: { 
-  title: string; 
-  value: string | number; 
-  icon: React.ElementType; 
+}: {
+  title: string;
+  value: string | number;
+  icon: React.ElementType;
   description?: string;
   trend?: { value: number; label: string };
   color?: string;
@@ -123,7 +123,11 @@ export default function DashboardPage() {
     if (!guildId) return;
 
     async function fetchStats() {
+      // Clear old data first to prevent showing stale data
+      setStats(null);
+      setChartData([]);
       setLoading(true);
+
       try {
         const res = await fetch(`/api/guilds/${guildId}/stats`);
         const data = await res.json();
@@ -319,12 +323,11 @@ export default function DashboardPage() {
             <div className="space-y-3">
               {stats?.leaderboard?.slice(0, 5).map((member, index) => (
                 <div key={index} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                    index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                    index === 1 ? 'bg-gray-400/20 text-gray-300' :
-                    index === 2 ? 'bg-amber-600/20 text-amber-500' :
-                    'bg-white/10 text-gray-400'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                      index === 1 ? 'bg-gray-400/20 text-gray-300' :
+                        index === 2 ? 'bg-amber-600/20 text-amber-500' :
+                          'bg-white/10 text-gray-400'
+                    }`}>
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -340,8 +343,8 @@ export default function DashboardPage() {
                   </Badge>
                 </div>
               )) || (
-                <p className="text-gray-400 text-center py-8">No members yet</p>
-              )}
+                  <p className="text-gray-400 text-center py-8">No members yet</p>
+                )}
             </div>
           </CardContent>
         </Card>
@@ -365,14 +368,14 @@ export default function DashboardPage() {
                     <span className="text-gray-400">Level {level.level}</span>
                     <span className="text-white font-medium">{level.count} members</span>
                   </div>
-                  <Progress 
-                    value={(level.count / (stats?.stats.members || 1)) * 100} 
+                  <Progress
+                    value={(level.count / (stats?.stats.members || 1)) * 100}
                     className="h-2 bg-white/10"
                   />
                 </div>
               )) || (
-                <p className="text-gray-400 text-center py-8">No level data</p>
-              )}
+                  <p className="text-gray-400 text-center py-8">No level data</p>
+                )}
             </div>
           </CardContent>
         </Card>
@@ -403,8 +406,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )) || (
-                <p className="text-gray-400 text-center py-8">No recent activity</p>
-              )}
+                  <p className="text-gray-400 text-center py-8">No recent activity</p>
+                )}
             </div>
           </CardContent>
         </Card>
