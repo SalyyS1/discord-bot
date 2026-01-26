@@ -23,15 +23,16 @@ export function useSelectedGuild(): UseSelectedGuildReturn {
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   const fetchGuilds = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const res = await fetch('/api/guilds');
       const data = await res.json();
-      
+
       if (!data.guilds?.length) {
         setError('No servers found. Make sure the bot is in at least one server.');
         setGuilds([]);
@@ -39,7 +40,7 @@ export function useSelectedGuild(): UseSelectedGuildReturn {
       }
 
       setGuilds(data.guilds);
-      
+
       // Auto-select first guild if none selected
       if (!selectedGuildId && data.guilds.length > 0) {
         setSelectedGuildId(data.guilds[0].id);
@@ -58,12 +59,13 @@ export function useSelectedGuild(): UseSelectedGuildReturn {
     }
   }, [isInitialized, fetchGuilds]);
 
-  // Listen for guild changes from server selector
+  // Listen for guild changes from server selector - force re-render
   useEffect(() => {
     const handleGuildChange = () => {
-      // Just re-render, the guildId from context will be updated
+      // Force re-render by incrementing counter
+      setRefreshCounter(c => c + 1);
     };
-    
+
     window.addEventListener('guild-changed', handleGuildChange);
     return () => window.removeEventListener('guild-changed', handleGuildChange);
   }, []);
