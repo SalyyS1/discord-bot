@@ -25,24 +25,24 @@ const autoResponderUpdateSchema = z.object({
   responseType: z.enum(['TEXT', 'EMBED', 'REACTION', 'RANDOM']).optional(),
   cooldownSeconds: z.number().int().min(0).max(3600).optional(),
   enabled: z.boolean().optional(),
-  
+
   // Advanced features
   mentionUser: z.boolean().optional(),
   deleteOriginal: z.boolean().optional(),
   replyToMessage: z.boolean().optional(),
   dmUser: z.boolean().optional(),
-  
+
   // Tone & Style
   tone: z.enum(['formal', 'casual', 'friendly', 'playful', 'professional']).optional().nullable(),
   pronoun: z.enum(['neutral', 'first_person', 'third_person']).optional().nullable(),
   emoji: z.boolean().optional(),
-  
+
   // Role-based responses
   roleResponses: z.array(roleResponseSchema).optional().nullable(),
-  
+
   // User-specific responses
   userResponses: z.array(userResponseSchema).optional().nullable(),
-  
+
   // Restrictions
   allowedRoleIds: z.array(z.string()).optional(),
   blockedRoleIds: z.array(z.string()).optional(),
@@ -50,7 +50,7 @@ const autoResponderUpdateSchema = z.object({
   blockedChannelIds: z.array(z.string()).optional(),
   allowedUserIds: z.array(z.string()).optional(),
   blockedUserIds: z.array(z.string()).optional(),
-  
+
   // Random responses
   randomResponses: z.array(z.string()).optional(),
 });
@@ -76,9 +76,18 @@ export async function PATCH(
     const body = await request.json();
     const validated = autoResponderUpdateSchema.parse(body);
 
+    // Transform JSON fields to Prisma-compatible format
+    const updateData: Record<string, unknown> = { ...validated };
+    if ('roleResponses' in updateData) {
+      updateData.roleResponses = updateData.roleResponses === null ? null : updateData.roleResponses;
+    }
+    if ('userResponses' in updateData) {
+      updateData.userResponses = updateData.userResponses === null ? null : updateData.userResponses;
+    }
+
     const autoResponder = await prisma.autoResponder.update({
       where: { id, guildId },
-      data: validated,
+      data: updateData as Parameters<typeof prisma.autoResponder.update>[0]['data'],
     });
 
     // Publish config update for real-time sync
