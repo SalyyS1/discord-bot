@@ -38,7 +38,7 @@ export async function PATCH(
         return ApiResponse.success(product);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return ApiResponse.badRequest(error.errors);
+            return ApiResponse.badRequest(error.errors[0]?.message || 'Validation failed');
         }
         logger.error(`Error updating ticket product: ${error}`);
         return ApiResponse.serverError();
