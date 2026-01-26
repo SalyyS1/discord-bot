@@ -32,6 +32,9 @@ export async function middleware(request: NextRequest) {
     (pattern) => pathname.includes(pattern)
   );
   const isDashboardRoute = pathname.includes('/dashboard');
+  const isProfileRoute = pathname.includes('/profile');
+  const isAdminRoute = pathname.includes('/admin');
+  const isProtectedRoute = isDashboardRoute || isProfileRoute || isAdminRoute;
 
   // Check for session cookie (better-auth uses different names in secure/non-secure contexts)
   const sessionCookie =
@@ -47,8 +50,8 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // If no session and trying to access dashboard, redirect to login BEFORE i18n middleware
-  if (!sessionCookie && isDashboardRoute) {
+  // If no session and trying to access protected route, redirect to login BEFORE i18n middleware
+  if (!sessionCookie && isProtectedRoute) {
     const locale = getLocale(pathname);
     const loginUrl = new URL(`/${locale}/login`, request.url);
     // Store the original URL to redirect back after login
