@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   },
 
   // Enable transpilation of workspace packages
-  transpilePackages: ['@repo/database', '@repo/config', '@repo/types'],
+  transpilePackages: ['@repo/database', '@repo/config', '@repo/security', '@repo/types'],
 
   // Image optimization configuration
   images: {
