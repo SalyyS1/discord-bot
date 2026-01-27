@@ -1,5 +1,5 @@
 import type Redis from 'ioredis';
-import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from './channels.ts';
+import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from './channels.js';
 
 /**
  * Config publisher for dashboard to notify bot of changes

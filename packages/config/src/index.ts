@@ -1,10 +1,10 @@
-export * from './env.ts';
-export * from './sync/index.ts';
-export * from './cache.ts';
-export * from './audit.ts';
-export * from './settings-schema.ts';
-export * from './message-compiler.ts';
-export * from './features.ts';
+export * from './env.js';
+export * from './sync/index.js';
+export * from './cache.js';
+export * from './audit.js';
+export * from './settings-schema.js';
+export * from './message-compiler.js';
+export * from './features.js';
 
 /**
  * Shared constants

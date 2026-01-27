@@ -21,5 +21,5 @@ if (process.env.NODE_ENV !== 'production') {
 export * from '@prisma/client';
 
 // Multi-tenant exports
-export * from './schema-manager.ts';
-export * from './tenant-prisma.ts';
+export * from './schema-manager.js';
+export * from './tenant-prisma.js';
