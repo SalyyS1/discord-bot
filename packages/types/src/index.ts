@@ -3,7 +3,7 @@
  */
 
 // Message Builder types
-export * from './message-config.js';
+export * from './message-config';
 
 // Config sync message for Redis pub/sub
 export interface ConfigUpdateMessage {
