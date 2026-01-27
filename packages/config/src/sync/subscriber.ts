@@ -1,5 +1,5 @@
 import type Redis from 'ioredis';
-import { CONFIG_CHANNELS, type ConfigUpdateMessage, type ConfigChannel } from './channels';
+import { CONFIG_CHANNELS, type ConfigUpdateMessage, type ConfigChannel } from './channels.ts';
 
 export type ConfigHandler = (message: ConfigUpdateMessage) => void | Promise<void>;
 
@@ -27,7 +27,7 @@ export class ConfigSubscriber {
       try {
         const parsed = JSON.parse(message) as ConfigUpdateMessage;
         const handlers = this.handlers.get(channel as ConfigChannel) || [];
-        
+
         for (const handler of handlers) {
           Promise.resolve(handler(parsed)).catch((err) => {
             console.error(`Error in config handler for ${channel}:`, err);
