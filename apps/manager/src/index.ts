@@ -94,10 +94,10 @@ async function main() {
       for (const tenant of activeTenants) {
         try {
           logger.info(`Auto-starting bot`, { tenantId: tenant.id });
-          // Note: In production, decrypt token here
+          // Token stays encrypted - spawner decrypts it securely at spawn time
           await spawner.spawn({
             tenantId: tenant.id,
-            discordToken: tenant.discordToken,
+            discordTokenEncrypted: tenant.discordToken, // Already encrypted in DB
             discordClientId: tenant.discordClientId,
             databaseUrl: buildTenantDatabaseUrl(tenant.id),
           });

@@ -17,13 +17,6 @@ interface TenantParams {
   tenantId: string;
 }
 
-// Decrypt token function placeholder (implemented in Phase 04)
-async function decryptToken(encryptedToken: string): Promise<string> {
-  // TODO: Implement in Phase 04 - Security
-  // For now, return as-is (assuming plain text during development)
-  return encryptedToken;
-}
-
 // Build database URL with tenant schema
 function buildTenantDatabaseUrl(tenantId: string): string {
   const baseUrl = process.env.DATABASE_URL || '';
@@ -146,12 +139,10 @@ export function createApi(spawner: BotSpawner, healthMonitor: HealthMonitor): ex
     }
 
     try {
-      // Decrypt token
-      const decryptedToken = await decryptToken(tenant.discordToken);
-
+      // Token stays encrypted - spawner handles secure decryption
       await spawner.spawn({
         tenantId,
-        discordToken: decryptedToken,
+        discordTokenEncrypted: tenant.discordToken, // Encrypted in DB
         discordClientId: tenant.discordClientId,
         databaseUrl: buildTenantDatabaseUrl(tenantId),
       });
@@ -174,7 +165,7 @@ export function createApi(spawner: BotSpawner, healthMonitor: HealthMonitor): ex
       } as ApiResponse);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      
+
       await prisma.tenant.update({
         where: { id: tenantId },
         data: {
@@ -263,12 +254,10 @@ export function createApi(spawner: BotSpawner, healthMonitor: HealthMonitor): ex
         await spawner.stop(tenantId);
       }
 
-      // Then start
-      const decryptedToken = await decryptToken(tenant.discordToken);
-      
+      // Token stays encrypted - spawner handles secure decryption
       await spawner.spawn({
         tenantId,
-        discordToken: decryptedToken,
+        discordTokenEncrypted: tenant.discordToken, // Encrypted in DB
         discordClientId: tenant.discordClientId,
         databaseUrl: buildTenantDatabaseUrl(tenantId),
       });

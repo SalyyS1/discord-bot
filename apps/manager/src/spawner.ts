@@ -3,6 +3,10 @@
  * 
  * Manages spawning, stopping, and monitoring of tenant bot processes.
  * Each bot runs as an isolated child process with its own environment.
+ * 
+ * SECURITY: Discord tokens are stored encrypted and only decrypted
+ * at spawn time within this service. Tokens are never logged or
+ * passed to external code in plaintext.
  */
 
 import { fork, ChildProcess } from 'child_process';
@@ -10,6 +14,7 @@ import { EventEmitter } from 'events';
 import path from 'path';
 import { TenantConfig, BotStatus, IPCMessage } from './types.js';
 import { logger } from './logger.js';
+import { getEncryptionService } from '@repo/security';
 
 interface BotProcess {
   process: ChildProcess;
@@ -59,11 +64,23 @@ export class BotSpawner extends EventEmitter {
       }
     }
 
+    // Decrypt token securely - only here at spawn time
+    let decryptedToken: string;
+    try {
+      const encryptionService = getEncryptionService();
+      decryptedToken = encryptionService.decrypt(config.discordTokenEncrypted);
+      logger.debug(`Token decrypted successfully`, { tenantId });
+    } catch (err) {
+      const error = err as Error;
+      logger.error(`Failed to decrypt token: ${error.message}`, { tenantId });
+      throw new Error(`Token decryption failed for tenant ${tenantId}`);
+    }
+
     // Build environment for the child process
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       TENANT_ID: tenantId,
-      DISCORD_TOKEN: config.discordToken,
+      DISCORD_TOKEN: decryptedToken,
       DISCORD_CLIENT_ID: config.discordClientId,
       DATABASE_URL: config.databaseUrl,
       REDIS_PREFIX: config.redisPrefix || `tenant:${tenantId}:`,

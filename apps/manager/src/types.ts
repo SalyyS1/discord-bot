@@ -5,7 +5,8 @@
 // Tenant configuration for spawning a bot
 export interface TenantConfig {
   tenantId: string;
-  discordToken: string;
+  /** Encrypted Discord token (AES-256-GCM format: iv:authTag:ciphertext) */
+  discordTokenEncrypted: string;
   discordClientId: string;
   databaseUrl: string;
   redisPrefix?: string;

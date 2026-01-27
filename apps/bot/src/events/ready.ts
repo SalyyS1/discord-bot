@@ -3,6 +3,7 @@ import { Event } from '../structures/Event.js';
 import { logger } from '../utils/logger.js';
 import { prisma } from '../lib/prisma.js';
 import { AntiRaidModule } from '../modules/security/antiRaid.js';
+import { initMusicPlayer } from '../modules/music/index.js';
 
 export default new Event({
   name: Events.ClientReady,
@@ -13,6 +14,14 @@ export default new Event({
 
     // Initialize Anti-Raid module
     AntiRaidModule.init(client);
+
+    // Initialize Music Player
+    try {
+      await initMusicPlayer(client);
+      logger.info('[Music] Player initialized');
+    } catch (error) {
+      logger.error('[Music] Failed to initialize player:', error);
+    }
 
     // Sync all guilds to database
     try {
