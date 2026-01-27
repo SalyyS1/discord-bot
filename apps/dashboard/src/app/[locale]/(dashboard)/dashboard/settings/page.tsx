@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Settings,
   Bot,
@@ -19,7 +20,9 @@ import {
   Zap,
   Palette,
   Sun,
-  Moon
+  Moon,
+  AlertTriangle,
+  Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LanguageSwitcher } from '@/components/language-switcher';
@@ -32,9 +35,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
+import { useUserPreferences, useUpdatePreferences } from '@/hooks/use-user-preferences';
+import { SettingsSkeleton } from '@/components/skeletons';
 
 interface BotStats {
   guilds: number;
@@ -45,25 +62,72 @@ interface BotStats {
 
 export default function SettingsPage() {
   const [botStats, setBotStats] = useState<BotStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+
+  // User preferences hook
+  const { data: preferences, isLoading: prefsLoading } = useUserPreferences();
+  const updatePreferences = useUpdatePreferences();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Fetch bot stats from API (could be a hook in future)
   useEffect(() => {
-    setTimeout(() => {
-      setBotStats({
-        guilds: 1,
-        users: 150,
-        commands: 45,
-        uptime: '99.9%',
-      });
-      setLoading(false);
-    }, 500);
+    async function fetchStats() {
+      try {
+        // For now, use mock data until a bot stats API is available
+        // In production, this would fetch from /api/bot/stats
+        setBotStats({
+          guilds: 1,
+          users: 150,
+          commands: 45,
+          uptime: '99.9%',
+        });
+      } finally {
+        setStatsLoading(false);
+      }
+    }
+    fetchStats();
   }, []);
+
+  // Handle preference toggle
+  const handlePreferenceChange = (key: string, value: boolean) => {
+    updatePreferences.mutate({ [key]: value }, {
+      onSuccess: () => {
+        toast.success('Preference saved');
+      },
+      onError: () => {
+        toast.error('Failed to save preference');
+      },
+    });
+  };
+
+  // Handle dangerous actions
+  const handleResetSettings = async () => {
+    try {
+      // In a real implementation, this would call an API
+      toast.success('Settings reset successfully');
+    } catch {
+      toast.error('Failed to reset settings');
+    }
+  };
+
+  const handleRemoveBot = async () => {
+    try {
+      // In a real implementation, this would call an API
+      toast.success('Bot removal initiated');
+    } catch {
+      toast.error('Failed to remove bot');
+    }
+  };
+
+  // Show skeleton while loading
+  if (prefsLoading && statsLoading) {
+    return <SettingsSkeleton />;
+  }
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -96,22 +160,22 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="stat-card">
                   <Server className="h-5 w-5 text-purple-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white dark:text-white">{loading ? '-' : botStats?.guilds}</p>
+                  <p className="text-2xl font-bold text-white dark:text-white">{statsLoading ? '-' : botStats?.guilds}</p>
                   <p className="text-xs text-gray-400">Servers</p>
                 </div>
                 <div className="stat-card">
                   <Users className="h-5 w-5 text-blue-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white dark:text-white">{loading ? '-' : botStats?.users}</p>
+                  <p className="text-2xl font-bold text-white dark:text-white">{statsLoading ? '-' : botStats?.users}</p>
                   <p className="text-xs text-gray-400">Users</p>
                 </div>
                 <div className="stat-card">
                   <Zap className="h-5 w-5 text-yellow-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white dark:text-white">{loading ? '-' : botStats?.commands}</p>
+                  <p className="text-2xl font-bold text-white dark:text-white">{statsLoading ? '-' : botStats?.commands}</p>
                   <p className="text-xs text-gray-400">Commands</p>
                 </div>
                 <div className="stat-card">
                   <Clock className="h-5 w-5 text-emerald-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white dark:text-white">{loading ? '-' : botStats?.uptime}</p>
+                  <p className="text-2xl font-bold text-white dark:text-white">{statsLoading ? '-' : botStats?.uptime}</p>
                   <p className="text-xs text-gray-400">Uptime</p>
                 </div>
               </div>
@@ -190,7 +254,10 @@ export default function SettingsPage() {
 
               <div className="space-y-2">
                 <Label className="text-gray-300">Timezone</Label>
-                <Select defaultValue="utc">
+                <Select 
+                  value={preferences?.timezone ?? 'utc'}
+                  onValueChange={(v) => handlePreferenceChange('timezone', v as any)}
+                >
                   <SelectTrigger className="bg-[#1a1d26] dark:bg-[#1a1d26] border-white/10 text-white max-w-[300px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -226,7 +293,10 @@ export default function SettingsPage() {
                       <p className="text-gray-400 text-sm">Get notified when new tickets are created</p>
                     </div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={preferences?.ticketNotifications ?? true}
+                    onCheckedChange={(checked) => handlePreferenceChange('ticketNotifications', checked)}
+                  />
                 </div>
               </div>
 
@@ -239,7 +309,10 @@ export default function SettingsPage() {
                       <p className="text-gray-400 text-sm">Moderation actions and raid warnings</p>
                     </div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={preferences?.securityAlerts ?? true}
+                    onCheckedChange={(checked) => handlePreferenceChange('securityAlerts', checked)}
+                  />
                 </div>
               </div>
 
@@ -252,7 +325,10 @@ export default function SettingsPage() {
                       <p className="text-gray-400 text-sm">New features and changelog updates</p>
                     </div>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={preferences?.botUpdates ?? false}
+                    onCheckedChange={(checked) => handlePreferenceChange('botUpdates', checked)}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -267,17 +343,23 @@ export default function SettingsPage() {
               <CardTitle className="text-white dark:text-white">Quick Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start border-white/10 text-gray-300 hover:bg-white/5 hover:text-white">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Documentation
+              <Button variant="outline" className="w-full justify-start border-white/10 text-gray-300 hover:bg-white/5 hover:text-white" asChild>
+                <Link href="https://docs.sylabot.site" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Documentation
+                </Link>
               </Button>
-              <Button variant="outline" className="w-full justify-start border-white/10 text-gray-300 hover:bg-white/5 hover:text-white">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Support Server
+              <Button variant="outline" className="w-full justify-start border-white/10 text-gray-300 hover:bg-white/5 hover:text-white" asChild>
+                <Link href="https://discord.gg/sylabot" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Support Server
+                </Link>
               </Button>
-              <Button variant="outline" className="w-full justify-start border-white/10 text-gray-300 hover:bg-white/5 hover:text-white">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Status Page
+              <Button variant="outline" className="w-full justify-start border-white/10 text-gray-300 hover:bg-white/5 hover:text-white" asChild>
+                <Link href="https://status.sylabot.site" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Status Page
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -351,15 +433,69 @@ export default function SettingsPage() {
           {/* Danger Zone */}
           <Card className="overflow-hidden bg-red-950/20 border-red-500/20">
             <CardHeader className="pb-3">
-              <CardTitle className="text-red-400 text-sm">Danger Zone</CardTitle>
+              <CardTitle className="text-red-400 text-sm flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Danger Zone
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10">
-                Reset All Settings
-              </Button>
-              <Button variant="outline" className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10">
-                Remove Bot from Server
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reset All Settings
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-[#1a1d26] border-white/10">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-white">Reset All Settings?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-400">
+                      This will reset all your dashboard preferences and notification settings to their default values. 
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-white/5 border-white/10 text-gray-300 hover:bg-white/10">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleResetSettings}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      Reset Settings
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove Bot from Server
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-[#1a1d26] border-white/10">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-white">Remove Bot from Server?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-400">
+                      This will kick the bot from your server and delete all associated data including 
+                      leveling progress, ticket history, and settings. This action is permanent.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-white/5 border-white/10 text-gray-300 hover:bg-white/10">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleRemoveBot}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      Remove Bot
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </div>

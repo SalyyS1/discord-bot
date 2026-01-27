@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import {
-  Plus, Trash2, Edit2, Zap, Save, Server, Search, AlertCircle, Loader2, AtSign, Reply, Eye,
+  Plus, Trash2, Edit2, Zap, Save, Server, Search, AlertCircle, AtSign, Reply, Eye,
   Shield, User, Crown, MessageSquare, Settings2, Hash, Clock, ToggleLeft,
   Smile, Heart, Sparkles, Check, X, ChevronRight,
   Filter, Target, Lock, FileText, Mic, Ban
@@ -20,9 +20,18 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useGuildContext } from '@/context/guild-context';
-import { useGuilds } from '@/hooks';
+import { useGuilds, useGuildRoles, useGuildChannels } from '@/hooks';
+import { 
+  useAutoResponders, 
+  useCreateAutoResponder, 
+  useUpdateAutoResponder, 
+  useDeleteAutoResponder,
+  useToggleAutoResponder,
+  type AutoResponder 
+} from '@/hooks/use-autoresponders';
 import { RoleSelector } from '@/components/selectors/role-selector';
 import { ChannelSelector, Channel } from '@/components/selectors/channel-selector';
+import { AutoResponderListSkeleton, AutoResponderStatsSkeleton } from '@/components/skeletons';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -32,55 +41,6 @@ interface RoleResponse {
   roleId: string;
   roleName?: string;
   response: string;
-}
-
-interface UserResponse {
-  userId: string;
-  username?: string;
-  response: string;
-}
-
-interface AutoResponder {
-  id: string;
-  trigger: string;
-  triggerType: 'EXACT' | 'CONTAINS' | 'STARTS_WITH' | 'ENDS_WITH' | 'REGEX' | 'WILDCARD';
-  response: string;
-  responseType: 'TEXT' | 'EMBED' | 'REACTION' | 'RANDOM';
-  cooldownSeconds: number;
-  enabled: boolean;
-
-  // Advanced features
-  mentionUser?: boolean;
-  deleteOriginal?: boolean;
-  replyToMessage?: boolean;
-  dmUser?: boolean;
-
-  // Tone & Style
-  tone?: 'formal' | 'casual' | 'friendly' | 'playful' | 'professional';
-  pronoun?: 'neutral' | 'first_person' | 'third_person';
-  emoji?: boolean;
-
-  // Role-based responses
-  roleResponses?: RoleResponse[];
-
-  // User-specific responses
-  userResponses?: UserResponse[];
-
-  // Restrictions
-  allowedRoleIds?: string[];
-  blockedRoleIds?: string[];
-  allowedChannelIds?: string[];
-  blockedChannelIds?: string[];
-  allowedUserIds?: string[];
-  blockedUserIds?: string[];
-
-  // Random responses
-  randomResponses?: string[];
-
-  // Metadata
-  usageCount?: number;
-  lastUsedAt?: string;
-  createdAt?: string;
 }
 
 interface Role {
@@ -123,14 +83,8 @@ const PRONOUNS = [
 // ═══════════════════════════════════════════════
 
 export default function AutoResponderPage() {
-  const [responders, setResponders] = useState<AutoResponder[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterEnabled, setFilterEnabled] = useState<'all' | 'enabled' | 'disabled'>('all');
-  const [_activeTab, _setActiveTab] = useState('overview');
-
-  // Guild data
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [channels, setChannels] = useState<Channel[]>([]);
 
   // Edit/Create State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -161,79 +115,39 @@ export default function AutoResponderPage() {
 
   const { selectedGuildId, setSelectedGuildId } = useGuildContext();
   const { data: guilds, isLoading: guildsLoading, error: guildsError } = useGuilds();
+  
+  // Use TanStack Query hooks for data fetching
+  const { data: responders = [], isLoading: respondersLoading } = useAutoResponders(selectedGuildId);
+  const { data: rolesData = [] } = useGuildRoles(selectedGuildId);
+  const { data: channelsData = [] } = useGuildChannels(selectedGuildId);
+  
+  // Mutations
+  const createMutation = useCreateAutoResponder(selectedGuildId || '');
+  const updateMutation = useUpdateAutoResponder(selectedGuildId || '');
+  const deleteMutation = useDeleteAutoResponder(selectedGuildId || '');
+  const toggleMutation = useToggleAutoResponder(selectedGuildId || '');
+  
+  // Transform roles and channels
+  const roles = useMemo(() => rolesData as Role[], [rolesData]);
+  const channels = useMemo(() => {
+    return (channelsData as Channel[]).filter(c => c.type === 'text');
+  }, [channelsData]);
 
-  // Fetch guild data
-  const fetchGuildData = useCallback(async () => {
-    if (!selectedGuildId) return;
-
-    try {
-      const [rolesRes, channelsRes, respondersRes] = await Promise.all([
-        fetch(`/api/guilds/${selectedGuildId}/roles`),
-        fetch(`/api/guilds/${selectedGuildId}/channels`),
-        fetch(`/api/guilds/${selectedGuildId}/autoresponders`),
-      ]);
-
-      if (rolesRes.ok) {
-        const { data } = await rolesRes.json();
-        setRoles(data || []);
-      }
-
-      if (channelsRes.ok) {
-        const { data } = await channelsRes.json();
-        // Filter to text channels and properly type-cast
-        const textChannels = (data || [])
-          .filter((c: { type: string }) => c.type === 'text')
-          .map((c: { id: string; name: string; type: string; parentId?: string | null; parentName?: string }) => ({
-            ...c,
-            type: c.type as Channel['type'],
-          }));
-        setChannels(textChannels);
-      }
-
-      if (respondersRes.ok) {
-        const { data } = await respondersRes.json();
-        setResponders(data || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch guild data:', error);
-    }
-  }, [selectedGuildId]);
-
-  useEffect(() => {
-    if (!selectedGuildId && guilds?.length) {
-      setSelectedGuildId(guilds[0].id);
-    }
-  }, [guilds, selectedGuildId, setSelectedGuildId]);
-
-  useEffect(() => {
-    fetchGuildData();
-  }, [fetchGuildData]);
+  // Auto-select first guild if none selected
+  if (!selectedGuildId && guilds?.length && !guildsLoading) {
+    setSelectedGuildId(guilds[0].id);
+  }
 
   const handleSave = async () => {
     if (!selectedGuildId) return;
 
     try {
       if (editingId) {
-        const res = await fetch(`/api/guilds/${selectedGuildId}/autoresponders/${editingId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        if (res.ok) {
-          setResponders(prev => prev.map(r => r.id === editingId ? { ...r, ...formData } as AutoResponder : r));
-          toast.success('Responder updated!');
-        }
+        await updateMutation.mutateAsync({ id: editingId, data: formData });
+        toast.success('Responder updated!');
       } else {
-        const res = await fetch(`/api/guilds/${selectedGuildId}/autoresponders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setResponders(prev => [data.data, ...prev]);
-          toast.success('Responder created!');
-        }
+        await createMutation.mutateAsync(formData as any);
+        toast.success('Responder created!');
       }
       setIsDialogOpen(false);
       resetForm();
@@ -245,8 +159,7 @@ export default function AutoResponderPage() {
   const handleDelete = async (id: string) => {
     if (!selectedGuildId) return;
     try {
-      await fetch(`/api/guilds/${selectedGuildId}/autoresponders/${id}`, { method: 'DELETE' });
-      setResponders(prev => prev.filter(r => r.id !== id));
+      await deleteMutation.mutateAsync(id);
       toast.success('Deleted');
     } catch {
       toast.error('Delete failed');
@@ -256,12 +169,7 @@ export default function AutoResponderPage() {
   const handleToggle = async (id: string, enabled: boolean) => {
     if (!selectedGuildId) return;
     try {
-      await fetch(`/api/guilds/${selectedGuildId}/autoresponders/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
-      });
-      setResponders(prev => prev.map(r => r.id === id ? { ...r, enabled } : r));
+      await toggleMutation.mutateAsync({ id, enabled });
       toast.success(enabled ? 'Enabled' : 'Disabled');
     } catch {
       toast.error('Toggle failed');
@@ -392,8 +300,19 @@ export default function AutoResponderPage() {
 
   if (guildsLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-[hsl(174_72%_55%)]" />
+      <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-lg bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-shimmer" />
+            <div className="space-y-2">
+              <div className="h-8 w-48 rounded bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-shimmer" />
+              <div className="h-4 w-64 rounded bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-shimmer" />
+            </div>
+          </div>
+        </div>
+        <AutoResponderStatsSkeleton />
+        <AutoResponderListSkeleton count={6} />
       </div>
     );
   }
@@ -525,7 +444,9 @@ export default function AutoResponderPage() {
       </div>
 
       {/* List */}
-      {filteredResponders.length === 0 ? (
+      {respondersLoading ? (
+        <AutoResponderListSkeleton count={6} />
+      ) : filteredResponders.length === 0 ? (
         <Card className="surface-card border-dashed">
           <CardContent className="py-12 text-center">
             <Reply className="h-12 w-12 text-gray-600 mx-auto mb-4" />

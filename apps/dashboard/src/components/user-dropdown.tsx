@@ -45,9 +45,9 @@ export function UserDropdown({ user }: UserDropdownProps) {
           </span>
         </button>
       </DropdownMenuTrigger>
-      
-      <DropdownMenuContent 
-        align="end" 
+
+      <DropdownMenuContent
+        align="end"
         className="w-56 bg-black/90 border-white/10 backdrop-blur-xl shadow-xl"
         sideOffset={8}
       >
@@ -57,33 +57,33 @@ export function UserDropdown({ user }: UserDropdownProps) {
             <p className="text-xs text-gray-400 truncate">{user.email}</p>
           </div>
         </DropdownMenuLabel>
-        
+
         <DropdownMenuSeparator className="bg-white/10" />
-        
+
         <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/10">
-          <Link href="/dashboard/settings" className="flex items-center">
+          <Link href="/profile" className="flex items-center">
             <User className="mr-2 h-4 w-4 text-gray-400" />
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/10">
           <Link href="/dashboard/settings" className="flex items-center">
             <Settings className="mr-2 h-4 w-4 text-gray-400" />
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/10">
           <Link href="/pricing" className="flex items-center">
             <Crown className="mr-2 h-4 w-4 text-yellow-500" />
             <span>Upgrade to Pro</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator className="bg-white/10" />
-        
-        <DropdownMenuItem 
+
+        <DropdownMenuItem
           onClick={handleLogout}
           className="cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10"
         >

@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@repo/database';
 import { logger } from '@/lib/logger';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ guildId: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ guildId: string }> }) {
   const { guildId } = await params;
 
   try {
@@ -14,7 +11,7 @@ export async function GET(
       where: { id: guildId },
       include: {
         settings: true,
-      }
+      },
     });
 
     if (!guild) {
@@ -66,7 +63,7 @@ export async function GET(
       // Message count from members
       prisma.member.aggregate({
         where: { guildId },
-        _sum: { totalMessages: true }
+        _sum: { totalMessages: true },
       }),
 
       // Top 10 members by XP
@@ -76,9 +73,10 @@ export async function GET(
         take: 10,
         select: {
           discordId: true,
+          username: true,
           xp: true,
           level: true,
-        }
+        },
       }),
 
       // Recent mod logs
@@ -91,25 +89,25 @@ export async function GET(
           action: true,
           reason: true,
           createdAt: true,
-        }
+        },
       }),
 
       // Total XP in guild
       prisma.member.aggregate({
         where: { guildId },
-        _sum: { xp: true }
+        _sum: { xp: true },
       }),
 
       // Average level
       prisma.member.aggregate({
         where: { guildId },
-        _avg: { level: true }
+        _avg: { level: true },
       }),
 
       // Top level
       prisma.member.aggregate({
         where: { guildId },
-        _max: { level: true }
+        _max: { level: true },
       }),
 
       // Today's active members (who gained XP today)
@@ -117,9 +115,9 @@ export async function GET(
         where: {
           guildId,
           lastXpGain: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0))
-          }
-        }
+            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          },
+        },
       }),
     ]);
 
@@ -167,24 +165,26 @@ export async function GET(
           antiSpamEnabled: guild.settings?.antiSpamEnabled ?? false,
           antiLinkEnabled: guild.settings?.antiLinkEnabled ?? false,
         },
-        leaderboard: topMembers,
-        levelDistribution: levelStats.map(s => ({
+        leaderboard: topMembers.map((m) => ({
+          discordId: m.discordId,
+          nodeName: m.username || `User#${m.discordId.slice(-4)}`,
+          xp: m.xp,
+          level: m.level,
+        })),
+        levelDistribution: levelStats.map((s) => ({
           level: s.level,
           count: s._count.level,
         })),
-        recentActivity: recentActivity.map(log => ({
+        recentActivity: recentActivity.map((log) => ({
           id: log.id,
           action: log.action,
           reason: log.reason,
           time: log.createdAt,
         })),
-      }
+      },
     });
   } catch (error) {
     logger.error(`Failed to fetch guild stats: ${error}`);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch stats' }, { status: 500 });
   }
 }

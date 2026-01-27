@@ -380,6 +380,9 @@ model Member {
   guildId   String
   guild     Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
+  // User info (denormalized for dashboard)
+  username    String?   // Discord username (updated on XP gain)
+
   // Leveling
   xp            Int       @default(0)
   level         Int       @default(0)

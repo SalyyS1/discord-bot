@@ -1,9 +1,4 @@
-import {
-  Message,
-  GuildMember,
-  EmbedBuilder,
-  TextChannel,
-} from 'discord.js';
+import { Message, GuildMember, EmbedBuilder, TextChannel } from 'discord.js';
 import { prisma, type GuildSettings } from '../../lib/prisma.js';
 import { redis } from '../../lib/redis.js';
 import { getLevelFromXp, getRandomXp } from './xpCalculator.js';
@@ -33,7 +28,7 @@ export class LevelingModule {
 
     // Check No-XP role exclusion
     if (message.member && settings.noXpRoleIds?.length) {
-      const hasNoXpRole = settings.noXpRoleIds.some(roleId =>
+      const hasNoXpRole = settings.noXpRoleIds.some((roleId) =>
         message.member!.roles.cache.has(roleId)
       );
       if (hasNoXpRole) {
@@ -69,8 +64,11 @@ export class LevelingModule {
       create: {
         discordId: message.author.id,
         guildId: message.guild.id,
+        username: message.author.username,
       },
-      update: {},
+      update: {
+        username: message.author.username,
+      },
     });
 
     // Database fallback for cooldown when Redis is unavailable
@@ -216,7 +214,8 @@ export class LevelingModule {
       embed = new EmbedBuilder(JSON.parse(parsedJson));
     } else {
       // Default embed
-      const defaultContent = template?.content || `Congratulations ${member}! You've reached **Level ${newLevel}**!`;
+      const defaultContent =
+        template?.content || `Congratulations ${member}! You've reached **Level ${newLevel}**!`;
       const description = parseTemplate(defaultContent, context);
 
       embed = new EmbedBuilder()
@@ -229,7 +228,7 @@ export class LevelingModule {
 
     // Append new roles field if roles were assigned and not using custom embed that assumes full control
     // If using default embed (or custom content only), we definitely append.
-    // If using custom embedJson, we append only if no fields defined? 
+    // If using custom embedJson, we append only if no fields defined?
     // Safest: Always append "New Roles" if roles assigned, unless we see user might have handled it.
     // Simplifying: Just append for now.
     if (assignedRoles.length > 0) {

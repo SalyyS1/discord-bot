@@ -206,11 +206,11 @@ export default function DashboardPage() {
       {/* Main Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Members"
+          title="Tracked Members"
           value={stats?.stats.members?.toLocaleString() || '0'}
           icon={Users}
           color="cyan"
-          trend={{ value: 12, label: 'this week' }}
+          description="Members with XP activity"
         />
         <StatCard
           title="Messages Sent"
