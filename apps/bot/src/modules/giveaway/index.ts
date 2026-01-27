@@ -87,6 +87,7 @@ export class GiveawayModule {
     const giveaway = await prisma.giveaway.create({
       data: {
         guildId: guild.id,
+        status: 'ACTIVE', // Immediately active so users can enter
         channelId: options.channelId,
         messageId: msg.id,
         hostId: options.hostId,

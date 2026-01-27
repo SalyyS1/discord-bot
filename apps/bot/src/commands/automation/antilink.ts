@@ -56,12 +56,32 @@ export default new Command({
 
     switch (subcommand) {
       case 'enable': {
+        // Check if already enabled
+        const { prisma } = await import('../../lib/prisma.js');
+        const currentSettings = await prisma.guildSettings.findUnique({
+          where: { guildId },
+          select: { antiLinkEnabled: true },
+        });
+        if (currentSettings?.antiLinkEnabled) {
+          await interaction.reply({ content: '⚠️ Anti-link protection is already enabled.', ephemeral: true });
+          return;
+        }
         await AntiLinkModule.setEnabled(guildId, interaction.guild!.name, true);
         await interaction.reply('✅ Anti-link protection enabled. Links will be deleted and users warned.');
         break;
       }
 
       case 'disable': {
+        // Check if already disabled
+        const { prisma } = await import('../../lib/prisma.js');
+        const currentSettings = await prisma.guildSettings.findUnique({
+          where: { guildId },
+          select: { antiLinkEnabled: true },
+        });
+        if (!currentSettings?.antiLinkEnabled) {
+          await interaction.reply({ content: '⚠️ Anti-link protection is already disabled.', ephemeral: true });
+          return;
+        }
         await AntiLinkModule.setEnabled(guildId, interaction.guild!.name, false);
         await interaction.reply('✅ Anti-link protection disabled.');
         break;
@@ -69,7 +89,7 @@ export default new Command({
 
       case 'whitelist': {
         const domain = interaction.options.getString('domain', true);
-        
+
         // Basic domain validation
         const cleanDomain = domain
           .toLowerCase()
