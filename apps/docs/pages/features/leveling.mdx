@@ -1,0 +1,56 @@
+# Leveling System
+
+Reward active members with XP and ranks.
+
+## Overview
+
+The leveling system tracks member activity and rewards engagement with:
+- XP for messages and voice activity
+- Customizable level-up rewards
+- Role assignments at milestones
+- Leaderboards
+
+## Setup
+
+1. Go to **Dashboard** → **Features** → **Leveling**
+2. Toggle "Enable Leveling"
+3. Configure settings
+
+## Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| XP per message | Base XP for each message | 15-25 |
+| XP cooldown | Seconds between XP gains | 60 |
+| Voice XP | XP per minute in voice | 10 |
+| Level-up channel | Where to announce | Current |
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/rank` | View your current rank |
+| `/leaderboard` | Server XP leaderboard |
+| `/setxp @user amount` | Set user's XP (admin) |
+
+## Level Roles
+
+Automatically assign roles at specific levels:
+
+1. Go to **Level Roles** tab
+2. Click "Add Role"
+3. Select level and role
+4. Save
+
+Example:
+- Level 5 → Active Member
+- Level 10 → Regular
+- Level 25 → Veteran
+
+## XP Multipliers
+
+Boost XP gain for specific roles or channels:
+
+- **Role multiplier**: VIP gets 1.5x XP
+- **Channel multiplier**: #general gets 2x XP
+- **Weekend bonus**: 2x XP on weekends

@@ -1,0 +1,43 @@
+# Permissions
+
+Understanding Discord permissions for SylaBot.
+
+## Required Bot Permissions
+
+| Permission | Purpose |
+|------------|---------|
+| Send Messages | Send responses and embeds |
+| Embed Links | Display rich embeds |
+| Attach Files | Send images and files |
+| Read Message History | Context for commands |
+| Manage Roles | Assign level-up roles |
+| Manage Channels | Create ticket channels |
+| Kick/Ban Members | Moderation actions |
+| Manage Messages | Delete messages, purge |
+
+## Dashboard Access
+
+To manage SylaBot via the dashboard, you need **Manage Server** permission in Discord.
+
+## Role Hierarchy
+
+SylaBot can only manage roles **below** its highest role:
+
+```
+✅ Can manage:    Member, VIP, Moderator
+❌ Cannot manage: Admin, Bot Role (above SylaBot)
+```
+
+**Tip:** Move SylaBot's role high in the hierarchy for full functionality.
+
+## Troubleshooting
+
+### "Missing Permissions" Error
+1. Check bot's role position
+2. Verify channel-specific overrides
+3. Ensure bot has required permissions
+
+### Bot Not Responding
+1. Check if bot is online
+2. Verify bot has message read access
+3. Check channel permissions
