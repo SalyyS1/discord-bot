@@ -31,8 +31,7 @@ export async function getCurrentUserId(): Promise<string | null> {
  * Response helpers for consistent error responses
  */
 export const ApiResponse = {
-  unauthorized: () =>
-    NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 }),
+  unauthorized: () => NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 }),
 
   forbidden: (message = 'Forbidden') =>
     NextResponse.json({ success: false, error: message }, { status: 403 }),
@@ -49,18 +48,16 @@ export const ApiResponse = {
   tooManyRequests: (message = 'Too many requests') =>
     NextResponse.json({ success: false, error: message }, { status: 429 }),
 
-  success: <T>(data: T, status = 200) =>
-    NextResponse.json({ success: true, data }, { status }),
+  success: <T>(data: T, status = 200) => NextResponse.json({ success: true, data }, { status }),
 
-  created: <T>(data: T) =>
-    NextResponse.json({ success: true, data }, { status: 201 }),
+  created: <T>(data: T) => NextResponse.json({ success: true, data }, { status: 201 }),
 
   error: (message: string, status = 400) =>
     NextResponse.json({ success: false, error: message }, { status }),
 };
 
 // Import OAuth module for token refresh support
-import { getUserDiscordGuilds } from './discord-oauth';
+import { getUserDiscordGuilds, type GuildFetchResult } from './discord-oauth';
 
 /**
  * Validate API request: check session and verify user has MANAGE_GUILD permission
@@ -84,21 +81,34 @@ export async function validateGuildAccess(guildId: string): Promise<NextResponse
   }
 
   // Try to fetch user's Discord guilds and verify permission
-  const userGuilds = await getUserDiscordGuilds(session.user.id);
-  
+  const guildResult = await getUserDiscordGuilds(session.user.id);
+
+  // Handle fetch errors with appropriate status codes
+  if (!guildResult.success) {
+    // Token issues → 401 (re-authenticate)
+    if (guildResult.error === 'no_token' || guildResult.error === 'token_expired') {
+      return ApiResponse.error('Session expired. Please sign in again.', 401);
+    }
+    // Discord revoked token → 401
+    if (guildResult.error === 'token_revoked') {
+      return ApiResponse.error('Discord access revoked. Please re-link your account.', 401);
+    }
+    // API/network error → 503 (retry later)
+    return ApiResponse.error('Unable to verify guild access. Please try again.', 503);
+  }
+
   // If user has Discord OAuth linked, verify permission
-  if (userGuilds.length > 0) {
-    const userGuild = userGuilds.find(g => g.id === guildId);
-    
+  if (guildResult.guilds.length > 0) {
+    const userGuild = guildResult.guilds.find((g) => g.id === guildId);
+
     // Check if user has MANAGE_GUILD permission
     if (!userGuild || (BigInt(userGuild.permissions) & MANAGE_GUILD_PERMISSION) === BigInt(0)) {
       return ApiResponse.forbidden('You do not have permission to manage this guild');
     }
   }
-  // If no Discord OAuth tokens, allow access in development mode
-  // In production, this should be more strict
+  // User has 0 guilds - allow in dev, block in prod
   else if (process.env.NODE_ENV === 'production') {
-    return ApiResponse.forbidden('Please link your Discord account to manage guilds');
+    return ApiResponse.forbidden('You are not a member of any Discord servers');
   }
 
   return null; // Validation passed
@@ -131,15 +141,15 @@ export interface AuditContext {
 export async function getAuditContext(request: NextRequest): Promise<AuditContext> {
   const session = await getServerSession();
   const headersList = await headers();
-  
+
   // Get client IP from various headers
   const forwardedFor = headersList.get('x-forwarded-for');
   const realIp = headersList.get('x-real-ip');
   const ipAddress = forwardedFor?.split(',')[0] || realIp || undefined;
-  
+
   // Get user agent
   const userAgent = headersList.get('user-agent') || undefined;
-  
+
   return {
     userId: session?.user?.id || 'unknown',
     requestId: generateRequestId(),

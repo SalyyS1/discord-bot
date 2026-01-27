@@ -30,7 +30,12 @@ function formatLog(entry: LogEntry): string {
   return `[${entry.timestamp}] ${entry.level.toUpperCase()}${reqId}: ${entry.message}${ctx}`;
 }
 
-function log(level: LogLevel, message: string, context?: Record<string, unknown>, requestId?: string) {
+function log(
+  level: LogLevel,
+  message: string,
+  context?: Record<string, unknown>,
+  requestId?: string
+) {
   if (!shouldLog(level)) return;
 
   const entry: LogEntry = {
@@ -53,13 +58,42 @@ function log(level: LogLevel, message: string, context?: Record<string, unknown>
 }
 
 export const logger = {
-  debug: (msg: string, ctx?: Record<string, unknown>, reqId?: string) => log('debug', msg, ctx, reqId),
-  info: (msg: string, ctx?: Record<string, unknown>, reqId?: string) => log('info', msg, ctx, reqId),
-  warn: (msg: string, ctx?: Record<string, unknown>, reqId?: string) => log('warn', msg, ctx, reqId),
-  error: (msg: string, ctx?: Record<string, unknown>, reqId?: string) => log('error', msg, ctx, reqId),
+  debug: (msg: string, ctx?: Record<string, unknown>, reqId?: string) =>
+    log('debug', msg, ctx, reqId),
+  info: (msg: string, ctx?: Record<string, unknown>, reqId?: string) =>
+    log('info', msg, ctx, reqId),
+  warn: (msg: string, ctx?: Record<string, unknown>, reqId?: string) =>
+    log('warn', msg, ctx, reqId),
+  error: (msg: string, ctx?: Record<string, unknown>, reqId?: string) =>
+    log('error', msg, ctx, reqId),
 };
 
 // Request ID generator for tracing
 export function generateRequestId(): string {
   return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * Log API errors with full context
+ */
+export function logApiError(
+  route: string,
+  error: unknown,
+  context?: Record<string, unknown>
+): void {
+  const errorInfo = {
+    route,
+    error:
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : String(error),
+    ...context,
+    timestamp: new Date().toISOString(),
+  };
+
+  logger.error(`API Error in ${route}`, errorInfo);
 }

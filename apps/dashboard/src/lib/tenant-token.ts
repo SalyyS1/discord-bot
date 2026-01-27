@@ -55,9 +55,22 @@ export async function getGuildBotToken(guildId: string): Promise<string | null> 
       return process.env.DISCORD_TOKEN || null;
     }
 
-    // Decrypt token
-    const encryptionService = getEncryptionService();
-    const decryptedToken = encryptionService.decrypt(tenant.discordToken);
+    // Decrypt token with explicit error handling
+    let decryptedToken: string;
+    try {
+      const encryptionService = getEncryptionService();
+      decryptedToken = encryptionService.decrypt(tenant.discordToken);
+    } catch (decryptError) {
+      // VALIDATED DECISION: Option C - Fallback + log alert for admin
+      logger.error(`[ADMIN ALERT] Token decryption failed for guild ${guildId}`, {
+        error: String(decryptError),
+        tenantId: guild.tenantId,
+        severity: 'high',
+        action: 'Investigate tenant token configuration',
+      });
+      // Fallback to default token on decryption failure
+      return process.env.DISCORD_TOKEN || null;
+    }
 
     // Cache the result
     tokenCache.set(guildId, {

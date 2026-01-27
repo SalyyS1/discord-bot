@@ -4,39 +4,46 @@ import { z } from 'zod';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
 import { getPublisher } from '@/lib/configSync';
+import { validateGuildId } from '@/lib/validation';
 
-const settingsUpdateSchema = z.object({
-  // Welcome & Goodbye
-  welcomeChannelId: z.string().optional().nullable(),
-  welcomeMessage: z.string().max(2000).optional().nullable(),
-  welcomeImageEnabled: z.boolean().optional(),
-  goodbyeChannelId: z.string().optional().nullable(),
-  goodbyeMessage: z.string().max(2000).optional().nullable(),
-  goodbyeImageEnabled: z.boolean().optional(),
+const settingsUpdateSchema = z
+  .object({
+    // Welcome & Goodbye
+    welcomeChannelId: z.string().optional().nullable(),
+    welcomeMessage: z.string().max(2000).optional().nullable(),
+    welcomeImageEnabled: z.boolean().optional(),
+    goodbyeChannelId: z.string().optional().nullable(),
+    goodbyeMessage: z.string().max(2000).optional().nullable(),
+    goodbyeImageEnabled: z.boolean().optional(),
 
-  // Tickets
-  ticketCategoryId: z.string().optional().nullable(),
-  ticketLogChannelId: z.string().optional().nullable(),
-  ticketWelcomeMessage: z.string().max(2000).optional().nullable(),
+    // Tickets
+    ticketCategoryId: z.string().optional().nullable(),
+    ticketLogChannelId: z.string().optional().nullable(),
+    ticketWelcomeMessage: z.string().max(2000).optional().nullable(),
 
-  // Logging
-  logChannelId: z.string().optional().nullable(),
+    // Logging
+    logChannelId: z.string().optional().nullable(),
 
-  // Moderation
-  muteRoleId: z.string().optional().nullable(),
-  automodEnabled: z.boolean().optional(),
+    // Moderation
+    muteRoleId: z.string().optional().nullable(),
+    automodEnabled: z.boolean().optional(),
 
-  // Leveling
-  levelingEnabled: z.boolean().optional(),
-  levelUpChannelId: z.string().optional().nullable(),
-  levelUpMessage: z.string().max(500).optional().nullable(),
-}).partial();
+    // Leveling
+    levelingEnabled: z.boolean().optional(),
+    levelUpChannelId: z.string().optional().nullable(),
+    levelUpMessage: z.string().max(500).optional().nullable(),
+  })
+  .partial();
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   // Validate session and guild access
   const validationError = await validateGuildAccess(guildId);
@@ -68,6 +75,10 @@ export async function PATCH(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   // Validate session and guild access
   const validationError = await validateGuildAccess(guildId);

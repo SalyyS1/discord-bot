@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { prisma } from '@repo/database';
 import { getServerSession, ApiResponse } from '@/lib/session';
 import { getRequestContext } from '@/lib/request-context';
-import { getUserDiscordGuilds } from '@/lib/discord-oauth';
+import { getUserDiscordGuildsLegacy } from '@/lib/discord-oauth';
 import { createPortalSession, STRIPE_ENABLED } from '@/lib/stripe';
 
 // Required permission: MANAGE_GUILD
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   const { guildId } = result.data;
 
   // 1. Validate user has MANAGE_GUILD permission
-  const userGuilds = await getUserDiscordGuilds(session.user.id);
+  const userGuilds = await getUserDiscordGuildsLegacy(session.user.id);
   const guild = userGuilds.find((g) => g.id === guildId);
 
   if (!guild) {

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { publishModerationUpdate } from '@/lib/configSync';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { validateGuildId } from '@/lib/validation';
 
 const moderationConfigSchema = z.object({
   antiSpamEnabled: z.boolean().optional(),
@@ -33,6 +34,10 @@ export async function GET(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   // Validate session and guild access
   const validationError = await validateGuildAccess(guildId);
@@ -102,6 +107,10 @@ export async function PATCH(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   // Validate session and guild access
   const validationError = await validateGuildAccess(guildId);

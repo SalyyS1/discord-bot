@@ -3,6 +3,7 @@ import { validateGuildAccess, ApiResponse } from '@/lib/session';
 import { discordService, DiscordApiError } from '@/lib/discord';
 import { getGuildBotToken } from '@/lib/tenant-token';
 import { logger } from '@/lib/logger';
+import { validateGuildId } from '@/lib/validation';
 
 // GET - Get guild roles
 export async function GET(
@@ -10,6 +11,10 @@ export async function GET(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   const validationError = await validateGuildAccess(guildId);
   if (validationError) return validationError;

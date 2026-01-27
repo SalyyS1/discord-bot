@@ -9,7 +9,7 @@ import { prisma } from '@repo/database';
 import { createAuditLogger } from '@repo/config';
 import { getServerSession, ApiResponse } from '@/lib/session';
 import { getRequestContext } from '@/lib/request-context';
-import { getUserDiscordGuilds } from '@/lib/discord-oauth';
+import { getUserDiscordGuildsLegacy } from '@/lib/discord-oauth';
 import { createCheckoutSession, STRIPE_ENABLED } from '@/lib/stripe';
 
 const auditLog = createAuditLogger(prisma);
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   const { guildId, priceId } = result.data;
 
   // 1. Validate user has MANAGE_GUILD permission
-  const userGuilds = await getUserDiscordGuilds(session.user.id);
+  const userGuilds = await getUserDiscordGuildsLegacy(session.user.id);
   const guild = userGuilds.find((g) => g.id === guildId);
 
   if (!guild) {

@@ -4,132 +4,147 @@ import { z } from 'zod';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
 import { publishTempVoiceUpdate } from '@/lib/configSync';
+import { validateGuildId } from '@/lib/validation';
 
 const voiceSettingsSchema = z.object({
-    tempVoiceEnabled: z.boolean().optional(),
-    tempVoiceCreatorId: z.string().nullable().optional(),
-    tempVoiceCategoryId: z.string().nullable().optional(),
-    voiceDefaultLimit: z.number().int().min(0).max(99).optional(),
-    voiceDefaultBitrate: z.number().int().min(8).max(384).optional(),
-    voiceDefaultRegion: z.string().nullable().optional(),
-    voiceLockByDefault: z.boolean().optional(),
-    voiceAutoDeleteEmpty: z.boolean().optional(),
-    voiceControlPanelConfig: z.any().nullable().optional(),
+  tempVoiceEnabled: z.boolean().optional(),
+  tempVoiceCreatorId: z.string().nullable().optional(),
+  tempVoiceCategoryId: z.string().nullable().optional(),
+  voiceDefaultLimit: z.number().int().min(0).max(99).optional(),
+  voiceDefaultBitrate: z.number().int().min(8).max(384).optional(),
+  voiceDefaultRegion: z.string().nullable().optional(),
+  voiceLockByDefault: z.boolean().optional(),
+  voiceAutoDeleteEmpty: z.boolean().optional(),
+  voiceControlPanelConfig: z.any().nullable().optional(),
 });
 
 /**
  * GET - Get voice settings for a guild
  */
 export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ guildId: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ guildId: string }> }
 ) {
-    const { guildId } = await params;
+  const { guildId } = await params;
 
-    const validationError = await validateGuildAccess(guildId);
-    if (validationError) return validationError;
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
-    try {
-        const settings = await prisma.guildSettings.findUnique({
-            where: { guildId },
-            select: {
-                tempVoiceEnabled: true,
-                tempVoiceCreatorId: true,
-                tempVoiceCategoryId: true,
-                voiceDefaultLimit: true,
-                voiceDefaultBitrate: true,
-                voiceDefaultRegion: true,
-                voiceLockByDefault: true,
-                voiceAutoDeleteEmpty: true,
-                voiceControlPanelConfig: true,
-            },
-        });
+  const validationError = await validateGuildAccess(guildId);
+  if (validationError) return validationError;
 
-        // Get active voice sessions count
-        const activeSessions = await prisma.voiceSession.count({
-            where: { guildId },
-        });
+  try {
+    const settings = await prisma.guildSettings.findUnique({
+      where: { guildId },
+      select: {
+        tempVoiceEnabled: true,
+        tempVoiceCreatorId: true,
+        tempVoiceCategoryId: true,
+        voiceDefaultLimit: true,
+        voiceDefaultBitrate: true,
+        voiceDefaultRegion: true,
+        voiceLockByDefault: true,
+        voiceAutoDeleteEmpty: true,
+        voiceControlPanelConfig: true,
+      },
+    });
 
-        return ApiResponse.success({
-            ...settings,
-            activeSessions,
-        });
-    } catch (error) {
-        logger.error(`Error fetching voice settings: ${error}`);
-        return ApiResponse.serverError();
-    }
+    // Get active voice sessions count
+    const activeSessions = await prisma.voiceSession.count({
+      where: { guildId },
+    });
+
+    return ApiResponse.success({
+      ...settings,
+      activeSessions,
+    });
+  } catch (error) {
+    logger.error(`Error fetching voice settings: ${error}`);
+    return ApiResponse.serverError();
+  }
 }
 
 /**
  * PATCH - Update voice settings
  */
 export async function PATCH(
-    request: NextRequest,
-    { params }: { params: Promise<{ guildId: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ guildId: string }> }
 ) {
-    const { guildId } = await params;
+  const { guildId } = await params;
 
-    const validationError = await validateGuildAccess(guildId);
-    if (validationError) return validationError;
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
-    try {
-        const body = await request.json();
-        const validated = voiceSettingsSchema.parse(body);
+  const validationError = await validateGuildAccess(guildId);
+  if (validationError) return validationError;
 
-        await ensureGuildExists(guildId);
+  try {
+    const body = await request.json();
+    const validated = voiceSettingsSchema.parse(body);
 
-        const settings = await prisma.guildSettings.upsert({
-            where: { guildId },
-            update: validated,
-            create: {
-                guildId,
-                ...validated,
-            },
-            select: {
-                tempVoiceEnabled: true,
-                tempVoiceCreatorId: true,
-                tempVoiceCategoryId: true,
-                voiceDefaultLimit: true,
-                voiceDefaultBitrate: true,
-                voiceDefaultRegion: true,
-                voiceLockByDefault: true,
-                voiceAutoDeleteEmpty: true,
-            },
-        });
+    await ensureGuildExists(guildId);
 
-        // Sync to TempVoiceConfig table for bot to read
-        if (validated.tempVoiceEnabled && validated.tempVoiceCreatorId && validated.tempVoiceCategoryId) {
-            await prisma.tempVoiceConfig.upsert({
-                where: { guildId },
-                update: {
-                    creatorChannelId: validated.tempVoiceCreatorId,
-                    categoryId: validated.tempVoiceCategoryId,
-                    defaultLimit: validated.voiceDefaultLimit,
-                },
-                create: {
-                    guildId,
-                    creatorChannelId: validated.tempVoiceCreatorId,
-                    categoryId: validated.tempVoiceCategoryId,
-                    defaultName: "{user}'s Channel",
-                    defaultLimit: validated.voiceDefaultLimit,
-                },
-            });
-        } else if (validated.tempVoiceEnabled === false) {
-            // Disable temp voice
-            await prisma.tempVoiceConfig.delete({
-                where: { guildId },
-            }).catch(() => { }); // Ignore if not exists
-        }
+    const settings = await prisma.guildSettings.upsert({
+      where: { guildId },
+      update: validated,
+      create: {
+        guildId,
+        ...validated,
+      },
+      select: {
+        tempVoiceEnabled: true,
+        tempVoiceCreatorId: true,
+        tempVoiceCategoryId: true,
+        voiceDefaultLimit: true,
+        voiceDefaultBitrate: true,
+        voiceDefaultRegion: true,
+        voiceLockByDefault: true,
+        voiceAutoDeleteEmpty: true,
+      },
+    });
 
-        // Notify bot to invalidate cache
-        await publishTempVoiceUpdate(guildId, 'update');
-
-        return ApiResponse.success(settings);
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return ApiResponse.badRequest(error.errors.map(e => e.message).join(', '));
-        }
-        logger.error(`Error updating voice settings: ${error}`);
-        return ApiResponse.serverError();
+    // Sync to TempVoiceConfig table for bot to read
+    if (
+      validated.tempVoiceEnabled &&
+      validated.tempVoiceCreatorId &&
+      validated.tempVoiceCategoryId
+    ) {
+      await prisma.tempVoiceConfig.upsert({
+        where: { guildId },
+        update: {
+          creatorChannelId: validated.tempVoiceCreatorId,
+          categoryId: validated.tempVoiceCategoryId,
+          defaultLimit: validated.voiceDefaultLimit,
+        },
+        create: {
+          guildId,
+          creatorChannelId: validated.tempVoiceCreatorId,
+          categoryId: validated.tempVoiceCategoryId,
+          defaultName: "{user}'s Channel",
+          defaultLimit: validated.voiceDefaultLimit,
+        },
+      });
+    } else if (validated.tempVoiceEnabled === false) {
+      // Disable temp voice
+      await prisma.tempVoiceConfig
+        .delete({
+          where: { guildId },
+        })
+        .catch(() => {}); // Ignore if not exists
     }
+
+    // Notify bot to invalidate cache
+    await publishTempVoiceUpdate(guildId, 'update');
+
+    return ApiResponse.success(settings);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return ApiResponse.badRequest(error.errors.map((e) => e.message).join(', '));
+    }
+    logger.error(`Error updating voice settings: ${error}`);
+    return ApiResponse.serverError();
+  }
 }

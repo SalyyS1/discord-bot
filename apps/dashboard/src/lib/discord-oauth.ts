@@ -155,13 +155,13 @@ async function performTokenRefresh(
 
 /**
  * Fetch user's Discord guilds using a valid access token
- * Automatically handles token refresh
+ * Returns discriminated union with error reason for proper error handling
  */
-export async function getUserDiscordGuilds(userId: string): Promise<DiscordGuild[]> {
+export async function getUserDiscordGuilds(userId: string): Promise<GuildFetchResult> {
   const token = await getValidAccessToken(userId);
 
   if (!token) {
-    return [];
+    return { success: false, error: 'no_token' };
   }
 
   try {
@@ -171,17 +171,28 @@ export async function getUserDiscordGuilds(userId: string): Promise<DiscordGuild
 
     if (!response.ok) {
       if (response.status === 401) {
-        // Token might have been revoked - trigger a re-auth on next attempt
         logger.warn(`[OAuth] Token unauthorized for user ${userId}`);
+        return { success: false, error: 'token_revoked' };
       }
-      return [];
+      logger.error(`[OAuth] Discord API error: ${response.status}`);
+      return { success: false, error: 'api_error' };
     }
 
-    return await response.json();
+    const guilds = await response.json();
+    return { success: true, guilds };
   } catch (error) {
-    logger.error(`[OAuth] Error fetching guilds for user ${userId}`, { error: String(error) });
-    return [];
+    logger.error(`[OAuth] Network error for user ${userId}`, { error: String(error) });
+    return { success: false, error: 'network_error' };
   }
+}
+
+/**
+ * Legacy wrapper for backward compatibility
+ * @deprecated Use getUserDiscordGuilds() with proper error handling instead
+ */
+export async function getUserDiscordGuildsLegacy(userId: string): Promise<DiscordGuild[]> {
+  const result = await getUserDiscordGuilds(userId);
+  return result.success ? result.guilds : [];
 }
 
 export interface DiscordGuild {
@@ -191,6 +202,18 @@ export interface DiscordGuild {
   owner: boolean;
   permissions: string;
 }
+
+// Discriminated union for guild fetch results
+export type GuildFetchError =
+  | 'no_token' // No token in database
+  | 'token_expired' // Refresh failed
+  | 'token_revoked' // Discord 401
+  | 'api_error' // Discord API error
+  | 'network_error'; // Network failure
+
+export type GuildFetchResult =
+  | { success: true; guilds: DiscordGuild[] }
+  | { success: false; error: GuildFetchError };
 
 export interface DiscordRole {
   id: string;

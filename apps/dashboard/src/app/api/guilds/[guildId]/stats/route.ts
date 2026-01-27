@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { discordService, DiscordApiError } from '@/lib/discord';
 import { getGuildBotToken } from '@/lib/tenant-token';
 import { logger } from '@/lib/logger';
+import { validateGuildId } from '@/lib/validation';
 
 // Discord guild data type for member counts
 interface DiscordGuildData {
@@ -16,15 +17,37 @@ interface DiscordGuildData {
 export async function GET(request: Request, { params }: { params: Promise<{ guildId: string }> }) {
   const { guildId } = await params;
 
+  // Validate guildId format
+  const validationError = validateGuildId(guildId);
+  if (validationError) return validationError;
+
   try {
-    // Fetch Discord data and DB data in parallel
-    const [discordData, dbStats] = await Promise.all([
+    // Fetch Discord data and DB data in parallel with resilience
+    const [discordResult, dbResult] = await Promise.allSettled([
       fetchDiscordGuildData(guildId),
       fetchDatabaseStats(guildId),
     ]);
 
+    // Handle DB failure (critical)
+    if (dbResult.status === 'rejected') {
+      logger.error(`Database query failed for guild ${guildId}`, {
+        error: String(dbResult.reason),
+      });
+      return NextResponse.json(
+        { success: false, error: 'Database temporarily unavailable' },
+        { status: 503 }
+      );
+    }
+
+    const dbStats = dbResult.value;
     if (!dbStats.guild) {
       return NextResponse.json({ error: 'Guild not found' }, { status: 404 });
+    }
+
+    // Discord data is optional - gracefully degrade
+    const discordData = discordResult.status === 'fulfilled' ? discordResult.value : null;
+    if (discordResult.status === 'rejected') {
+      logger.warn(`Discord API failed for guild ${guildId}, using DB-only data`);
     }
 
     return NextResponse.json(
@@ -124,33 +147,21 @@ async function fetchDiscordGuildData(guildId: string): Promise<DiscordGuildData 
 }
 
 /**
- * Fetch all database stats in parallel.
+ * Fetch all database stats with resilience.
+ * Critical queries fail fast, optional queries use allSettled.
  */
 async function fetchDatabaseStats(guildId: string) {
-  const [
-    guild,
-    memberCount,
-    ticketCount,
-    openTickets,
-    giveawayCount,
-    activeGiveaways,
-    warningCount,
-    autoresponderCount,
-    levelRoleCount,
-    messageStats,
-    topMembers,
-    recentActivity,
-    totalXp,
-    avgLevel,
-    topLevel,
-    todayActivity,
-    levelStats,
-  ] = await Promise.all([
+  // Critical queries - must succeed
+  const [guild, memberCount] = await Promise.all([
     prisma.guild.findUnique({
       where: { id: guildId },
       include: { settings: true },
     }),
     prisma.member.count({ where: { guildId } }),
+  ]);
+
+  // Optional queries - use allSettled so failures don't break response
+  const optionalResults = await Promise.allSettled([
     prisma.ticket.count({ where: { guildId } }),
     prisma.ticket.count({ where: { guildId, status: 'OPEN' } }),
     prisma.giveaway.count({ where: { guildId } }),
@@ -174,18 +185,9 @@ async function fetchDatabaseStats(guildId: string) {
       take: 5,
       select: { id: true, action: true, reason: true, createdAt: true },
     }),
-    prisma.member.aggregate({
-      where: { guildId },
-      _sum: { xp: true },
-    }),
-    prisma.member.aggregate({
-      where: { guildId },
-      _avg: { level: true },
-    }),
-    prisma.member.aggregate({
-      where: { guildId },
-      _max: { level: true },
-    }),
+    prisma.member.aggregate({ where: { guildId }, _sum: { xp: true } }),
+    prisma.member.aggregate({ where: { guildId }, _avg: { level: true } }),
+    prisma.member.aggregate({ where: { guildId }, _max: { level: true } }),
     prisma.member.count({
       where: {
         guildId,
@@ -201,23 +203,27 @@ async function fetchDatabaseStats(guildId: string) {
     }),
   ]);
 
+  // Extract values with defaults for failed queries
+  const getValue = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+    result.status === 'fulfilled' ? result.value : fallback;
+
   return {
     guild,
     memberCount,
-    ticketCount,
-    openTickets,
-    giveawayCount,
-    activeGiveaways,
-    warningCount,
-    autoresponderCount,
-    levelRoleCount,
-    messageStats,
-    topMembers,
-    recentActivity,
-    totalXp,
-    avgLevel,
-    topLevel,
-    todayActivity,
-    levelStats,
+    ticketCount: getValue(optionalResults[0], 0),
+    openTickets: getValue(optionalResults[1], 0),
+    giveawayCount: getValue(optionalResults[2], 0),
+    activeGiveaways: getValue(optionalResults[3], 0),
+    warningCount: getValue(optionalResults[4], 0),
+    autoresponderCount: getValue(optionalResults[5], 0),
+    levelRoleCount: getValue(optionalResults[6], 0),
+    messageStats: getValue(optionalResults[7], { _sum: { totalMessages: 0 } }),
+    topMembers: getValue(optionalResults[8], []),
+    recentActivity: getValue(optionalResults[9], []),
+    totalXp: getValue(optionalResults[10], { _sum: { xp: 0 } }),
+    avgLevel: getValue(optionalResults[11], { _avg: { level: 0 } }),
+    topLevel: getValue(optionalResults[12], { _max: { level: 0 } }),
+    todayActivity: getValue(optionalResults[13], 0),
+    levelStats: getValue(optionalResults[14], []),
   };
 }

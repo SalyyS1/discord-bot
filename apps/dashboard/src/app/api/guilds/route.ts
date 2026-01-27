@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@repo/database';
 import { logger } from '@/lib/logger';
-import { getServerSession } from '@/lib/session';
+import { getServerSession, ApiResponse } from '@/lib/session';
 import { getUserDiscordGuilds } from '@/lib/discord-oauth';
 
 // MANAGE_GUILD permission bit (0x20)
@@ -15,7 +15,7 @@ export async function GET() {
     // Check session - require authentication
     const session = await getServerSession();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return ApiResponse.unauthorized();
     }
 
     // Get user's Discord account to check if they're an admin
@@ -45,24 +45,40 @@ export async function GET() {
       });
 
       return NextResponse.json({
-        guilds: allGuilds.map(g => ({ ...g, icon: null })),
+        guilds: allGuilds.map((g) => ({ ...g, icon: null })),
         isAdmin: true,
       });
     }
 
     // Get user's Discord guilds with permissions
-    const userGuilds = await getUserDiscordGuilds(session.user.id);
+    const guildResult = await getUserDiscordGuilds(session.user.id);
+
+    // Handle fetch errors
+    if (!guildResult.success) {
+      // For the guilds list endpoint, we return empty array on errors
+      // but with proper status code hints
+      if (guildResult.error === 'no_token' || guildResult.error === 'token_revoked') {
+        return ApiResponse.error('Please re-link your Discord account', 401);
+      }
+      // For API errors, return empty with 503
+      if (guildResult.error === 'api_error' || guildResult.error === 'network_error') {
+        return ApiResponse.error('Unable to fetch guilds. Please try again.', 503);
+      }
+      return NextResponse.json({ guilds: [], isAdmin: false });
+    }
+
+    const userGuilds = guildResult.guilds;
 
     // Filter to only guilds where user has MANAGE_GUILD permission
     const manageableGuildIds = userGuilds
-      .filter(g => (BigInt(g.permissions) & MANAGE_GUILD_PERMISSION) !== BigInt(0))
-      .map(g => g.id);
+      .filter((g) => (BigInt(g.permissions) & MANAGE_GUILD_PERMISSION) !== BigInt(0))
+      .map((g) => g.id);
 
     // Get bot guilds that the user can manage
     const botGuilds = await prisma.guild.findMany({
       where: {
         id: { in: manageableGuildIds },
-        leftAt: null
+        leftAt: null,
       },
       select: {
         id: true,
@@ -76,12 +92,12 @@ export async function GET() {
       userId: session.user.id,
       userGuildsCount: userGuilds.length,
       manageableCount: manageableGuildIds.length,
-      botGuildsCount: botGuilds.length
+      botGuildsCount: botGuilds.length,
     });
 
     // Merge icon from user's guild data
-    const guildsWithIcon = botGuilds.map(g => {
-      const userGuild = userGuilds.find(ug => ug.id === g.id);
+    const guildsWithIcon = botGuilds.map((g) => {
+      const userGuild = userGuilds.find((ug) => ug.id === g.id);
       return {
         ...g,
         icon: userGuild?.icon || null,

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { publishLevelingUpdate } from '@/lib/configSync';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { validateGuildId } from '@/lib/validation';
 
 const levelRoleSchema = z.object({
   level: z.number().int().min(1),
@@ -59,6 +60,10 @@ export async function GET(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   // Validate session and guild access
   const validationError = await validateGuildAccess(guildId);
@@ -122,7 +127,7 @@ export async function GET(
 
     return ApiResponse.success({
       ...settings,
-      levelRoles: levelRoles.map(r => ({
+      levelRoles: levelRoles.map((r) => ({
         id: r.id,
         level: r.level,
         roleId: r.roleId,
@@ -131,7 +136,7 @@ export async function GET(
         roleColor: r.roleColor,
         autoCreate: r.autoCreate,
       })),
-      dailyQuests: dailyQuests.map(q => ({
+      dailyQuests: dailyQuests.map((q) => ({
         id: q.id,
         name: q.name,
         description: q.description,
@@ -154,6 +159,10 @@ export async function PATCH(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  // Validate guildId format first
+  const guildIdError = validateGuildId(guildId);
+  if (guildIdError) return guildIdError;
 
   // Validate session and guild access
   const validationError = await validateGuildAccess(guildId);
@@ -208,7 +217,7 @@ export async function PATCH(
 
       if (levelRoles.length > 0) {
         await prisma.levelRole.createMany({
-          data: levelRoles.map(r => ({
+          data: levelRoles.map((r) => ({
             guildId,
             level: r.level,
             roleId: r.roleId,
@@ -228,12 +237,18 @@ export async function PATCH(
 
       if (dailyQuests.length > 0) {
         await prisma.dailyQuest.createMany({
-          data: dailyQuests.map(q => ({
+          data: dailyQuests.map((q) => ({
             guildId,
             name: q.name,
             description: q.description,
             emoji: q.emoji,
-            type: q.type as 'MESSAGE' | 'VOICE' | 'REACTION' | 'FORUM_POST' | 'IMAGE_POST' | 'CUSTOM',
+            type: q.type as
+              | 'MESSAGE'
+              | 'VOICE'
+              | 'REACTION'
+              | 'FORUM_POST'
+              | 'IMAGE_POST'
+              | 'CUSTOM',
             requirement: q.requirement,
             xpReward: q.xpReward,
             channelId: q.channelId,

@@ -7,6 +7,7 @@ import { AnimatedContent } from '@/components/layout/animated-content';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { CommandPalette } from '@/components/command-palette';
 import { LoadingOverlay } from '@/components/loading-overlay';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 export default function DashboardLayout({
   children,
@@ -24,7 +25,9 @@ export default function DashboardLayout({
             <DashboardShell>
               <Header />
               <main className="p-6">
-                <AnimatedContent>{children}</AnimatedContent>
+                <ErrorBoundary>
+                  <AnimatedContent>{children}</AnimatedContent>
+                </ErrorBoundary>
               </main>
             </DashboardShell>
           </div>
