@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/session';
 
+// Force dynamic to skip pre-rendering at build time
+export const dynamic = 'force-dynamic';
+
 const PRICE_IDS = {
     monthly: process.env.STRIPE_PRICE_MONTHLY || '',
     yearly: process.env.STRIPE_PRICE_YEARLY || '',
