@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.text();
-  const event = constructWebhookEvent(body, signature);
+  const event = await constructWebhookEvent(body, signature) as { id: string; type: string; data: { object: unknown } } | null;
 
   if (!event) {
     return new NextResponse('Invalid signature', { status: 400 });
