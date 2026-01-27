@@ -1,11 +1,15 @@
 import type Redis from 'ioredis';
-import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from './channels';
+import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from './channels.ts';
 
 /**
  * Config publisher for dashboard to notify bot of changes
  */
 export class ConfigPublisher {
-  constructor(private redis: Redis) { }
+  private redis: Redis;
+
+  constructor(redis: Redis) {
+    this.redis = redis;
+  }
 
   /**
    * Publish a config update message

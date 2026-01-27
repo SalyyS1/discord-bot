@@ -5,32 +5,35 @@
 
 import { prisma } from '@repo/database';
 
-export enum AuditAction {
+// Using const object instead of enum for Node.js strip-only compatibility
+export const AuditAction = {
   // Tenant lifecycle
-  TENANT_CREATED = 'TENANT_CREATED',
-  TENANT_UPDATED = 'TENANT_UPDATED',
-  TENANT_DELETED = 'TENANT_DELETED',
-  
+  TENANT_CREATED: 'TENANT_CREATED',
+  TENANT_UPDATED: 'TENANT_UPDATED',
+  TENANT_DELETED: 'TENANT_DELETED',
+
   // Bot operations
-  TENANT_STARTED = 'TENANT_STARTED',
-  TENANT_STOPPED = 'TENANT_STOPPED',
-  TENANT_RESTARTED = 'TENANT_RESTARTED',
-  TENANT_CRASHED = 'TENANT_CRASHED',
-  
+  TENANT_STARTED: 'TENANT_STARTED',
+  TENANT_STOPPED: 'TENANT_STOPPED',
+  TENANT_RESTARTED: 'TENANT_RESTARTED',
+  TENANT_CRASHED: 'TENANT_CRASHED',
+
   // Security events
-  TOKEN_ROTATED = 'TOKEN_ROTATED',
-  TOKEN_VALIDATED = 'TOKEN_VALIDATED',
-  TOKEN_INVALID = 'TOKEN_INVALID',
-  CREDENTIALS_ACCESSED = 'CREDENTIALS_ACCESSED',
-  
+  TOKEN_ROTATED: 'TOKEN_ROTATED',
+  TOKEN_VALIDATED: 'TOKEN_VALIDATED',
+  TOKEN_INVALID: 'TOKEN_INVALID',
+  CREDENTIALS_ACCESSED: 'CREDENTIALS_ACCESSED',
+
   // Rate limiting
-  RATE_LIMITED = 'RATE_LIMITED',
-  
+  RATE_LIMITED: 'RATE_LIMITED',
+
   // Admin actions
-  TIER_UPGRADED = 'TIER_UPGRADED',
-  TIER_DOWNGRADED = 'TIER_DOWNGRADED',
-  ADMIN_FORCE_STOP = 'ADMIN_FORCE_STOP',
-}
+  TIER_UPGRADED: 'TIER_UPGRADED',
+  TIER_DOWNGRADED: 'TIER_DOWNGRADED',
+  ADMIN_FORCE_STOP: 'ADMIN_FORCE_STOP',
+} as const;
+
+export type AuditAction = typeof AuditAction[keyof typeof AuditAction];
 
 export interface AuditEntry {
   action: AuditAction | string;
@@ -69,7 +72,7 @@ export async function getAuditLogs(
   options: { limit?: number; offset?: number; actions?: AuditAction[] } = {}
 ): Promise<any[]> {
   const { limit = 50, offset = 0, actions } = options;
-  
+
   return prisma.tenantAuditLog.findMany({
     where: {
       tenantId,
@@ -89,7 +92,7 @@ export async function getUserAuditLogs(
   options: { limit?: number; offset?: number } = {}
 ): Promise<any[]> {
   const { limit = 50, offset = 0 } = options;
-  
+
   return prisma.tenantAuditLog.findMany({
     where: { userId },
     orderBy: { timestamp: 'desc' },
