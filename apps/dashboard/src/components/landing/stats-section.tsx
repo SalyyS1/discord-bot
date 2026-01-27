@@ -92,7 +92,7 @@ export function StatsSection() {
     }
 
     fetchStats();
-    
+
     // Refresh stats every 30 seconds
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
@@ -104,7 +104,7 @@ export function StatsSection() {
       value: stats.servers,
       suffix: '',
       label: 'Active Servers',
-      description: 'Communities using KisBot',
+      description: 'Communities using SylaBot',
       gradient: 'from-cyan-500 to-blue-500',
       bgGlow: 'bg-cyan-500/20',
     },
@@ -147,15 +147,15 @@ export function StatsSection() {
     <section id="analytics" className="relative py-28">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900/30 to-black" />
-      
+
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
+        <motion.div
           className="absolute top-1/2 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[150px]"
           animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute top-1/2 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[150px]"
           animate={{ x: [0, -30, 0], y: [0, 20, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
@@ -185,7 +185,7 @@ export function StatsSection() {
             </span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Join the Discord servers that rely on KisBot for their daily operations.
+            Join the Discord servers that rely on SylaBot for their daily operations.
           </p>
         </motion.div>
 
@@ -203,15 +203,15 @@ export function StatsSection() {
               <div className="relative p-6 md:p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-all duration-300 overflow-hidden hover:shadow-2xl">
                 {/* Hover gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500`} />
-                
+
                 {/* Background glow */}
                 <div className={`absolute -bottom-4 -right-4 w-24 h-24 ${stat.bgGlow} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                
+
                 {/* Icon */}
                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
-                
+
                 {/* Value */}
                 <div className="text-4xl md:text-5xl font-bold text-white mb-1 flex items-baseline gap-1">
                   {loading ? (
@@ -223,13 +223,13 @@ export function StatsSection() {
                     <ArrowUpRight className="w-5 h-5 text-emerald-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
                   )}
                 </div>
-                
+
                 {/* Label */}
                 <div className="text-lg font-medium text-white/80 mb-1">{stat.label}</div>
-                
+
                 {/* Description */}
                 <div className="text-sm text-gray-500 group-hover:text-gray-400 transition-colors">{stat.description}</div>
-                
+
                 {/* Bottom line accent */}
                 <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r ${stat.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
               </div>
@@ -246,7 +246,7 @@ export function StatsSection() {
           className="flex flex-wrap items-center justify-center gap-8 md:gap-16 p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]"
         >
           {additionalStats.map((stat) => (
-            <div 
+            <div
               key={stat.description}
               className="flex items-center gap-3 group cursor-default"
             >

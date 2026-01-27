@@ -27,9 +27,9 @@ const footerLinks = {
 
 const socialLinks = [
   { icon: MessageCircle, href: 'https://discord.gg/your-server', label: 'Discord', color: 'hover:text-indigo-400 hover:bg-indigo-500/10' },
-  { icon: Twitter, href: 'https://twitter.com/kisbot', label: 'Twitter', color: 'hover:text-sky-400 hover:bg-sky-500/10' },
-  { icon: Github, href: 'https://github.com/kisbot', label: 'GitHub', color: 'hover:text-white hover:bg-white/10' },
-  { icon: Mail, href: 'mailto:support@kisbot.io', label: 'Email', color: 'hover:text-emerald-400 hover:bg-emerald-500/10' },
+  { icon: Twitter, href: 'https://twitter.com/sylabot', label: 'Twitter', color: 'hover:text-sky-400 hover:bg-sky-500/10' },
+  { icon: Github, href: 'https://github.com/salyvn', label: 'GitHub', color: 'hover:text-white hover:bg-white/10' },
+  { icon: Mail, href: 'mailto:support@sylabot.io', label: 'Email', color: 'hover:text-emerald-400 hover:bg-emerald-500/10' },
 ];
 
 export function Footer() {
@@ -37,10 +37,10 @@ export function Footer() {
     <footer className="relative border-t border-white/[0.05] bg-black overflow-hidden">
       {/* Top gradient line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-      
+
       {/* Background glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-t from-cyan-500/5 to-transparent blur-[100px] pointer-events-none" />
-      
+
       <div className="max-w-6xl mx-auto px-4 py-16 relative">
         {/* CTA Section */}
         <div className="mb-16 p-8 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 border border-white/10 text-center">
@@ -48,7 +48,7 @@ export function Footer() {
             Ready to level up your Discord server?
           </h3>
           <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Join 10,000+ communities using KisBot to engage members and streamline moderation.
+            Join 10,000+ communities using SylaBot to engage members and streamline moderation.
           </p>
           <Link href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1462790510883110965'}&scope=bot%20applications.commands&permissions=8`} target="_blank">
             <Button className="h-12 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-xl font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 group">
@@ -70,15 +70,15 @@ export function Footer() {
                 </div>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:from-cyan-400 group-hover:to-blue-400 transition-all duration-300">
-                KisBot
+                SylaBot
               </span>
             </Link>
-            
+
             <p className="text-gray-500 leading-relaxed max-w-sm mb-6">
-              The ultimate Discord bot for moderation, engagement, and community management. 
+              The ultimate Discord bot for moderation, engagement, and community management.
               Trusted by 10,000+ servers worldwide.
             </p>
-            
+
             {/* Social Links */}
             <div className="flex gap-2">
               {socialLinks.map((social) => (
@@ -164,7 +164,7 @@ export function Footer() {
         <div className="mt-16 pt-8 border-t border-white/[0.05]">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} KisBot. All rights reserved.
+              © {new Date().getFullYear()} SylaBot. All rights reserved.
             </p>
             <p className="text-sm text-gray-600 flex items-center gap-1 group cursor-default">
               Made with{' '}

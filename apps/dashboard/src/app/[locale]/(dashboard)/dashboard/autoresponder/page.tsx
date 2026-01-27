@@ -115,7 +115,7 @@ const TONES = [
 const PRONOUNS = [
   { value: 'neutral', label: 'Neutral (Bot)', example: 'The bot says...' },
   { value: 'first_person', label: 'First Person (I/Me)', example: 'I think...' },
-  { value: 'third_person', label: 'Third Person (KisBot)', example: 'KisBot believes...' },
+  { value: 'third_person', label: 'Third Person (SylaBot)', example: 'SylaBot believes...' },
 ];
 
 // ═══════════════════════════════════════════════
@@ -1062,7 +1062,7 @@ export default function AutoResponderPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-yellow-400">KisBot</span>
+                      <span className="font-semibold text-yellow-400">SylaBot</span>
                       <Badge className="bg-[#5865F2] text-white text-[10px] px-1 py-0">BOT</Badge>
                       <span className="text-xs text-gray-500">Today at {new Date().toLocaleTimeString()}</span>
                     </div>

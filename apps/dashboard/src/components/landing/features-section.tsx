@@ -77,7 +77,7 @@ export function FeaturesSection() {
       {/* Background elements */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900/50 to-black" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-cyan-500/5 rounded-full blur-[150px]" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         {/* Section header */}
         <motion.div
@@ -91,7 +91,7 @@ export function FeaturesSection() {
             <Sparkles className="w-4 h-4 text-cyan-400" />
             <span className="text-sm font-medium text-cyan-400">Powerful Features</span>
           </div>
-          
+
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             <span className="text-white">Everything you need to</span>
             <br />
@@ -99,9 +99,9 @@ export function FeaturesSection() {
               build thriving communities
             </span>
           </h2>
-          
+
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            From moderation to engagement, KisBot has all the tools you need in one powerful package.
+            From moderation to engagement, SylaBot has all the tools you need in one powerful package.
           </p>
         </motion.div>
 
@@ -120,7 +120,7 @@ export function FeaturesSection() {
             >
               {/* Hover gradient overlay */}
               <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
-              
+
               {/* Free/Premium badge */}
               <div className="absolute top-6 right-6">
                 {feature.free ? (
@@ -134,27 +134,27 @@ export function FeaturesSection() {
                   </span>
                 )}
               </div>
-              
+
               {/* Icon */}
               <div className={`relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
                 <feature.icon className="w-7 h-7 text-white" />
                 {/* Icon glow */}
                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300`} />
               </div>
-              
+
               {/* Content */}
               <h3 className="text-xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-300">
                 {feature.title}
               </h3>
-              
+
               <p className="text-gray-400 leading-relaxed mb-6">
                 {feature.description}
               </p>
-              
+
               {/* Highlights */}
               <div className="grid grid-cols-2 gap-2">
                 {feature.highlights.map((highlight, i) => (
-                  <div 
+                  <div
                     key={highlight}
                     className={`flex items-center gap-2 text-sm text-gray-500 group-hover:text-gray-400 transition-colors duration-300`}
                     style={{ transitionDelay: `${i * 50}ms` }}
@@ -164,10 +164,10 @@ export function FeaturesSection() {
                   </div>
                 ))}
               </div>
-              
+
               {/* Bottom accent line */}
               <div className={`absolute bottom-0 left-8 right-8 h-[2px] bg-gradient-to-r ${feature.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full origin-left`} />
-              
+
               {/* Corner decoration */}
               <div className={`absolute -bottom-2 -right-2 w-16 h-16 ${feature.bgGlow} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
             </motion.div>
@@ -192,9 +192,9 @@ export function FeaturesSection() {
                 <p className="text-sm text-gray-400">Temp voice, welcome messages, logging, and 50+ commands</p>
               </div>
             </div>
-            
+
             <div className="h-px w-full sm:h-12 sm:w-px bg-white/10" />
-            
+
             <Link href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1462790510883110965'}&scope=bot%20applications.commands&permissions=8`} target="_blank">
               <Button className="h-12 px-6 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-xl font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 group">
                 <Sparkles className="mr-2 w-4 h-4 group-hover:rotate-12 transition-transform" />

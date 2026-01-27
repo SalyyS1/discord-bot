@@ -46,23 +46,20 @@ export function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'py-2' : 'py-3'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-2' : 'py-3'
+        }`}
     >
       {/* Backdrop */}
-      <div 
-        className={`absolute inset-0 transition-all duration-300 ${
-          scrolled 
-            ? 'bg-black/80 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20' 
+      <div
+        className={`absolute inset-0 transition-all duration-300 ${scrolled
+            ? 'bg-black/80 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20'
             : 'bg-transparent'
-        }`} 
+          }`}
       />
-      
+
       <div className="container mx-auto px-4 relative">
-        <div className={`flex items-center justify-between transition-all duration-300 ${
-          scrolled ? 'h-14' : 'h-16'
-        }`}>
+        <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? 'h-14' : 'h-16'
+          }`}>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
@@ -72,7 +69,7 @@ export function Navbar() {
               </div>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:from-cyan-400 group-hover:to-blue-400 transition-all duration-300">
-              KisBot
+              SylaBot
             </span>
           </Link>
 
@@ -163,8 +160,8 @@ export function Navbar() {
                   </Link>
                 </motion.div>
               ))}
-              
-              <motion.div 
+
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}

@@ -2055,7 +2055,7 @@ export default function TicketsPage() {
                 <Input
                   value={selectedPanel.footer || ''}
                   onChange={(e) => setSelectedPanel({ ...selectedPanel, footer: e.target.value || undefined })}
-                  placeholder="Powered by KisBot"
+                  placeholder="Powered by SylaBot"
                   className="bg-[hsl(220_20%_10%)] border-white/10 text-white"
                 />
               </div>

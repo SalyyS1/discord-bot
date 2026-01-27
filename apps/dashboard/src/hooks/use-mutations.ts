@@ -2,184 +2,97 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { queryKeys } from '@/lib/query-keys';
 
-// Generic settings mutation with optimistic updates
+type ApiEndpoint = 'settings' | 'welcome' | 'leveling' | 'moderation' | 'tickets';
+
+interface MutationConfig {
+  endpoint: ApiEndpoint;
+  successMessage: string;
+}
+
+/**
+ * Generic mutation factory for guild settings
+ * Uses proper query key namespacing and optimistic updates
+ */
+function createGuildMutation(guildId: string | null, config: MutationConfig) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      if (!guildId) throw new Error('No guild selected');
+
+      const res = await fetch(`/api/guilds/${guildId}/${config.endpoint}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update');
+      return res.json();
+    },
+    onMutate: async (newData) => {
+      if (!guildId) return;
+
+      const queryKey = queryKeys.guildSettings(guildId);
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousSettings = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, (old: Record<string, unknown> | undefined) => ({
+        ...old,
+        ...newData,
+      }));
+
+      return { previousSettings };
+    },
+    onSuccess: () => {
+      toast.success(config.successMessage);
+    },
+    onError: (_err, _newData, context) => {
+      if (guildId && context?.previousSettings) {
+        queryClient.setQueryData(queryKeys.guildSettings(guildId), context.previousSettings);
+      }
+      toast.error('Failed to save settings');
+    },
+    onSettled: () => {
+      if (guildId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.guildSettings(guildId) });
+      }
+    },
+  });
+}
+
+// Exported hooks using the factory
 export function useUpdateSettings(guildId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const res = await fetch(`/api/guilds/${guildId}/settings`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update settings');
-      return res.json();
-    },
-    // OPTIMISTIC UPDATE: Show new value immediately
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['guild-settings', guildId] });
-      const previousSettings = queryClient.getQueryData(['guild-settings', guildId]);
-      queryClient.setQueryData(['guild-settings', guildId], (old: Record<string, unknown> | undefined) => ({
-        ...old,
-        ...newData,
-      }));
-      return { previousSettings };
-    },
-    onSuccess: () => {
-      toast.success('Settings saved!');
-    },
-    onError: (_err, _newData, context) => {
-      queryClient.setQueryData(['guild-settings', guildId], context?.previousSettings);
-      toast.error('Failed to save settings');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['guild-settings', guildId] });
-    },
+  return createGuildMutation(guildId, {
+    endpoint: 'settings',
+    successMessage: 'Settings saved!',
   });
 }
 
-// Welcome/Goodbye mutation
 export function useUpdateWelcome(guildId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const res = await fetch(`/api/guilds/${guildId}/welcome`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      return res.json();
-    },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['guild-settings', guildId] });
-      const previousSettings = queryClient.getQueryData(['guild-settings', guildId]);
-      queryClient.setQueryData(['guild-settings', guildId], (old: Record<string, unknown> | undefined) => ({
-        ...old,
-        ...newData,
-      }));
-      return { previousSettings };
-    },
-    onSuccess: () => {
-      toast.success('Welcome settings saved!');
-    },
-    onError: (_err, _newData, context) => {
-      queryClient.setQueryData(['guild-settings', guildId], context?.previousSettings);
-      toast.error('Failed to save settings');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['guild-settings', guildId] });
-    },
+  return createGuildMutation(guildId, {
+    endpoint: 'welcome',
+    successMessage: 'Welcome settings saved!',
   });
 }
 
-// Leveling mutation
 export function useUpdateLeveling(guildId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const res = await fetch(`/api/guilds/${guildId}/leveling`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      return res.json();
-    },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['guild-settings', guildId] });
-      const previousSettings = queryClient.getQueryData(['guild-settings', guildId]);
-      queryClient.setQueryData(['guild-settings', guildId], (old: Record<string, unknown> | undefined) => ({
-        ...old,
-        ...newData,
-      }));
-      return { previousSettings };
-    },
-    onSuccess: () => {
-      toast.success('Leveling settings saved!');
-    },
-    onError: (_err, _newData, context) => {
-      queryClient.setQueryData(['guild-settings', guildId], context?.previousSettings);
-      toast.error('Failed to save settings');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['guild-settings', guildId] });
-    },
+  return createGuildMutation(guildId, {
+    endpoint: 'leveling',
+    successMessage: 'Leveling settings saved!',
   });
 }
 
-// Moderation mutation
 export function useUpdateModeration(guildId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const res = await fetch(`/api/guilds/${guildId}/moderation`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      return res.json();
-    },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['guild-settings', guildId] });
-      const previousSettings = queryClient.getQueryData(['guild-settings', guildId]);
-      queryClient.setQueryData(['guild-settings', guildId], (old: Record<string, unknown> | undefined) => ({
-        ...old,
-        ...newData,
-      }));
-      return { previousSettings };
-    },
-    onSuccess: () => {
-      toast.success('Moderation settings saved!');
-    },
-    onError: (_err, _newData, context) => {
-      queryClient.setQueryData(['guild-settings', guildId], context?.previousSettings);
-      toast.error('Failed to save settings');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['guild-settings', guildId] });
-    },
+  return createGuildMutation(guildId, {
+    endpoint: 'moderation',
+    successMessage: 'Moderation settings saved!',
   });
 }
 
-// Tickets mutation
 export function useUpdateTickets(guildId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const res = await fetch(`/api/guilds/${guildId}/tickets`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      return res.json();
-    },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ['guild-settings', guildId] });
-      const previousSettings = queryClient.getQueryData(['guild-settings', guildId]);
-      queryClient.setQueryData(['guild-settings', guildId], (old: Record<string, unknown> | undefined) => ({
-        ...old,
-        ...newData,
-      }));
-      return { previousSettings };
-    },
-    onSuccess: () => {
-      toast.success('Ticket settings saved!');
-    },
-    onError: (_err, _newData, context) => {
-      queryClient.setQueryData(['guild-settings', guildId], context?.previousSettings);
-      toast.error('Failed to save settings');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['guild-settings', guildId] });
-    },
+  return createGuildMutation(guildId, {
+    endpoint: 'tickets',
+    successMessage: 'Ticket settings saved!',
   });
 }

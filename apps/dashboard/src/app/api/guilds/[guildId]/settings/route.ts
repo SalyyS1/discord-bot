@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { z } from 'zod';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { getPublisher } from '@/lib/configSync';
 
 const settingsUpdateSchema = z.object({
   // Welcome & Goodbye
@@ -87,6 +88,15 @@ export async function PATCH(
         ...validated,
       },
     });
+
+    // Notify bot to invalidate its cache via Redis Pub/Sub
+    try {
+      const publisher = getPublisher();
+      await publisher.publishSettings(guildId);
+    } catch (pubsubError) {
+      // Log but don't fail the request - DB is source of truth
+      logger.warn(`Failed to publish settings update: ${pubsubError}`);
+    }
 
     return ApiResponse.success(settings);
   } catch (error) {

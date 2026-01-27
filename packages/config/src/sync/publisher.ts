@@ -5,7 +5,7 @@ import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from '
  * Config publisher for dashboard to notify bot of changes
  */
 export class ConfigPublisher {
-  constructor(private redis: Redis) {}
+  constructor(private redis: Redis) { }
 
   /**
    * Publish a config update message
@@ -18,9 +18,9 @@ export class ConfigPublisher {
   ): Promise<void> {
     const message = createConfigMessage(guildId, module, action, data);
     const channel = CONFIG_CHANNELS[module];
-    
+
     await this.redis.publish(channel, JSON.stringify(message));
-    
+
     // Also publish to the main update channel
     await this.redis.publish(
       CONFIG_CHANNELS.CONFIG_UPDATE,
@@ -33,6 +33,13 @@ export class ConfigPublisher {
    */
   async publishWelcome(guildId: string, data?: Record<string, unknown>): Promise<void> {
     await this.publish(guildId, 'WELCOME', 'update', data);
+  }
+
+  /**
+   * Publish general settings update
+   */
+  async publishSettings(guildId: string, data?: Record<string, unknown>): Promise<void> {
+    await this.publish(guildId, 'SETTINGS', 'update', data);
   }
 
   /**

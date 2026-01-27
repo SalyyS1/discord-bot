@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/query-keys';
 import type { GuildSettings } from '@/types/api';
 
 async function fetchGuildSettings(guildId: string): Promise<GuildSettings> {
@@ -12,9 +13,10 @@ async function fetchGuildSettings(guildId: string): Promise<GuildSettings> {
 
 export function useGuildSettings(guildId: string | null) {
   return useQuery({
-    queryKey: ['guild-settings', guildId],
+    queryKey: guildId ? queryKeys.guildSettings(guildId) : ['noop'],
     queryFn: () => fetchGuildSettings(guildId!),
-    enabled: !!guildId, // Only fetch when guildId exists
-    staleTime: 60 * 1000, // 1 minute
+    enabled: !!guildId,
+    staleTime: 30_000, // 30s - balance between freshness and over-fetching
+    refetchOnWindowFocus: true,
   });
 }

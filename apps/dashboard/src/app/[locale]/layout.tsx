@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/providers/theme-provider';
 import '../globals.css';
 
 export const metadata: Metadata = {
-  title: 'KisBot Dashboard',
+  title: 'SylaBot Dashboard',
   description: 'Manage your Discord bot settings',
 };
 

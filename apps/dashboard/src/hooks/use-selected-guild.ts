@@ -23,7 +23,6 @@ export function useSelectedGuild(): UseSelectedGuildReturn {
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshCounter, setRefreshCounter] = useState(0);
 
   const fetchGuilds = useCallback(async () => {
     try {
@@ -59,16 +58,8 @@ export function useSelectedGuild(): UseSelectedGuildReturn {
     }
   }, [isInitialized, fetchGuilds]);
 
-  // Listen for guild changes from server selector - force re-render
-  useEffect(() => {
-    const handleGuildChange = () => {
-      // Force re-render by incrementing counter
-      setRefreshCounter(c => c + 1);
-    };
-
-    window.addEventListener('guild-changed', handleGuildChange);
-    return () => window.removeEventListener('guild-changed', handleGuildChange);
-  }, []);
+  // NOTE: Window event listener removed - proper cache invalidation
+  // is now handled in server-selector.tsx via queryClient
 
   const guild = guilds.find(g => g.id === selectedGuildId) || null;
 

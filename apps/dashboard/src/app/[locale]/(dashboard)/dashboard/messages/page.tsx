@@ -765,8 +765,8 @@ export default function MessagesPage() {
               key={cat.id}
               onClick={() => handleCategorySelect(cat.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all ${selectedCategory === cat.id
-                  ? 'bg-white/15 text-white border border-white/20'
-                  : 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10 hover:text-white'
+                ? 'bg-white/15 text-white border border-white/20'
+                : 'bg-white/5 text-gray-400 border border-transparent hover:bg-white/10 hover:text-white'
                 }`}
             >
               <span className="text-lg">{cat.icon}</span>
@@ -793,8 +793,8 @@ export default function MessagesPage() {
                   key={name}
                   onClick={() => handleTemplateSelect(name)}
                   className={`w-full text-left p-3 rounded-xl transition-all group ${isSelected
-                      ? 'bg-purple-500/20 text-white border border-purple-500/30'
-                      : 'bg-white/5 text-gray-300 border border-transparent hover:bg-white/10 hover:text-white'
+                    ? 'bg-purple-500/20 text-white border border-purple-500/30'
+                    : 'bg-white/5 text-gray-300 border border-transparent hover:bg-white/10 hover:text-white'
                     }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1184,7 +1184,7 @@ export default function MessagesPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">KisBot</span>
+                      <span className="text-white font-medium">SylaBot</span>
                       <span className="px-1.5 py-0.5 bg-[#5865f2] text-white text-[10px] font-medium rounded">BOT</span>
                       <span className="text-gray-500 text-xs">Today at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>

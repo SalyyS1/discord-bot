@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, Plus, Server, Check } from 'lucide-react';
 import {
     DropdownMenu,
@@ -14,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGuildContext } from '@/context/guild-context';
+import { queryKeys } from '@/lib/query-keys';
 
 interface Guild {
     id: string;
@@ -21,10 +23,18 @@ interface Guild {
     icon: string | null;
 }
 
+async function fetchGuildSettings(guildId: string) {
+    const res = await fetch(`/api/guilds/${guildId}/settings`);
+    if (!res.ok) throw new Error('Failed to fetch settings');
+    const json = await res.json();
+    return json.data || json;
+}
+
 export function ServerSelector() {
     const { selectedGuildId, setSelectedGuildId, isInitialized } = useGuildContext();
     const [guilds, setGuilds] = useState<Guild[]>([]);
     const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         async function fetchGuilds() {
@@ -49,20 +59,49 @@ export function ServerSelector() {
         }
     }, [isInitialized, selectedGuildId, setSelectedGuildId]);
 
-    const selectedGuild = useMemo(() => 
+    const selectedGuild = useMemo(() =>
         guilds.find(g => g.id === selectedGuildId) || null,
         [guilds, selectedGuildId]
     );
 
+    /**
+     * Handle guild switch with proper cache management:
+     * 1. Cancel in-flight queries for old guild
+     * 2. Remove old guild cache entirely (not just invalidate)
+     * 3. Update selected guild
+     * 4. Prefetch new guild data for smooth UX
+     */
+    const handleSelectGuild = useCallback(async (newGuildId: string) => {
+        const oldGuildId = selectedGuildId;
+
+        // 1. Cancel any in-flight queries for OLD guild
+        if (oldGuildId) {
+            await queryClient.cancelQueries({
+                queryKey: queryKeys.guild(oldGuildId),
+            });
+        }
+
+        // 2. Remove old guild cache entirely (prevents stale data flash)
+        if (oldGuildId && oldGuildId !== newGuildId) {
+            queryClient.removeQueries({
+                queryKey: queryKeys.guild(oldGuildId),
+            });
+        }
+
+        // 3. Update selected guild (this triggers refetch via enabled flag)
+        setSelectedGuildId(newGuildId);
+
+        // 4. Prefetch new guild data for smooth UX
+        queryClient.prefetchQuery({
+            queryKey: queryKeys.guildSettings(newGuildId),
+            queryFn: () => fetchGuildSettings(newGuildId),
+            staleTime: 30_000,
+        });
+    }, [selectedGuildId, setSelectedGuildId, queryClient]);
+
     if (loading || !isInitialized) {
         return <Skeleton className="h-12 w-full rounded-lg" />;
     }
-
-    const handleSelectGuild = (guildId: string) => {
-        setSelectedGuildId(guildId);
-        // Force refresh pages that depend on guild
-        window.dispatchEvent(new CustomEvent('guild-changed', { detail: guildId }));
-    };
 
     return (
         <DropdownMenu>
@@ -113,7 +152,7 @@ export function ServerSelector() {
                     ))
                 )}
                 <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                     className="cursor-pointer hover:bg-white/10 focus:bg-white/10 text-muted-foreground"
                     onClick={() => window.open(`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1462790510883110965'}&permissions=8&scope=bot%20applications.commands`, '_blank')}
                 >

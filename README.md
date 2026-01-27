@@ -1,4 +1,4 @@
-# 🤖 KisBot — Discord Bot Platform
+# 🤖 SylaBot — Discord Bot Platform
 
 <div align="center">
 
@@ -344,6 +344,6 @@ MIT License — See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Made with ❤️ by KisBot Team**
+**Made with ❤️ by SalyVn**
 
 </div>

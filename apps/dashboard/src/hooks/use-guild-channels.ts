@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/query-keys';
 import type { Channel } from '@/types/api';
 
 async function fetchGuildChannels(guildId: string): Promise<Channel[]> {
@@ -12,9 +13,9 @@ async function fetchGuildChannels(guildId: string): Promise<Channel[]> {
 
 export function useGuildChannels(guildId: string | null) {
   return useQuery({
-    queryKey: ['guild-channels', guildId],
+    queryKey: guildId ? queryKeys.guildChannels(guildId) : ['noop'],
     queryFn: () => fetchGuildChannels(guildId!),
     enabled: !!guildId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 60_000, // 1 min - channels change less frequently
   });
 }

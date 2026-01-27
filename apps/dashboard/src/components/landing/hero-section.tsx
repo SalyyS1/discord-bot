@@ -60,9 +60,9 @@ export function HeroSection() {
       {/* Animated Background */}
       <div className="absolute inset-0">
         {/* Main gradient orb */}
-        <motion.div 
+        <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px]"
-          animate={{ 
+          animate={{
             scale: [1, 1.1, 1],
             rotate: [0, 5, 0],
           }}
@@ -70,27 +70,27 @@ export function HeroSection() {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-blue-500/20 to-purple-500/30 rounded-full blur-[120px]" />
         </motion.div>
-        
+
         {/* Secondary orbs */}
-        <motion.div 
+        <motion.div
           className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/20 rounded-full blur-[80px]"
           animate={{ y: [0, 30, 0], x: [0, 20, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px]"
           animate={{ y: [0, -30, 0], x: [0, -20, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute top-1/2 right-1/4 w-64 h-64 bg-pink-500/15 rounded-full blur-[80px]"
           animate={{ y: [0, 40, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
-        
+
         {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]" />
-        
+
         {/* Radial gradient overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]" />
       </div>
@@ -160,7 +160,7 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Powerful moderation, engaging leveling system, viral giveaways, and smart ticket management 
+            Powerful moderation, engaging leveling system, viral giveaways, and smart ticket management
             — all in one beautifully designed bot. <span className="text-cyan-400 font-medium">Free forever.</span>
           </motion.p>
 
@@ -172,13 +172,12 @@ export function HeroSection() {
             className="flex flex-wrap items-center justify-center gap-3 mb-10"
           >
             {quickFeatures.map((feature, i) => (
-              <div 
+              <div
                 key={feature.label}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
-                  feature.free 
-                    ? 'bg-white/5 border border-white/10 text-gray-300' 
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${feature.free
+                    ? 'bg-white/5 border border-white/10 text-gray-300'
                     : 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 text-amber-400'
-                } hover:scale-105 transition-transform duration-200 cursor-default`}
+                  } hover:scale-105 transition-transform duration-200 cursor-default`}
               >
                 <feature.icon className={`w-4 h-4 ${feature.free ? 'text-cyan-400' : 'text-amber-400'}`} />
                 <span className="text-sm font-medium">{feature.label}</span>
@@ -196,8 +195,8 @@ export function HeroSection() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1462790510883110965'}&scope=bot%20applications.commands&permissions=8`} target="_blank">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="h-14 px-8 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-2xl shadow-[0_0_40px_rgba(6,182,212,0.3)] hover:shadow-[0_0_60px_rgba(6,182,212,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
               >
                 <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -206,9 +205,9 @@ export function HeroSection() {
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Button
+                size="lg"
+                variant="outline"
                 className="h-14 px-8 text-base font-semibold border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 text-white rounded-2xl backdrop-blur-sm hover:scale-105 active:scale-95 transition-all duration-300 group"
               >
                 Open Dashboard
@@ -226,12 +225,12 @@ export function HeroSection() {
           >
             <div className="flex items-center gap-2 hover:scale-105 transition-transform cursor-default">
               <div className="flex -space-x-2">
-                {[1,2,3,4,5].map((i) => (
-                  <div 
-                    key={i} 
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
                     className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-black flex items-center justify-center text-xs font-bold text-white shadow-lg"
-                    style={{ 
-                      background: `linear-gradient(135deg, ${['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][i-1]}40, ${['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][i-1]}20)` 
+                    style={{
+                      background: `linear-gradient(135deg, ${['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][i - 1]}40, ${['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'][i - 1]}20)`
                     }}
                   >
                     {String.fromCharCode(64 + i)}
@@ -244,12 +243,12 @@ export function HeroSection() {
                     <Loader2 className="w-3 h-3 animate-spin" /> Loading...
                   </span>
                 ) : (
-                  `${stats.servers} server${stats.servers !== 1 ? 's' : ''} using KisBot`
+                  `${stats.servers} server${stats.servers !== 1 ? 's' : ''} using SylaBot`
                 )}
               </span>
             </div>
             <div className="flex items-center gap-1 hover:scale-105 transition-transform cursor-default group">
-              {[1,2,3,4,5].map((i) => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400 group-hover:animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />
               ))}
               <span className="ml-2 text-sm">{stats.rating}/5 rating</span>
@@ -271,7 +270,7 @@ export function HeroSection() {
           {/* Glow effect behind preview */}
           <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/20 via-transparent to-transparent blur-3xl -z-10" />
           <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl -z-10" />
-          
+
           <div className="relative rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl p-2 shadow-2xl hover:border-white/20 transition-all duration-500 group">
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
@@ -282,11 +281,11 @@ export function HeroSection() {
               </div>
               <div className="flex-1 mx-4">
                 <div className="h-6 bg-white/5 rounded-lg max-w-md mx-auto flex items-center px-3 hover:bg-white/10 transition-colors">
-                  <span className="text-xs text-gray-500">kisbot.io/dashboard</span>
+                  <span className="text-xs text-gray-500">sylabot.io/dashboard</span>
                 </div>
               </div>
             </div>
-            
+
             {/* Dashboard mockup content */}
             <div className="aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 rounded-b-xl overflow-hidden">
               <div className="p-6 h-full flex gap-4">
@@ -294,34 +293,32 @@ export function HeroSection() {
                 <div className="w-48 bg-slate-800/50 rounded-xl p-4 space-y-3 hidden sm:block">
                   <div className="h-8 bg-cyan-500/20 rounded-lg animate-pulse" />
                   <div className="space-y-2">
-                    {[1,2,3,4,5].map((i) => (
-                      <div 
-                        key={i} 
-                        className={`h-8 rounded-lg transition-all duration-300 ${
-                          i === 1 ? 'bg-cyan-500/30' : 'bg-white/5 hover:bg-white/10'
-                        }`} 
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className={`h-8 rounded-lg transition-all duration-300 ${i === 1 ? 'bg-cyan-500/30' : 'bg-white/5 hover:bg-white/10'
+                          }`}
                       />
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Main content mockup */}
                 <div className="flex-1 space-y-4">
                   {/* Stats cards */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {['Members', 'Messages', 'Tickets', 'Giveaways'].map((label, i) => (
-                      <div 
-                        key={label} 
+                      <div
+                        key={label}
                         className="bg-slate-800/50 rounded-xl p-4 hover:bg-slate-800/70 transition-colors duration-300 group/card"
                       >
                         <div className="h-3 w-16 bg-white/10 rounded mb-2" />
-                        <div className={`h-6 w-20 rounded group-hover/card:scale-105 transition-transform ${
-                          ['bg-cyan-500/30', 'bg-blue-500/30', 'bg-purple-500/30', 'bg-pink-500/30'][i]
-                        }`} />
+                        <div className={`h-6 w-20 rounded group-hover/card:scale-105 transition-transform ${['bg-cyan-500/30', 'bg-blue-500/30', 'bg-purple-500/30', 'bg-pink-500/30'][i]
+                          }`} />
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* Chart placeholder */}
                   <div className="bg-slate-800/50 rounded-xl p-4 flex-1 min-h-[200px] hover:bg-slate-800/70 transition-colors duration-300">
                     <div className="h-3 w-32 bg-white/10 rounded mb-4" />
@@ -341,7 +338,7 @@ export function HeroSection() {
               </div>
             </div>
           </div>
-          
+
           {/* Floating badges around preview */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -356,7 +353,7 @@ export function HeroSection() {
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
