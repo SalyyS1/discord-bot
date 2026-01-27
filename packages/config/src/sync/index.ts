@@ -1,3 +1,3 @@
-export * from './channels';
-export * from './publisher';
-export * from './subscriber';
+export * from './channels.ts';
+export * from './publisher.ts';
+export * from './subscriber.ts';
