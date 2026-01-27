@@ -202,7 +202,7 @@ export interface CreateCheckoutOptions {
  */
 export async function createCheckoutSession(
   options: CreateCheckoutOptions
-): Promise<{ url: string | null } | null> {
+): Promise<{ url: string | null; id: string } | null> {
   const stripe = await getStripe();
   if (!stripe) return null;
 
