@@ -1,10 +1,10 @@
-export * from './env';
-export * from './sync/index';
-export * from './cache';
-export * from './audit';
-export * from './settings-schema';
-export * from './message-compiler';
-export * from './features';
+export * from './env.js';
+export * from './sync/index.js';
+export * from './cache.js';
+export * from './audit.js';
+export * from './settings-schema.js';
+export * from './message-compiler.js';
+export * from './features.js';
 
 /**
  * Shared constants

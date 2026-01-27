@@ -1,5 +1,5 @@
 import type Redis from 'ioredis';
-import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from './channels';
+import { CONFIG_CHANNELS, createConfigMessage, type ConfigUpdateMessage } from './channels.js';
 
 /**
  * Config publisher for dashboard to notify bot of changes
@@ -26,10 +26,7 @@ export class ConfigPublisher {
     await this.redis.publish(channel, JSON.stringify(message));
 
     // Also publish to the main update channel
-    await this.redis.publish(
-      CONFIG_CHANNELS.CONFIG_UPDATE,
-      JSON.stringify(message)
-    );
+    await this.redis.publish(CONFIG_CHANNELS.CONFIG_UPDATE, JSON.stringify(message));
   }
 
   /**

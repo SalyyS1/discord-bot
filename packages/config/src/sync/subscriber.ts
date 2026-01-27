@@ -1,5 +1,5 @@
 import type Redis from 'ioredis';
-import { CONFIG_CHANNELS, type ConfigUpdateMessage, type ConfigChannel } from './channels';
+import { CONFIG_CHANNELS, type ConfigUpdateMessage, type ConfigChannel } from './channels.js';
 
 export type ConfigHandler = (message: ConfigUpdateMessage) => void | Promise<void>;
 

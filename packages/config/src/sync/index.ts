@@ -1,3 +1,3 @@
-export * from './channels';
-export * from './publisher';
-export * from './subscriber';
+export * from './channels.js';
+export * from './publisher.js';
+export * from './subscriber.js';

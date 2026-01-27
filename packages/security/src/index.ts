@@ -1,6 +1,6 @@
 /**
  * @repo/security - Security utilities for multi-tenant bot platform
- * 
+ *
  * Features:
  * - AES-256-GCM encryption for sensitive credentials
  * - Discord token validation
@@ -14,7 +14,7 @@ export {
   getEncryptionService,
   clearEncryptionService,
   generateEncryptionKey,
-} from './encryption';
+} from './encryption.js';
 
 // Token validation
 export {
@@ -23,7 +23,7 @@ export {
   validateTokenFormat,
   extractBotIdFromToken,
   type TokenValidationResult,
-} from './validator';
+} from './validator.js';
 
 // Audit logging
 export {
@@ -33,7 +33,7 @@ export {
   getUserAuditLogs,
   createAuditHelper,
   type AuditEntry,
-} from './audit';
+} from './audit.js';
 
 // Rate limiting
 export {
@@ -45,4 +45,4 @@ export {
   canAccessApi,
   getRateLimitHeaders,
   type RateLimitResult,
-} from './ratelimit';
+} from './ratelimit.js';
