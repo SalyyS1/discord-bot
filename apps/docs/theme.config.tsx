@@ -15,7 +15,7 @@ const config: DocsThemeConfig = {
     },
     docsRepositoryBase: 'https://github.com/SalyyS1/discord-bot/tree/main/apps/docs',
     footer: {
-        text: '© 2026 SylaBot. All rights reserved.',
+        content: '© 2026 SylaBot. All rights reserved.',
     },
     head: (
         <>
