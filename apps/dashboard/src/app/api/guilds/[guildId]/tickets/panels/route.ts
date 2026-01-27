@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@repo/database';
 import { validateGuildAccess, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { getPublisher } from '@/lib/configSync';
 
 // GET - List all panels
 export async function GET(
@@ -68,6 +69,9 @@ export async function POST(
         categories: true,
       },
     });
+
+    // Notify bot of new panel
+    await getPublisher().publish(guildId, 'TICKETS', 'create');
 
     return ApiResponse.success(panel);
   } catch (error) {

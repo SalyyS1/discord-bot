@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGuildContext } from '@/context/guild-context';
+import { useLoadingContext } from '@/context/loading-context';
 import { queryKeys } from '@/lib/query-keys';
 
 interface Guild {
@@ -32,6 +33,7 @@ async function fetchGuildSettings(guildId: string) {
 
 export function ServerSelector() {
     const { selectedGuildId, setSelectedGuildId, isInitialized } = useGuildContext();
+    const { startGuildSwitch, endGuildSwitch } = useLoadingContext();
     const [guilds, setGuilds] = useState<Guild[]>([]);
     const [loading, setLoading] = useState(true);
     const queryClient = useQueryClient();
@@ -74,6 +76,12 @@ export function ServerSelector() {
     const handleSelectGuild = useCallback(async (newGuildId: string) => {
         const oldGuildId = selectedGuildId;
 
+        // Skip if same guild
+        if (oldGuildId === newGuildId) return;
+
+        // Show loading overlay
+        startGuildSwitch();
+
         // 1. Cancel any in-flight queries for OLD guild
         if (oldGuildId) {
             await queryClient.cancelQueries({
@@ -92,12 +100,17 @@ export function ServerSelector() {
         setSelectedGuildId(newGuildId);
 
         // 4. Prefetch new guild data for smooth UX
-        queryClient.prefetchQuery({
-            queryKey: queryKeys.guildSettings(newGuildId),
-            queryFn: () => fetchGuildSettings(newGuildId),
-            staleTime: 30_000,
-        });
-    }, [selectedGuildId, setSelectedGuildId, queryClient]);
+        try {
+            await queryClient.prefetchQuery({
+                queryKey: queryKeys.guildSettings(newGuildId),
+                queryFn: () => fetchGuildSettings(newGuildId),
+                staleTime: 30_000,
+            });
+        } finally {
+            // Hide loading overlay
+            endGuildSwitch();
+        }
+    }, [selectedGuildId, setSelectedGuildId, queryClient, startGuildSwitch, endGuildSwitch]);
 
     if (loading || !isInitialized) {
         return <Skeleton className="h-12 w-full rounded-lg" />;

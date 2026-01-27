@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { z } from 'zod';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { publishTempVoiceUpdate } from '@/lib/configSync';
 
 const voiceSettingsSchema = z.object({
     tempVoiceEnabled: z.boolean().optional(),
@@ -119,6 +120,9 @@ export async function PATCH(
                 where: { guildId },
             }).catch(() => { }); // Ignore if not exists
         }
+
+        // Notify bot to invalidate cache
+        await publishTempVoiceUpdate(guildId, 'update');
 
         return ApiResponse.success(settings);
     } catch (error) {

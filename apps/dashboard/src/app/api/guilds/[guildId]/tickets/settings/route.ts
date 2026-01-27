@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@repo/database';
 import { validateGuildAccess, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { getPublisher } from '@/lib/configSync';
 
 // Default message configs
 const DEFAULT_MESSAGE_CONFIGS = {
@@ -209,6 +210,9 @@ export async function PATCH(
       },
       update: updateData,
     });
+
+    // Notify bot to invalidate cache
+    await getPublisher().publish(guildId, 'TICKETS', 'update');
 
     return ApiResponse.success({ updated: true });
   } catch (error) {
