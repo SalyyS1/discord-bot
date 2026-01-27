@@ -1,7 +1,7 @@
 ---
 title: 'Fix Dashboard Discord Data Issues'
 description: 'Resolve channels/roles not showing and stats page displaying wrong data due to hardcoded bot token in multi-tenant system'
-status: in_progress
+status: completed
 priority: P1
 effort: 3h 15min
 branch: main
