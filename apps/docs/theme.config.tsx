@@ -24,7 +24,6 @@ const config: DocsThemeConfig = {
             <meta property="og:description" content="Complete guide to SylaBot - The Ultimate Discord Bot" />
         </>
     ),
-    primaryHue: 185,
     sidebar: {
         defaultMenuCollapseLevel: 1,
         toggleButton: true,
