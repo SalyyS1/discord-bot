@@ -14,7 +14,7 @@ export {
   getEncryptionService,
   clearEncryptionService,
   generateEncryptionKey,
-} from './encryption.js';
+} from './encryption';
 
 // Token validation
 export {
@@ -23,7 +23,7 @@ export {
   validateTokenFormat,
   extractBotIdFromToken,
   type TokenValidationResult,
-} from './validator.js';
+} from './validator';
 
 // Audit logging
 export {
@@ -33,7 +33,7 @@ export {
   getUserAuditLogs,
   createAuditHelper,
   type AuditEntry,
-} from './audit.js';
+} from './audit';
 
 // Rate limiting
 export {
@@ -45,4 +45,4 @@ export {
   canAccessApi,
   getRateLimitHeaders,
   type RateLimitResult,
-} from './ratelimit.js';
+} from './ratelimit';
