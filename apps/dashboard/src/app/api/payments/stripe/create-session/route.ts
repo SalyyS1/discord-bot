@@ -1,19 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { prisma } from '@repo/database';
 import { getServerSession } from '@/lib/session';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-12-15.clover',
-});
+// Lazy initialize Stripe to avoid build errors when key is not set
+function getStripe() {
+    if (!process.env.STRIPE_SECRET_KEY) {
+        throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    return new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2025-12-15.clover',
+    });
+}
 
 const PRICE_IDS = {
-    monthly: process.env.STRIPE_PRICE_MONTHLY!,
-    yearly: process.env.STRIPE_PRICE_YEARLY!,
+    monthly: process.env.STRIPE_PRICE_MONTHLY || '',
+    yearly: process.env.STRIPE_PRICE_YEARLY || '',
 };
 
 export async function POST(request: NextRequest) {
     try {
+        // Check if Stripe is configured
+        if (!process.env.STRIPE_SECRET_KEY) {
+            return NextResponse.json(
+                { error: 'Payment is not configured' },
+                { status: 503 }
+            );
+        }
+
         const session = await getServerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -24,6 +37,8 @@ export async function POST(request: NextRequest) {
         if (!tier || !guildId || !['monthly', 'yearly'].includes(tier)) {
             return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
         }
+
+        const stripe = getStripe();
 
         // Create Stripe checkout session
         const checkoutSession = await stripe.checkout.sessions.create({
