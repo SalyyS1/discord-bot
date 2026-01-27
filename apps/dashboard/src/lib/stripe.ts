@@ -1,46 +1,57 @@
 /**
  * Stripe Billing Integration
  * Handles subscriptions, webhooks, and status mapping
+ * Uses lazy loading to avoid build-time errors when key not set
  */
 
-import Stripe from 'stripe';
 import { prisma } from '@repo/database';
 import type { SubscriptionStatus } from '@repo/config';
 
 // ═══════════════════════════════════════════════
-// Stripe Client
+// Lazy Stripe Client
 // ═══════════════════════════════════════════════
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+let _stripe: import('stripe').default | null = null;
 
-if (!STRIPE_SECRET_KEY) {
-  console.warn('[Stripe] STRIPE_SECRET_KEY not set - billing features disabled');
+export const STRIPE_ENABLED = !!process.env.STRIPE_SECRET_KEY;
+
+/**
+ * Get Stripe client (lazy loaded)
+ */
+export async function getStripe(): Promise<import('stripe').default | null> {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+
+  if (!_stripe) {
+    const Stripe = (await import('stripe')).default;
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+
+  return _stripe;
 }
 
-export const stripe = STRIPE_SECRET_KEY
-  ? new Stripe(STRIPE_SECRET_KEY)
-  : null;
-
-export const STRIPE_ENABLED = !!stripe;
+// For backwards compatibility (sync version, returns cached or null)
+export const stripe = null; // Will be null at module load, use getStripe() instead
 
 // ═══════════════════════════════════════════════
 // Status Mapping
 // ═══════════════════════════════════════════════
 
+type StripeSubscription = {
+  status: string;
+  canceled_at?: number | null;
+  cancel_at_period_end: boolean;
+  metadata: { guildId?: string };
+  customer: string | { id: string };
+  id: string;
+  items: { data: Array<{ price: { id: string } }> };
+};
+
 /**
  * Map Stripe subscription status to internal status
- * 
- * | Stripe Status         | Internal Status |
- * |-----------------------|-----------------|
- * | active/trialing       | ACTIVE          |
- * | past_due              | PAST_DUE        |
- * | canceled (≤3 days)    | GRACE_PERIOD    |
- * | canceled (>3 days)    | CANCELED → FREE |
- * | unpaid                | SUSPENDED       |
- * | incomplete*           | FREE            |
  */
-export function mapStripeStatus(subscription: Stripe.Subscription): SubscriptionStatus {
+export function mapStripeStatus(subscription: StripeSubscription): SubscriptionStatus {
   switch (subscription.status) {
     case 'active':
     case 'trialing':
@@ -103,7 +114,7 @@ export async function markEventProcessed(eventId: string, eventType: string): Pr
 /**
  * Update subscription record from Stripe data
  */
-export async function syncSubscription(subscription: Stripe.Subscription): Promise<void> {
+export async function syncSubscription(subscription: StripeSubscription): Promise<void> {
   const guildId = subscription.metadata.guildId;
   if (!guildId) {
     console.warn('[Stripe] Subscription missing guildId metadata:', subscription.id);
@@ -121,7 +132,7 @@ export async function syncSubscription(subscription: Stripe.Subscription): Promi
     graceEndAt = new Date((subscription.canceled_at + 3 * 24 * 60 * 60) * 1000);
   }
 
-  // Extract timestamps from subscription (API may vary by version)
+  // Extract timestamps from subscription
   const sub = subscription as unknown as Record<string, unknown>;
   const periodStart = (sub.current_period_start || sub.currentPeriodStart) as number | undefined;
   const periodEnd = (sub.current_period_end || sub.currentPeriodEnd) as number | undefined;
@@ -156,7 +167,7 @@ export async function syncSubscription(subscription: Stripe.Subscription): Promi
 /**
  * Handle subscription deletion (cancelled after period end)
  */
-export async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+export async function handleSubscriptionDeleted(subscription: StripeSubscription): Promise<void> {
   const guildId = subscription.metadata.guildId;
   if (!guildId) return;
 
@@ -191,7 +202,8 @@ export interface CreateCheckoutOptions {
  */
 export async function createCheckoutSession(
   options: CreateCheckoutOptions
-): Promise<Stripe.Checkout.Session | null> {
+): Promise<{ url: string | null } | null> {
+  const stripe = await getStripe();
   if (!stripe) return null;
 
   const { guildId, priceId, customerId, userEmail, successUrl, cancelUrl } = options;
@@ -240,7 +252,8 @@ export async function createCheckoutSession(
 export async function createPortalSession(
   customerId: string,
   returnUrl: string
-): Promise<Stripe.BillingPortal.Session | null> {
+): Promise<{ url: string } | null> {
+  const stripe = await getStripe();
   if (!stripe) return null;
 
   return stripe.billingPortal.sessions.create({
@@ -256,10 +269,13 @@ export async function createPortalSession(
 /**
  * Verify and construct Stripe webhook event
  */
-export function constructWebhookEvent(
+export async function constructWebhookEvent(
   payload: string,
   signature: string
-): Stripe.Event | null {
+): Promise<unknown | null> {
+  const stripe = await getStripe();
+  const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+
   if (!stripe || !STRIPE_WEBHOOK_SECRET) return null;
 
   try {
@@ -279,7 +295,8 @@ export function constructWebhookEvent(
  */
 export async function getStripeSubscription(
   subscriptionId: string
-): Promise<Stripe.Subscription | null> {
+): Promise<unknown | null> {
+  const stripe = await getStripe();
   if (!stripe) return null;
 
   try {
