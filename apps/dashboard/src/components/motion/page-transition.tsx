@@ -11,7 +11,7 @@ const pageVariants = {
     scale: 1,
     transition: {
       duration: 0.4,
-      ease: [0.25, 0.1, 0.25, 1], // cubic-bezier for smooth feel
+      ease: [0.25, 0.1, 0.25, 1] as const, // cubic-bezier for smooth feel
     },
   },
   exit: {
@@ -20,7 +20,7 @@ const pageVariants = {
     scale: 0.99,
     transition: {
       duration: 0.3,
-      ease: [0.25, 0.1, 0.25, 1],
+      ease: [0.25, 0.1, 0.25, 1] as const,
     },
   },
 };
