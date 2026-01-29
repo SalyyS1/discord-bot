@@ -8,7 +8,7 @@
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import path from 'path';
-import { quoteIdentifier, getTenantSchemaName } from './utils/safe-identifier-quote.js';
+import { quoteIdentifier, getTenantSchemaName } from './utils/safe-identifier-quote';
 
 export class SchemaManager {
   private prisma: PrismaClient;
@@ -63,17 +63,17 @@ export class SchemaManager {
   async migrateSchema(tenantId: string): Promise<void> {
     const schemaName = this.getSchemaName(tenantId);
     const baseUrl = process.env.DATABASE_URL;
-    
+
     if (!baseUrl) {
       throw new Error('DATABASE_URL not set');
     }
 
     // Append schema to database URL
     const tenantUrl = this.appendSchemaToUrl(baseUrl, schemaName);
-    
+
     // Run prisma migrate deploy with tenant URL
     const prismaPath = path.resolve(__dirname, '../prisma');
-    
+
     try {
       execSync(`npx prisma db push --skip-generate`, {
         env: { ...process.env, DATABASE_URL: tenantUrl },
@@ -90,14 +90,14 @@ export class SchemaManager {
    */
   async schemaExists(tenantId: string): Promise<boolean> {
     const schemaName = this.getSchemaName(tenantId);
-    
+
     const result = await this.prisma.$queryRaw<{ exists: boolean }[]>`
       SELECT EXISTS(
         SELECT 1 FROM information_schema.schemata 
         WHERE schema_name = ${schemaName}
       ) as exists
     `;
-    
+
     return result[0]?.exists ?? false;
   }
 
@@ -110,7 +110,7 @@ export class SchemaManager {
       WHERE schema_name LIKE 'tenant_%'
       ORDER BY schema_name
     `;
-    
+
     return result.map(r => r.schema_name);
   }
 
