@@ -2,7 +2,7 @@
  * AES-256-GCM Encryption Service for secure credential storage
  */
 
-import { scryptSync, randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import { scryptSync, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32;
