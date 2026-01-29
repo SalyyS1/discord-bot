@@ -89,7 +89,7 @@ export async function auditAdminAction(params: {
         tenantId: 'SYSTEM', // System-level admin action
         userId: params.userId,
         action: `ADMIN_${params.action}`,
-        metadata: params.metadata || {},
+        metadata: (params.metadata || {}) as any,
         ipAddress: params.ipAddress,
       },
     });
