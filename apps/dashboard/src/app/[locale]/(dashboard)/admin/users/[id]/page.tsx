@@ -137,10 +137,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             <div>
               <label className="text-xs text-white/60">Email Verified</label>
               <p className="text-sm text-white">
-                {user.emailVerified
-                  ? new Date(user.emailVerified).toLocaleDateString()
-                  : 'Not verified'
-                }
+                {user.emailVerified ? 'Verified' : 'Not verified'}
               </p>
             </div>
             <div>
