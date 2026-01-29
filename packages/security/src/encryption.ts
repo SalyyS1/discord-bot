@@ -2,7 +2,7 @@
  * AES-256-GCM Encryption Service for secure credential storage
  */
 
-import crypto from 'crypto';
+import { scryptSync, randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32;
@@ -32,11 +32,11 @@ export class EncryptionService {
 
     // Current key with dynamic salt
     const salt = installationSalt || this.generateInstallationSalt();
-    this.key = crypto.scryptSync(encryptionKey, salt, KEY_LENGTH);
+    this.key = scryptSync(encryptionKey, salt, KEY_LENGTH);
     this.version = CURRENT_VERSION;
 
     // Keep legacy key for decryption of old data
-    this.legacyKey = crypto.scryptSync(encryptionKey, LEGACY_SALT, KEY_LENGTH);
+    this.legacyKey = scryptSync(encryptionKey, LEGACY_SALT, KEY_LENGTH);
   }
 
   /**
@@ -45,7 +45,7 @@ export class EncryptionService {
    */
   private generateInstallationSalt(): string {
     // Generate a random salt and log warning
-    const randomSalt = crypto.randomBytes(16).toString('hex');
+    const randomSalt = randomBytes(16).toString('hex');
     console.warn(
       '[SECURITY WARNING] TENANT_ENCRYPTION_SALT not set. Generated random salt. ' +
       'This should be set in production to ensure consistent encryption across restarts.'
@@ -64,8 +64,8 @@ export class EncryptionService {
     }
 
     // Generate random IV for each encryption
-    const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv(ALGORITHM, this.key, iv);
+    const iv = randomBytes(IV_LENGTH);
+    const cipher = createCipheriv(ALGORITHM, this.key, iv);
 
     let encrypted = cipher.update(plaintext, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -138,7 +138,7 @@ export class EncryptionService {
         throw new Error('Legacy key not available');
       }
 
-      const decipher = crypto.createDecipheriv(ALGORITHM, this.legacyKey, iv);
+      const decipher = createDecipheriv(ALGORITHM, this.legacyKey, iv);
       decipher.setAuthTag(authTag);
 
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -176,7 +176,7 @@ export class EncryptionService {
         throw new Error('Invalid auth tag length');
       }
 
-      const decipher = crypto.createDecipheriv(ALGORITHM, this.key, iv);
+      const decipher = createDecipheriv(ALGORITHM, this.key, iv);
       decipher.setAuthTag(authTag);
 
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -282,6 +282,7 @@ export function getEncryptionService(): EncryptionService {
   if (!encryptionService) {
     const key = process.env.TENANT_ENCRYPTION_KEY;
     const salt = process.env.TENANT_ENCRYPTION_SALT;
+    console.log('[Security] Initializing encryption service with named imports');
 
     if (!key) {
       throw new Error(
@@ -311,5 +312,5 @@ export function clearEncryptionService(): void {
  * @returns Base64-encoded key
  */
 export function generateEncryptionKey(length: number = 32): string {
-  return crypto.randomBytes(length).toString('base64');
+  return randomBytes(length).toString('base64');
 }
