@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/session';
 import { prisma } from '@/lib/db';
 
 /**
@@ -12,7 +12,7 @@ import { prisma } from '@/lib/db';
  */
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession();
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -90,7 +90,7 @@ export async function GET() {
  */
 export async function DELETE(request: Request) {
   try {
-    const session = await auth();
+    const session = await getServerSession();
 
     if (!session?.user?.id) {
       return NextResponse.json(

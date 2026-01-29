@@ -4,12 +4,12 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/session';
 import { getUserAccessibleGuilds } from '@/lib/auth/guild-access-validator';
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession();
 
     if (!session?.user?.id) {
       return NextResponse.json(
