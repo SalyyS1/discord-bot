@@ -5,14 +5,14 @@
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/session';
 
 export default async function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const session = await getServerSession();
 
   if (!session?.user) {
     redirect('/auth/login');

@@ -4,12 +4,12 @@
  */
 
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/session';
 import { prisma } from '@/lib/db';
 import { NotificationSettings } from '@/components/profile/user-notification-settings';
 
 export default async function ProfileSettingsPage() {
-  const session = await auth();
+  const session = await getServerSession();
 
   if (!session?.user?.id) {
     redirect('/auth/login');

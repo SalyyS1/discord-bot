@@ -4,11 +4,11 @@
  */
 
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { getServerSession } from '@/lib/session';
 import { DangerZone } from '@/components/profile/account-danger-zone';
 
 export default async function ProfileDataPage() {
-  const session = await auth();
+  const session = await getServerSession();
 
   if (!session?.user?.id) {
     redirect('/auth/login');
