@@ -14,12 +14,13 @@ import {
 import Link from 'next/link';
 
 interface UserDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
+  const { id } = await params;
   const user = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       accounts: true,
       tenantMemberships: {
