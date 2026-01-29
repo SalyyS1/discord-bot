@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, SlashCommandUserOption } from 'discord.js';
 import { Command } from '../../structures/Command.js';
 import { LevelingModule } from '../../modules/leveling/index.js';
 import { getXpProgress, getTotalXpForLevel } from '../../modules/leveling/xpCalculator.js';
@@ -28,7 +28,7 @@ export default new Command({
   data: new SlashCommandBuilder()
     .setName('level')
     .setDescription('Check your level, XP, and progress to next level')
-    .addUserOption((opt) =>
+    .addUserOption((opt: SlashCommandUserOption) =>
       opt.setName('user').setDescription('User to check (leave empty for yourself)')
     ),
   async execute(interaction) {

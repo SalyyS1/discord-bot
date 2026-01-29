@@ -11,6 +11,7 @@ import {
     ChannelType,
     PermissionFlagsBits,
     TextChannel,
+    SlashCommandChannelOption,
 } from 'discord.js';
 import { Command } from '../../structures/Command.js';
 
@@ -18,7 +19,7 @@ export default new Command({
     data: new SlashCommandBuilder()
         .setName('musicpanel')
         .setDescription('Send a music control panel to a channel')
-        .addChannelOption((opt) =>
+        .addChannelOption((opt: SlashCommandChannelOption) =>
             opt
                 .setName('channel')
                 .setDescription('Channel to send the panel (default: current)')
