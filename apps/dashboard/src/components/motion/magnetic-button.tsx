@@ -17,7 +17,7 @@ interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
  * Optimized for 60fps with spring animations.
  */
 export const MagneticButton = React.forwardRef<HTMLButtonElement, MagneticButtonProps>(
-  ({ children, className, strength = 20, ...props }, ref) => {
+  ({ children, className, strength = 20, onDrag, onDragStart, onDragEnd, ...props }, ref) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
