@@ -66,9 +66,9 @@ export const GlowEffect = React.forwardRef<HTMLDivElement, GlowEffectProps>(
         };
 
     const glowTransition = pulse
-      ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+      ? { duration: 2, repeat: Infinity, ease: 'easeInOut' as const }
       : hover
-        ? { duration: 0.3, ease: 'easeOut' }
+        ? { duration: 0.3, ease: 'easeOut' as const }
         : {};
 
     return (
