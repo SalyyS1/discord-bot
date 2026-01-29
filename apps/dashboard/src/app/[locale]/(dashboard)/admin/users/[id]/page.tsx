@@ -180,7 +180,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                   </p>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {account.type}
+                  oauth
                 </Badge>
               </div>
             ))}
