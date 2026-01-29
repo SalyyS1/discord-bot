@@ -245,7 +245,7 @@ export async function updateWithOptimisticLock<T>(
     }
 
     // Update with version increment
-    return tx[model].update({
+    return (tx as any)[model].update({
       where: { id },
       data: {
         ...data,
@@ -280,7 +280,7 @@ export async function batchUpdate<T extends { id: string }>(
     await retryTransaction(prisma, async (tx) => {
       await Promise.all(
         chunk.map((record) =>
-          tx[model].update({
+          (tx as any)[model].update({
             where: { id: record.id },
             data: record,
           })
@@ -301,7 +301,7 @@ export async function safeUpsert<T>(
   update: any
 ): Promise<T> {
   return retryTransaction(prisma, async (tx) => {
-    return tx[model].upsert({
+    return (tx as any)[model].upsert({
       where,
       create,
       update,
