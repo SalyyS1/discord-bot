@@ -59,7 +59,10 @@ export async function migrateEncryptedTokens(): Promise<MigrationResult> {
 }
 
 // CLI runner
-if (require.main === module) {
+// ESM compatible main module check
+import { fileURLToPath } from 'node:url';
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   migrateEncryptedTokens()
     .then((result) => {
       console.log('\n=== Migration Complete ===');
