@@ -42,7 +42,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
     notFound();
   }
 
-  const discordAccount = user.accounts.find(a => a.provider === 'discord');
+  const discordAccount = user.accounts.find(a => a.providerId === 'discord');
   const activeSessions = user.sessions.length;
 
   return (
@@ -156,7 +156,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             {discordAccount && (
               <div>
                 <label className="text-xs text-white/60">Discord ID</label>
-                <p className="text-sm text-white font-mono">{discordAccount.providerAccountId}</p>
+                <p className="text-sm text-white font-mono">{discordAccount.accountId}</p>
               </div>
             )}
           </div>
@@ -176,10 +176,10 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
               >
                 <div>
                   <p className="text-sm font-medium text-white capitalize">
-                    {account.provider}
+                    {account.providerId}
                   </p>
                   <p className="text-xs text-white/60 font-mono">
-                    {account.providerAccountId}
+                    {account.accountId}
                   </p>
                 </div>
                 <Badge variant="outline" className="text-xs">
