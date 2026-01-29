@@ -1,0 +1,307 @@
+# Temporary Voice Channels
+
+Enable join-to-create temporary voice channels for your members.
+
+## Overview
+
+Temp Voice allows members to create their own temporary voice channels that automatically delete when empty. Perfect for gaming sessions, study groups, or private conversations.
+
+## Initial Setup
+
+### Step 1: Create Voice Category
+
+1. In Discord, create a category for temp channels (e.g., "Voice Rooms")
+2. Right-click category → **Copy ID**
+3. Save the category ID
+
+### Step 2: Create Join Channel
+
+1. Create a voice channel named "➕ Join to Create" (or similar)
+2. Place it in the category
+3. Right-click channel → **Copy ID**
+4. Save the channel ID
+
+### Step 3: Configure Dashboard
+
+1. Navigate to **Dashboard** → **Temp Voice**
+2. Enter **Creator Channel ID** (join channel)
+3. Enter **Category ID** (where new channels spawn)
+4. Configure default settings
+5. Save changes
+
+## Configuration Options
+
+### Default Channel Name
+
+Template for new channel names:
+
+**Available Variables**:
+- `{user}` - Channel creator's username
+- `{count}` - Sequential number
+- `{game}` - Current activity/game
+
+**Examples**:
+```
+{user}'s Room
+Room #{count}
+{user}'s {game}
+Private Room
+```
+
+### Default User Limit
+
+Set default member limit for new channels:
+
+```
+0  = No limit (unlimited)
+2  = Duo only
+4  = Small group
+10 = Medium group
+```
+
+Members can change this after creating their channel.
+
+### Default Region
+
+Select voice region:
+- Automatic (recommended)
+- US East/West
+- Europe
+- Asia
+- And more...
+
+## How Members Use It
+
+### Creating a Channel
+
+1. Join the "➕ Join to Create" voice channel
+2. A new channel is automatically created
+3. Member is moved to their new channel
+4. Channel name and settings apply
+
+### Managing Your Channel
+
+Once created, the channel owner has full control:
+
+**Channel Commands**:
+
+**Rename Channel**:
+```
+/voice rename [new-name]
+```
+
+**Change Limit**:
+```
+/voice limit [number]
+```
+
+**Lock Channel**:
+```
+/voice lock
+```
+
+**Unlock Channel**:
+```
+/voice unlock
+```
+
+**Invite User**:
+```
+/voice invite @user
+```
+
+**Kick User**:
+```
+/voice kick @user
+```
+
+**Transfer Ownership**:
+```
+/voice transfer @user
+```
+
+**Claim Ownership** (if owner left):
+```
+/voice claim
+```
+
+### Channel Deletion
+
+Channels automatically delete when:
+- Last member leaves
+- Channel is empty for 5 seconds
+
+All settings and permissions are lost on deletion.
+
+## Advanced Features
+
+### Channel Templates
+
+Save channel configurations as templates:
+
+1. Configure your channel perfectly
+2. Use `/voice save-template [name]`
+3. Load template: `/voice load-template [name]`
+
+### Permanent Rooms
+
+Make temp channel permanent:
+
+```
+/voice permanent
+```
+
+Requires admin permission. Channel won't auto-delete.
+
+### Interface Panel
+
+Create a channel control panel:
+
+```
+/voice panel
+```
+
+Generates message with buttons for:
+- Lock/Unlock
+- Change limit
+- Rename
+- Kick members
+
+## Permission System
+
+### Default Permissions
+
+New channels inherit:
+- Creator gets full control
+- Everyone else can join (unless locked)
+- Standard voice permissions
+
+### Custom Permissions
+
+Channel owners can:
+- Grant specific users access (whitelist)
+- Block specific users (blacklist)
+- Set role-based permissions
+- Make channel private
+
+### Admin Override
+
+Server admins can:
+- Join any temp channel
+- Delete any temp channel
+- Force unlock channels
+- Transfer ownership
+
+## Dashboard Management
+
+View all temp channels:
+
+### Active Channels
+
+- See all currently active temp channels
+- View channel owner
+- Check member count
+- Monitor creation time
+
+### Statistics
+
+Track temp voice usage:
+- **Total Created** - All-time temp channels
+- **Currently Active** - Channels right now
+- **Average Duration** - How long channels last
+- **Peak Usage** - Most channels at once
+
+### Analytics
+
+View engagement data:
+- Most active creators
+- Popular time periods
+- Average members per channel
+- Growth trends
+
+## Customization
+
+### Channel Permissions
+
+Configure default permissions:
+1. Go to **Temp Voice** → **Permissions**
+2. Set default channel permissions
+3. Configure creator permissions
+4. Save settings
+
+### Naming Rules
+
+Enforce naming standards:
+- Minimum/maximum length
+- Forbidden words filter
+- Required prefixes
+- Case formatting
+
+### Access Control
+
+Limit who can create channels:
+- Minimum level requirement
+- Required roles
+- Banned roles
+- Cooldown between creations
+
+## Use Cases
+
+**Gaming Communities**:
+- Game-specific channels
+- Quick team formation
+- Private competitive matches
+
+**Study Groups**:
+- Subject-based rooms
+- Quiet study sessions
+- Group project meetings
+
+**Community Events**:
+- Event breakout rooms
+- Workshop sessions
+- Q&A channels
+
+**General Use**:
+- Private conversations
+- Music listening parties
+- Watch parties
+
+## Best Practices
+
+1. **Clear Naming** - Make join channel obvious ("Join to Create")
+2. **Organized Category** - Keep temp channels in dedicated category
+3. **Reasonable Limits** - Default 4-10 member limit prevents abuse
+4. **Quick Deletion** - Short empty timer (5-10 seconds) keeps category clean
+5. **User Education** - Explain temp voice in welcome/rules channel
+
+## Troubleshooting
+
+**Channels Not Creating**: Check bot permissions (Manage Channels, Move Members).
+
+**Can't Delete Channels**: Ensure bot has Manage Channels permission.
+
+**Members Can't Join**: Check if channel is locked or user is blacklisted.
+
+**Duplicate Channels**: Verify only one join channel is configured.
+
+## Advanced Configuration
+
+### Channel Limits
+
+Set global limits:
+- Max channels per user (default: 1)
+- Max total temp channels (default: 50)
+- Cooldown between creations (default: 5s)
+
+### Auto-Moderation
+
+Integrate with moderation:
+- Muted members can't create channels
+- Timed-out members lose channel access
+- Banned members' channels auto-delete
+
+## Related Features
+
+- **[Leveling](/document/wiki/leveling)** - Level requirement for temp voice
+- **[Moderation](/document/wiki/moderation)** - Moderate temp channels

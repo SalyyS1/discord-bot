@@ -18,8 +18,14 @@ interface Order {
   notes?: string;
 }
 
+import { TTLMap } from '../../lib/ttl-map-with-auto-cleanup.js';
+
 // Mock order storage (in production, this would be an external API/database)
-const orders = new Map<string, Order>();
+// Using TTLMap to prevent unbounded memory growth
+const orders = new TTLMap<string, Order>({
+  defaultTtlMs: 7 * 24 * 60 * 60 * 1000, // 7 days
+  cleanupIntervalMs: 60 * 60 * 1000, // Cleanup every hour
+});
 
 /**
  * Studio orders module

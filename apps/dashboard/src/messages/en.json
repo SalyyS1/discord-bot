@@ -120,5 +120,18 @@
     "defaultName": "Default Channel Name",
     "defaultLimit": "Default User Limit",
     "howItWorks": "How it works"
+  },
+  "docs": {
+    "title": "Documentation",
+    "description": "Comprehensive guides for all features",
+    "wiki": "Wiki",
+    "guides": "Guides",
+    "search": "Search documentation...",
+    "searchPlaceholder": "Search documentation... (Cmd+K)",
+    "categories": {
+      "basics": "Basics",
+      "features": "Features",
+      "advanced": "Advanced"
+    }
   }
 }

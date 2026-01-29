@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@repo/database';
-import Redis from 'ioredis';
+import { redis } from '../../lib/redis.js';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -24,19 +24,6 @@ export interface TicketSettings {
 }
 
 // ═══════════════════════════════════════════════
-// Redis Instance
-// ═══════════════════════════════════════════════
-
-let redis: Redis | null = null;
-
-function getRedis(): Redis {
-  if (!redis) {
-    redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-  }
-  return redis;
-}
-
-// ═══════════════════════════════════════════════
 // Anti-Abuse Checks
 // ═══════════════════════════════════════════════
 
@@ -48,8 +35,6 @@ export async function checkTicketAbuse(
   userId: string,
   settings: TicketSettings
 ): Promise<AbuseCheck> {
-  const redis = getRedis();
-
   // 1. Check open ticket count
   const openTickets = await prisma.ticket.count({
     where: {
@@ -114,7 +99,6 @@ export async function setTicketCooldown(
   userId: string,
   cooldownMinutes: number
 ): Promise<void> {
-  const redis = getRedis();
   const key = `ticket:cooldown:${guildId}:${userId}`;
   await redis.setex(key, cooldownMinutes * 60, Date.now().toString());
 }
@@ -126,7 +110,6 @@ export async function clearTicketCooldown(
   guildId: string,
   userId: string
 ): Promise<void> {
-  const redis = getRedis();
   const key = `ticket:cooldown:${guildId}:${userId}`;
   await redis.del(key);
 }
@@ -135,7 +118,6 @@ export async function clearTicketCooldown(
  * Reset raid counter (admin action)
  */
 export async function resetRaidCounter(guildId: string): Promise<void> {
-  const redis = getRedis();
   const raidKey = `ticket:raid:${guildId}`;
   await redis.del(raidKey);
 }
@@ -148,7 +130,6 @@ export async function getRaidStatus(guildId: string): Promise<{
   isRaid: boolean;
   threshold: number;
 }> {
-  const redis = getRedis();
   const raidKey = `ticket:raid:${guildId}`;
   const count = parseInt((await redis.get(raidKey)) || '0');
 

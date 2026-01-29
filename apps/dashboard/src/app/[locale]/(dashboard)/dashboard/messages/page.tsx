@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import DOMPurify from 'dompurify';
+import { sanitizeForPreview } from '@/lib/sanitize-html-for-preview';
 import {
   Loader2,
   MessageSquare,
@@ -653,41 +653,7 @@ export default function MessagesPage() {
 
   // Preview renderer - sanitized to prevent XSS
   const renderPreview = useCallback((text: string) => {
-    // First sanitize the input to remove any malicious scripts
-    const sanitized = DOMPurify.sanitize(text, {
-      ALLOWED_TAGS: [], // Strip all HTML tags from user input
-      ALLOWED_ATTR: [],
-    });
-
-    // Then apply our safe formatting
-    return sanitized
-      .replace(/\{user\}/g, '<span class="text-blue-400">@JohnDoe</span>')
-      .replace(/\{username\}/g, 'JohnDoe')
-      .replace(/\{server\}/g, 'My Awesome Server')
-      .replace(/\{membercount\}/g, '1,234')
-      .replace(/\{inviter\}/g, '<span class="text-blue-400">@Inviter</span>')
-      .replace(/\{position\}/g, '1,234th')
-      .replace(/\{prize\}/g, 'Discord Nitro')
-      .replace(/\{winners\}/g, '<span class="text-blue-400">@Winner1</span>')
-      .replace(/\{ends\}/g, '<t:1706000000:R>')
-      .replace(/\{host\}/g, '<span class="text-blue-400">@Host</span>')
-      .replace(/\{entries\}/g, '150')
-      .replace(/\{reason\}/g, 'Issue resolved')
-      .replace(/\{moderator\}/g, '<span class="text-blue-400">@Moderator</span>')
-      .replace(/\{case\}/g, '#42')
-      .replace(/\{warnings\}/g, '3')
-      .replace(/\{duration\}/g, 'Permanent')
-      .replace(/\{role\}/g, '<span class="text-blue-400">@Member</span>')
-      .replace(/\{boosts\}/g, '15')
-      .replace(/\{level\}/g, '2')
-      .replace(/\{created\}/g, '2 years ago')
-      .replace(/\{joined\}/g, '6 months ago')
-      .replace(/\{requirement\}/g, '<span class="text-blue-400">@Member</span>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/__(.*?)__/g, '<u>$1</u>')
-      .replace(/~~(.*?)~~/g, '<s>$1</s>')
-      .replace(/\n/g, '<br/>');
+    return sanitizeForPreview(text);
   }, []);
 
   // Toggle section

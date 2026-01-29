@@ -1,0 +1,121 @@
+# Moderation
+
+Keep your Discord server safe with SylaBot's powerful auto-moderation features.
+
+## Overview
+
+The moderation system helps you automatically detect and handle rule violations, spam, and unwanted content without manual intervention.
+
+## Anti-Spam Protection
+
+Prevent spam messages from flooding your server.
+
+### How It Works
+
+The anti-spam system monitors message frequency and automatically takes action when users exceed the configured threshold.
+
+### Configuration
+
+1. Navigate to **Dashboard** → **Moderation**
+2. Enable **Anti-Spam** toggle
+3. Configure these settings:
+   - **Message Threshold** - Number of messages (default: 5)
+   - **Time Window** - Time period in milliseconds (default: 5000ms)
+
+### Example Configuration
+
+```
+Message Threshold: 5
+Time Window: 5000ms
+```
+
+This means if a user sends 5 messages within 5 seconds, the anti-spam will trigger.
+
+### Actions Taken
+
+When anti-spam triggers:
+- Message deletion
+- Temporary mute (configurable duration)
+- Warning logged to audit log
+- Notification to moderators (optional)
+
+## Anti-Link Protection
+
+Control link sharing in your server channels.
+
+### Features
+
+- Detect and remove unauthorized links
+- Whitelist trusted domains
+- Exempt specific roles (like moderators)
+
+### Setup
+
+1. Go to **Moderation** settings
+2. Enable **Anti-Link** toggle
+3. Configure allowed domains (optional)
+4. Set exempt roles
+
+### Whitelist Domains
+
+Add trusted domains to allow:
+```
+youtube.com
+discord.gg
+your-website.com
+```
+
+## Warnings System
+
+Track member violations and take progressive action.
+
+### Warning Thresholds
+
+Configure automatic actions based on warning count:
+
+- **3 Warnings** - 24-hour timeout
+- **5 Warnings** - 7-day timeout
+- **10 Warnings** - Kick from server
+
+## Moderation Logs
+
+All moderation actions are logged in the audit system:
+
+- View in **Dashboard** → **Audit**
+- Filter by action type
+- Export logs for review
+
+## Best Practices
+
+1. **Start Lenient** - Begin with higher thresholds and adjust based on server activity
+2. **Exempt Trusted Roles** - Don't apply strict rules to moderators and trusted members
+3. **Monitor Logs** - Regularly review moderation actions to fine-tune settings
+4. **Communicate Rules** - Make sure members know the server rules
+
+## Advanced Settings
+
+### Custom Filter Words
+
+Add custom words or phrases to auto-moderate:
+
+1. Go to **Auto Responder** settings
+2. Create trigger for filtered words
+3. Set action to delete message
+
+### Role-Based Exemptions
+
+Exclude specific roles from moderation:
+- Moderator roles
+- VIP members
+- Trusted contributors
+
+## Troubleshooting
+
+**False Positives**: If legitimate messages are being flagged, increase thresholds or add exemptions.
+
+**Not Working**: Ensure SylaBot has proper permissions (Manage Messages, Timeout Members).
+
+## Related Features
+
+- **[Tickets](/document/wiki/tickets)** - Support system
+- **[Welcome](/document/wiki/welcome)** - Server rules in welcome messages

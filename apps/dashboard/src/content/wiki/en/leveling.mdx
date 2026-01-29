@@ -1,0 +1,271 @@
+# Leveling System
+
+Encourage member engagement with an XP-based leveling system.
+
+## Overview
+
+The leveling system rewards members with XP for sending messages and participating in your server. As they accumulate XP, they level up and can unlock special roles and perks.
+
+## Enabling Leveling
+
+1. Navigate to **Dashboard** → **Leveling**
+2. Toggle **"Enable Leveling"** switch
+3. Configure XP settings
+4. Save changes
+
+## XP Configuration
+
+### XP Per Message
+
+Control how much XP members earn:
+
+**Min XP**: Minimum XP awarded per message (default: 15)
+
+**Max XP**: Maximum XP awarded per message (default: 25)
+
+Each message awards a random amount between min and max to prevent exploitation.
+
+### Cooldown
+
+**Cooldown Period**: Time between XP-earning messages (default: 60 seconds)
+
+This prevents spam and ensures natural conversation is rewarded.
+
+## XP Formula
+
+```
+XP required for level N = 5 * (N^2) + 50 * N + 100
+```
+
+Example level requirements:
+- **Level 1**: 155 XP
+- **Level 5**: 525 XP
+- **Level 10**: 1,100 XP
+- **Level 20**: 3,100 XP
+- **Level 50**: 15,100 XP
+
+## Level Roles
+
+Reward members with roles as they level up.
+
+### Creating Level Roles
+
+1. Create roles in Discord (e.g., "Level 5", "Level 10")
+2. Go to **Leveling** → **Level Roles**
+3. Click **"Add Level Role"**
+4. Configure:
+   - **Level**: Required level
+   - **Role**: Role to assign
+   - **Remove Lower**: Remove previous level roles
+
+### Role Stacking vs Replacement
+
+**Stacking** (Remove Lower = OFF):
+- Members keep all level roles
+- Shows progression history
+
+**Replacement** (Remove Lower = ON):
+- Only highest level role kept
+- Cleaner role list
+
+### Example Setup
+
+```
+Level 5  → Bronze Member
+Level 10 → Silver Member
+Level 20 → Gold Member
+Level 50 → Diamond Member
+```
+
+## Leaderboard
+
+### Viewing Leaderboard
+
+**Dashboard**: View in **Overview** page
+- Top 10 members
+- XP and level displayed
+- Real-time updates
+
+**Discord Command**:
+```
+/leaderboard
+```
+
+Shows top 10 members with:
+- Rank position
+- Username
+- Current level
+- Total XP
+
+### Leaderboard Features
+
+- Paginated for large servers
+- Filter by role
+- Weekly/monthly/all-time views
+- Export to CSV
+
+## Member XP Management
+
+### View Member XP
+
+Check any member's XP and level:
+
+```
+/level @user
+```
+
+Or view in dashboard:
+1. Go to **Leveling** → **Members**
+2. Search for member
+3. View detailed stats
+
+### Adjust XP
+
+**Add XP**:
+```
+/xp add @user 500
+```
+
+**Remove XP**:
+```
+/xp remove @user 200
+```
+
+**Set XP**:
+```
+/xp set @user 1000
+```
+
+**Reset XP**:
+```
+/xp reset @user
+```
+
+### Bulk Operations
+
+Reset entire server:
+```
+/xp reset-all
+```
+
+⚠️ Warning: This cannot be undone!
+
+## Leveling Rewards
+
+### Announcement Messages
+
+Customize level-up messages:
+
+1. Go to **Leveling** → **Announcements**
+2. Enable level-up announcements
+3. Select announcement channel
+4. Customize message template
+
+**Available Variables**:
+- `{user}` - Member mention
+- `{level}` - New level number
+- `{xp}` - Total XP
+- `{role}` - New role (if earned)
+
+**Example Message**:
+```
+🎉 Congratulations {user}! You've reached **Level {level}**!
+{role}
+```
+
+### Milestone Rewards
+
+Set special rewards for milestone levels:
+
+```
+Level 25  → Special color role + Channel access
+Level 50  → VIP perks + Custom emoji
+Level 100 → Exclusive role + Giveaway entry
+```
+
+## XP Modifiers
+
+### Channel Multipliers
+
+Give bonus XP in specific channels:
+
+1. Go to **Leveling** → **Multipliers**
+2. Add channel
+3. Set multiplier (e.g., 2x, 0.5x, 0x)
+
+**Use Cases**:
+- 2x XP in active discussion channels
+- 0x XP in bot/spam channels
+- 0.5x XP in voice-text channels
+
+### Role Multipliers
+
+Boost XP for certain roles:
+
+```
+Server Booster: 1.5x XP
+VIP: 1.25x XP
+Contributor: 1.2x XP
+```
+
+### Voice XP
+
+Award XP for voice channel activity:
+
+1. Enable **Voice XP** in settings
+2. Set XP per minute (default: 2 XP/min)
+3. Set minimum time in channel (prevents exploits)
+
+## Advanced Settings
+
+### Ignored Channels
+
+Disable XP in specific channels:
+- Bot commands channels
+- Spam channels
+- Admin channels
+
+### Ignored Roles
+
+Prevent certain roles from earning XP:
+- Bots
+- Muted members
+- Specific punishment roles
+
+### Stack Multipliers
+
+When multiple multipliers apply:
+- Channel multiplier: 2x
+- Role multiplier: 1.5x
+- **Total**: 3x XP
+
+## Analytics
+
+Track engagement metrics:
+
+- **Total XP Earned** - Server-wide XP
+- **Active Members** - Members who earned XP this week
+- **Average Level** - Server average level
+- **Top Earners** - Fastest leveling members
+
+## Best Practices
+
+1. **Balanced XP Rates** - Not too fast (devalues levels) or too slow (discourages participation)
+2. **Meaningful Rewards** - Make level roles actually valuable
+3. **Prevent Spam** - Use adequate cooldown (60-120 seconds)
+4. **Exclude Bot Channels** - Don't reward command spam
+5. **Voice XP** - Reward voice activity equally
+6. **Regular Events** - XP boost events to drive engagement
+
+## Troubleshooting
+
+**Members Not Earning XP**: Check if leveling is enabled and member isn't in ignored role.
+
+**XP Not Showing**: Verify database connection and check cooldown period.
+
+**Level Roles Not Assigned**: Ensure bot has Manage Roles permission and bot role is above level roles.
+
+## Related Features
+
+- **[Giveaways](/document/wiki/giveaways)** - Level-based entry requirements
+- **[Moderation](/document/wiki/moderation)** - XP penalties for violations

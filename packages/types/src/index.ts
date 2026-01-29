@@ -5,6 +5,9 @@
 // Message Builder types
 export * from './message-config';
 
+// Real-time Sync Event types
+export * from './sync-events';
+
 // Config sync message for Redis pub/sub
 export interface ConfigUpdateMessage {
   guildId: string;

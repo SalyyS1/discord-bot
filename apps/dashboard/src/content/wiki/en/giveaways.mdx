@@ -1,0 +1,210 @@
+# Giveaways
+
+Create engaging giveaways to reward your community members.
+
+## Overview
+
+The giveaway system allows you to host automated giveaways with customizable requirements, durations, and winner selection.
+
+## Creating a Giveaway
+
+### Using Dashboard
+
+1. Navigate to **Dashboard** → **Giveaways**
+2. Click **"Create Giveaway"** button
+3. Fill in the required details
+4. Click **"Start Giveaway"**
+
+### Using Commands
+
+Quick giveaway creation:
+
+```
+/giveaway create
+```
+
+Interactive setup wizard will guide you through:
+- Prize description
+- Duration
+- Winner count
+- Channel selection
+- Entry requirements
+
+## Giveaway Configuration
+
+### Basic Settings
+
+**Prize**: What members will win
+```
+Example: Discord Nitro (1 month)
+```
+
+**Duration**: How long the giveaway runs
+```
+Examples: 1h, 3d, 1w
+```
+
+**Winners**: Number of winners to select
+```
+Default: 1
+Maximum: 20
+```
+
+**Channel**: Where to post the giveaway
+```
+Select from dropdown
+```
+
+### Advanced Requirements
+
+**Role Requirements**:
+- Require specific roles to enter
+- Exclude certain roles
+
+**Level Requirements**:
+- Minimum level to participate
+- Reward active members
+
+**Age Requirements**:
+- Account age minimum
+- Server join date minimum
+
+## Managing Active Giveaways
+
+### Dashboard Overview
+
+View all giveaways:
+- **Active** - Currently running
+- **Scheduled** - Starting in future
+- **Ended** - Completed giveaways
+
+### Edit Giveaway
+
+Modify running giveaways:
+1. Click giveaway in dashboard
+2. Edit settings
+3. Save changes
+4. Giveaway message updates automatically
+
+### End Early
+
+End giveaway before scheduled time:
+
+```
+/giveaway end [giveaway-id]
+```
+
+Or use dashboard **"End Now"** button.
+
+### Reroll Winners
+
+If winner doesn't claim or is invalid:
+
+```
+/giveaway reroll [giveaway-id]
+```
+
+Selects new winner from valid entries.
+
+## Giveaway Features
+
+### Entry Tracking
+
+- See total entries in real-time
+- View entry list in dashboard
+- Check if specific user entered
+
+### Notifications
+
+Automatic notifications for:
+- Giveaway start
+- Winner selection
+- Winner claim reminder
+- Giveaway cancellation
+
+### Winner Selection
+
+Fair and transparent:
+- Cryptographically random selection
+- Validates requirements before selection
+- Automatic disqualification of invalid entries
+- Public announcement of winners
+
+## Giveaway Templates
+
+Save common configurations as templates:
+
+1. Create giveaway with desired settings
+2. Click **"Save as Template"**
+3. Name your template
+4. Reuse for future giveaways
+
+### Popular Templates
+
+**Quick Giveaway**:
+- Duration: 1 hour
+- Winners: 1
+- No requirements
+
+**Weekly Event**:
+- Duration: 7 days
+- Winners: 3
+- Level 10+ required
+
+**VIP Giveaway**:
+- Duration: 3 days
+- Winners: 1
+- VIP role required
+
+## Best Practices
+
+1. **Clear Prize Description** - Be specific about what winners receive
+2. **Reasonable Duration** - Not too short (gives everyone a chance) or too long (maintains excitement)
+3. **Appropriate Requirements** - Don't make entry too difficult
+4. **Multiple Winners** - Increases engagement for bigger prizes
+5. **Regular Schedule** - Weekly/monthly giveaways build anticipation
+
+## Giveaway Analytics
+
+Track giveaway performance:
+
+- **Total Entries** - Participation rate
+- **Entry Growth** - Entries over time
+- **Completion Rate** - Winners who claimed prizes
+- **Engagement Boost** - Server activity during giveaway
+
+## Troubleshooting
+
+**No Entries**: Check requirements aren't too strict, verify bot permissions.
+
+**Can't Select Winner**: Ensure enough valid entries meet requirements.
+
+**Winner Not Notified**: Check bot can DM winners or mention in channel.
+
+## Advanced Features
+
+### Sponsored Giveaways
+
+Track sponsor information:
+- Add sponsor name
+- Include sponsor message
+- Track ROI for sponsors
+
+### Entry Multipliers
+
+Give bonus entries for:
+- Server boosters (2x entries)
+- Invites (1 entry per invite)
+- Event participation
+
+### Auto-Rehost
+
+Automatically create recurring giveaways:
+- Set frequency (weekly, monthly)
+- Same prize and requirements
+- Auto-schedule next giveaway
+
+## Related Features
+
+- **[Leveling](/document/wiki/leveling)** - Level-based entry requirements
+- **[Welcome](/document/wiki/welcome)** - Announce giveaways to new members

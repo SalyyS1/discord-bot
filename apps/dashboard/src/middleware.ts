@@ -5,6 +5,12 @@ import { routing } from './i18n/navigation';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
+// CSRF Configuration
+const CSRF_COOKIE_NAME = '__Host-csrf';
+const CSRF_HEADER_NAME = 'x-csrf-token';
+const PROTECTED_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'];
+const CSRF_EXEMPT_ROUTES = ['/api/auth', '/api/csrf', '/api/payments/sepay/webhook', '/api/payments/stripe/webhook'];
+
 // Public routes that don't require authentication
 const publicRoutes = ['/login', '/api/auth', '/pricing', '/terms', '/privacy'];
 // Protected API routes that require session
@@ -22,6 +28,25 @@ function getLocale(pathname: string): string {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // CSRF Protection for API routes
+  if (pathname.startsWith('/api/')) {
+    // Check if route is exempt from CSRF protection
+    const isExempt = CSRF_EXEMPT_ROUTES.some(route => pathname.startsWith(route));
+
+    // Validate CSRF token for mutating methods
+    if (!isExempt && PROTECTED_METHODS.includes(request.method)) {
+      const csrfCookie = request.cookies.get(CSRF_COOKIE_NAME)?.value;
+      const csrfHeader = request.headers.get(CSRF_HEADER_NAME);
+
+      if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid CSRF token' },
+          { status: 403 }
+        );
+      }
+    }
+  }
 
   // Check if it's an API route or public route
   const isApiRoute = pathname.startsWith('/api');

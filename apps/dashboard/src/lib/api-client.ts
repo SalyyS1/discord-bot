@@ -1,5 +1,7 @@
 'use client';
 
+import { getCsrfToken } from './csrf-utils';
+
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -13,17 +15,29 @@ interface FetchResult<T> {
 }
 
 /**
- * Fetch wrapper with error handling
+ * Fetch wrapper with error handling and CSRF protection
  * Returns structured result with data or error
  */
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<FetchResult<T>> {
   try {
+    // Add CSRF token for mutating requests
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    };
+
+    // Add CSRF token for POST, PUT, DELETE, PATCH
+    const method = options?.method?.toUpperCase();
+    if (method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+      const csrfToken = getCsrfToken();
+      if (csrfToken) {
+        headers['x-csrf-token'] = csrfToken;
+      }
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
     });
 
     const json = (await response.json()) as ApiResponse<T>;

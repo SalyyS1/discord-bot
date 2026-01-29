@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import { Toaster } from 'sonner';
 import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { CsrfTokenProvider } from '@/providers/csrf-token-provider';
 import '../globals.css';
 
 export const metadata: Metadata = {
@@ -30,12 +31,14 @@ export default async function LocaleLayout({
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          <QueryProvider>
-            <NextIntlClientProvider messages={messages}>
-              {children}
-              <Toaster position="bottom-right" richColors />
-            </NextIntlClientProvider>
-          </QueryProvider>
+          <CsrfTokenProvider>
+            <QueryProvider>
+              <NextIntlClientProvider messages={messages}>
+                {children}
+                <Toaster position="bottom-right" richColors />
+              </NextIntlClientProvider>
+            </QueryProvider>
+          </CsrfTokenProvider>
         </ThemeProvider>
       </body>
     </html>

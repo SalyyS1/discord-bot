@@ -11,6 +11,7 @@ const navLinks = [
   { href: '#features', label: 'Features' },
   { href: '#pricing', label: 'Pricing' },
   { href: '#testimonials', label: 'Reviews' },
+  { href: '/document', label: 'Docs' },
 ];
 
 export function Navbar() {

@@ -1,8 +1,8 @@
-import { 
-  AuditLogEvent, 
-  Client, 
-  Guild, 
-  GuildAuditLogsEntry, 
+import {
+  AuditLogEvent,
+  Client,
+  Guild,
+  GuildAuditLogsEntry,
   GuildChannel,
   GuildMember,
   PermissionFlagsBits,
@@ -13,6 +13,7 @@ import {
 import { prisma } from '../../lib/prisma.js';
 import { redis } from '../../lib/redis.js';
 import { logger } from '../../utils/logger.js';
+import { TTLMap } from '../../lib/ttl-map-with-auto-cleanup.js';
 
 interface RaidAction {
   type: 'CHANNEL_DELETE' | 'ROLE_DELETE' | 'MEMBER_KICK' | 'MEMBER_BAN' | 'CHANNEL_CREATE';
@@ -59,9 +60,16 @@ const DEFAULT_CONFIG: AntiRaidConfig = {
   whitelistUserIds: [],
 };
 
-// In-memory cache for deleted items (for recovery)
-const deletedChannelsCache = new Map<string, Map<string, { name: string; type: number; parentId?: string; position: number }>>();
-const deletedRolesCache = new Map<string, Map<string, { name: string; color: number; permissions: bigint; position: number }>>();
+// In-memory cache for deleted items (for recovery) with TTL to prevent memory leaks
+const deletedChannelsCache = new TTLMap<string, Map<string, { name: string; type: number; parentId?: string; position: number }>>({
+  defaultTtlMs: 60 * 60 * 1000, // 1 hour
+  cleanupIntervalMs: 10 * 60 * 1000,
+});
+
+const deletedRolesCache = new TTLMap<string, Map<string, { name: string; color: number; permissions: bigint; position: number }>>({
+  defaultTtlMs: 60 * 60 * 1000, // 1 hour
+  cleanupIntervalMs: 10 * 60 * 1000,
+});
 
 /**
  * Anti-Raid Protection Module

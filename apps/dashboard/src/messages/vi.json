@@ -120,5 +120,18 @@
     "defaultName": "Tên kênh mặc định",
     "defaultLimit": "Giới hạn người dùng mặc định",
     "howItWorks": "Cách hoạt động"
+  },
+  "docs": {
+    "title": "Tài liệu",
+    "description": "Hướng dẫn toàn diện cho tất cả tính năng",
+    "wiki": "Wiki",
+    "guides": "Hướng dẫn",
+    "search": "Tìm kiếm tài liệu...",
+    "searchPlaceholder": "Tìm kiếm tài liệu... (Cmd+K)",
+    "categories": {
+      "basics": "Cơ bản",
+      "features": "Tính năng",
+      "advanced": "Nâng cao"
+    }
   }
 }

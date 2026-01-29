@@ -4,22 +4,13 @@ import { redis } from '../../lib/redis.js';
 import { client } from '../../lib/client.js';
 import { getLevelFromXp } from './xpCalculator.js';
 import { logger } from '../../utils/logger.js';
+import { TTLMap } from '../../lib/ttl-map-with-auto-cleanup.js';
 
-// Track active voice sessions in memory
-const voiceSessionMap = new Map<string, { guildId: string; startTime: number; channelId: string }>();
-
-// Cleanup interval for stale sessions (every 30 minutes)
-setInterval(() => {
-  const now = Date.now();
-  const maxSessionAge = 24 * 60 * 60 * 1000; // 24 hours max
-  
-  for (const [key, session] of voiceSessionMap.entries()) {
-    if (now - session.startTime > maxSessionAge) {
-      voiceSessionMap.delete(key);
-      logger.debug(`Cleaned up stale voice session: ${key}`);
-    }
-  }
-}, 30 * 60 * 1000);
+// Track active voice sessions in memory with TTL to prevent memory leaks
+const voiceSessionMap = new TTLMap<string, { guildId: string; startTime: number; channelId: string }>({
+  defaultTtlMs: 24 * 60 * 60 * 1000, // 24 hours max
+  cleanupIntervalMs: 30 * 60 * 1000, // Cleanup every 30 minutes
+});
 
 /**
  * Voice XP module - Awards XP for time spent in voice channels

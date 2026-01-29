@@ -25,6 +25,7 @@ import { prisma, TicketStatus } from '../../lib/prisma.js';
 import { ensureGuild } from '../../lib/settings.js';
 import { TranscriptService } from './transcripts.js';
 import { logger } from '../../utils/logger.js';
+import { TTLMap } from '../../lib/ttl-map-with-auto-cleanup.js';
 
 // Types for form questions from dashboard
 interface FormQuestion {
@@ -38,10 +39,13 @@ interface FormQuestion {
   maxLength?: number;
 }
 
-// Store question ID to label mapping for modal responses
-const questionLabelMap = new Map<string, Map<string, string>>();
+// Store question ID to label mapping for modal responses with TTL
+const questionLabelMap = new TTLMap<string, Map<string, string>>({
+  defaultTtlMs: 30 * 60 * 1000, // 30 minutes
+  cleanupIntervalMs: 5 * 60 * 1000,
+});
 
-// Store pending select responses for multi-step flow
+// Store pending select responses for multi-step flow with TTL
 interface PendingTicketData {
   categoryId: string;
   selectResponses: Record<string, string>;
@@ -49,17 +53,10 @@ interface PendingTicketData {
   userId: string;
   expiresAt: number;
 }
-const pendingTicketSelects = new Map<string, PendingTicketData>();
-
-// Clean up expired pending data every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, data] of pendingTicketSelects) {
-    if (data.expiresAt < now) {
-      pendingTicketSelects.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
+const pendingTicketSelects = new TTLMap<string, PendingTicketData>({
+  defaultTtlMs: 15 * 60 * 1000, // 15 minutes for pending selections
+  cleanupIntervalMs: 5 * 60 * 1000,
+});
 
 // Message config type from dashboard
 interface MessageConfig {

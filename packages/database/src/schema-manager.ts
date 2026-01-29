@@ -8,6 +8,7 @@
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import path from 'path';
+import { quoteIdentifier, getTenantSchemaName } from './utils/safe-identifier-quote.js';
 
 export class SchemaManager {
   private prisma: PrismaClient;
@@ -21,31 +22,39 @@ export class SchemaManager {
    */
   async createTenantSchema(tenantId: string): Promise<void> {
     const schemaName = this.getSchemaName(tenantId);
-    
+
     // Validate schema name to prevent SQL injection
     if (!this.isValidSchemaName(schemaName)) {
       throw new Error(`Invalid schema name: ${schemaName}`);
     }
 
-    // Create schema
-    await this.prisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
-    
+    // Create schema with safely quoted identifier
+    const quotedSchema = quoteIdentifier(schemaName);
+    await this.prisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS ${quotedSchema}`);
+
     // Run migrations for the new schema
     await this.migrateSchema(tenantId);
   }
 
   /**
    * Drop a tenant's schema (use with caution!)
+   * Requires explicit confirmation phrase to prevent accidental deletion
    */
-  async dropTenantSchema(tenantId: string): Promise<void> {
+  async dropTenantSchema(tenantId: string, confirmPhrase?: string): Promise<void> {
+    // Require explicit confirmation to prevent accidental deletion
+    if (confirmPhrase !== `DELETE_TENANT_${tenantId}`) {
+      throw new Error('Schema deletion requires confirmation phrase: DELETE_TENANT_' + tenantId);
+    }
+
     const schemaName = this.getSchemaName(tenantId);
-    
+
     if (!this.isValidSchemaName(schemaName)) {
       throw new Error(`Invalid schema name: ${schemaName}`);
     }
 
     // CASCADE will drop all objects in the schema
-    await this.prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaName}" CASCADE`);
+    const quotedSchema = quoteIdentifier(schemaName);
+    await this.prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS ${quotedSchema} CASCADE`);
   }
 
   /**
@@ -107,11 +116,10 @@ export class SchemaManager {
 
   /**
    * Get schema name from tenant ID
+   * Uses centralized validation and sanitization
    */
   getSchemaName(tenantId: string): string {
-    // Sanitize tenant ID - only allow alphanumeric and underscores
-    const sanitized = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
-    return `tenant_${sanitized}`;
+    return getTenantSchemaName(tenantId);
   }
 
   /**

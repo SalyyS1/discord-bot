@@ -188,29 +188,30 @@ model Guild {
   tenantId String?
 
   // Relations
-  settings         GuildSettings?
-  subscription     Subscription?
-  members          Member[]
-  warnings         Warning[]
-  modLogs          ModLog[]
-  giveaways        Giveaway[]
-  tickets          Ticket[]
-  invites          Invite[]
-  autoResponders   AutoResponder[]
-  tempVoiceConfig  TempVoiceConfig?
-  levelRoles       LevelRole[]
-  suggestions      Suggestion[]
-  stickyMessages   StickyMessage[]
-  blacklist        Blacklist[]
-  messageTemplates MessageTemplate[]
-  ticketProducts   TicketProduct[]
-  ticketPanels     TicketPanel[]
-  ticketCategories TicketCategory[]
-  stats            GuildStats[]
-  auditLogs        AuditLogEntry[]
-  voiceSessions    VoiceSession[]
-  musicSettings    MusicSettings?
-  savedPlaylists   SavedPlaylist[]
+  settings          GuildSettings?
+  subscription      Subscription?
+  members           Member[]
+  warnings          Warning[]
+  modLogs           ModLog[]
+  giveaways         Giveaway[]
+  tickets           Ticket[]
+  invites           Invite[]
+  autoResponders    AutoResponder[]
+  tempVoiceConfig   TempVoiceConfig?
+  tempVoiceChannels TempVoiceChannel[]
+  levelRoles        LevelRole[]
+  suggestions       Suggestion[]
+  stickyMessages    StickyMessage[]
+  blacklist         Blacklist[]
+  messageTemplates  MessageTemplate[]
+  ticketProducts    TicketProduct[]
+  ticketPanels      TicketPanel[]
+  ticketCategories  TicketCategory[]
+  stats             GuildStats[]
+  auditLogs         AuditLogEntry[]
+  voiceSessions     VoiceSession[]
+  musicSettings     MusicSettings?
+  savedPlaylists    SavedPlaylist[]
 
   @@index([tenantId])
 }
@@ -218,6 +219,9 @@ model Guild {
 model GuildSettings {
   guildId String @id
   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  // Optimistic locking for concurrent updates
+  version Int @default(0)
 
   // ═══════════════════════════════════════════════
   // CORE
@@ -413,6 +417,7 @@ model Member {
 
   @@unique([discordId, guildId])
   @@index([guildId, xp(sort: Desc)])
+  @@index([discordId])
 }
 
 // ============ MODERATION ============
@@ -450,6 +455,7 @@ model ModLog {
   createdAt DateTime @default(now())
 
   @@index([guildId, createdAt(sort: Desc)])
+  @@index([guildId, targetId])
 }
 
 enum ModAction {
@@ -537,6 +543,7 @@ model Giveaway {
   @@index([guildId, status])
   @@index([endsAt])
   @@index([startsAt])
+  @@index([status, endsAt])
 }
 
 enum GiveawayStatus {
@@ -916,6 +923,7 @@ model TempVoiceChannel {
   id        String   @id @default(cuid())
   channelId String   @unique
   guildId   String
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
   ownerId   String
   name      String
   userLimit Int      @default(0)
@@ -926,6 +934,9 @@ model TempVoiceChannel {
   rejected  String[] @default([])
 
   createdAt DateTime @default(now())
+
+  @@index([guildId])
+  @@index([ownerId])
 }
 
 // ============ LEVELING ============

@@ -1,12 +1,13 @@
 /**
  * Health Monitor for Bot Processes
- * 
+ *
  * Monitors health of spawned bot processes via IPC.
  */
 
 import { BotSpawner } from './spawner.js';
 import { BotHealth, IPCMessage } from './types.js';
 import { logger } from './logger.js';
+import { memoryStore } from '@repo/security';
 
 export class HealthMonitor {
   private healthData = new Map<string, BotHealth>();
@@ -144,6 +145,7 @@ export class HealthMonitor {
     unhealthy: number;
     unknown: number;
     totalGuilds: number;
+    memoryStore: { size: number; maxSize: number };
   } {
     let healthy = 0;
     let unhealthy = 0;
@@ -170,6 +172,7 @@ export class HealthMonitor {
       unhealthy,
       unknown,
       totalGuilds,
+      memoryStore: memoryStore.getStats(),
     };
   }
 }

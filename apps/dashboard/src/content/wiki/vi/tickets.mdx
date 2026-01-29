@@ -1,0 +1,156 @@
+# Hệ Thống Phiếu Hỗ Trợ
+
+Cung cấp hỗ trợ thành viên hiệu quả với hệ thống phiếu của SylaBot.
+
+## Tổng Quan
+
+Hệ thống phiếu cho phép thành viên tạo các kênh hỗ trợ riêng tư nơi họ có thể nhận trợ giúp từ đội ngũ kiểm duyệt của bạn.
+
+## Thiết Lập Ban Đầu
+
+### Bước 1: Tạo Danh Mục Phiếu
+
+1. Trong Discord, tạo danh mục mới có tên **"Tickets"** hoặc tương tự
+2. Nhấp chuột phải vào danh mục → **Copy ID**
+3. Dán ID trong cài đặt bảng điều khiển
+
+### Bước 2: Cấu Hình Bảng Điều Khiển
+
+1. Điều hướng đến **Bảng điều khiển** → **Phiếu hỗ trợ**
+2. Dán **ID Danh mục Phiếu**
+3. Cấu hình cài đặt phiếu:
+   - Số phiếu mở tối đa mỗi người dùng
+   - Đề cập vai trò hỗ trợ
+   - Bộ hẹn giờ tự động đóng
+
+### Bước 3: Tạo Bảng Phiếu
+
+Sử dụng lệnh bot để tạo bảng phiếu:
+
+```
+/ticket-panel create
+```
+
+Cấu hình tin nhắn bảng và emoji phản ứng.
+
+## Cách Thành Viên Tạo Phiếu
+
+Thành viên có thể tạo phiếu bằng hai cách:
+
+1. **Phản ứng với Bảng** - Nhấp vào phản ứng 📩 trên bảng phiếu
+2. **Sử dụng Lệnh** - Gõ `/ticket create [lý do]`
+
+## Quy Trình Phiếu
+
+### Khi Phiếu Được Tạo
+
+1. Kênh riêng tư được tạo trong danh mục phiếu
+2. Thành viên và nhân viên hỗ trợ được cấp quyền truy cập
+3. Thông báo gửi đến vai trò hỗ trợ
+4. Phiếu được ghi lại trong bảng điều khiển
+
+### Quản Lý Phiếu
+
+**Thêm Thành viên**:
+```
+/ticket add @user
+```
+
+**Xóa Thành viên**:
+```
+/ticket remove @user
+```
+
+**Đóng Phiếu**:
+```
+/ticket close [lý do]
+```
+
+**Nhận Phiếu**:
+```
+/ticket claim
+```
+
+## Quản Lý Bảng Điều Khiển
+
+Xem và quản lý tất cả phiếu từ bảng điều khiển:
+
+### Phiếu Đang Mở
+
+- Xem tất cả phiếu hiện đang mở
+- Xem thời gian tạo phiếu
+- Kiểm tra nhân viên được chỉ định
+- Truy cập nhanh để đóng phiếu
+
+### Phiếu Đã Đóng
+
+- Duyệt lịch sử phiếu
+- Xem lý do đóng
+- Xuất bản ghi phiếu
+- Phân tích về thời gian giải quyết
+
+## Thống Kê Phiếu
+
+Theo dõi hiệu quả hỗ trợ:
+
+- **Tổng Phiếu** - Tất cả phiếu đã tạo
+- **Phiếu Đang Mở** - Hiện đang hoạt động
+- **Thời gian Phản hồi Trung bình** - Thời gian đến phản hồi nhân viên đầu tiên
+- **Thời gian Giải quyết Trung bình** - Thời gian đóng phiếu
+
+## Thực Hành Tốt Nhất
+
+1. **Đặt Hướng dẫn Rõ ràng** - Cho thành viên biết phiếu dùng để làm gì
+2. **Mục tiêu Thời gian Phản hồi** - Hướng tới phản hồi trong vòng 24 giờ
+3. **Sử dụng Danh mục** - Tổ chức phiếu theo loại (Hỗ trợ, Báo cáo, Kháng cáo)
+4. **Lưu trữ Bản ghi** - Giữ hồ sơ của các phiếu quan trọng
+5. **Đào tạo Nhân viên** - Đảm bảo đội ngũ hỗ trợ biết lệnh phiếu
+
+## Cài Đặt Tự Động Đóng
+
+Cấu hình đóng phiếu tự động:
+
+- **Bộ hẹn giờ Không hoạt động** - Đóng sau X ngày không có tin nhắn
+- **Bộ hẹn giờ Giải quyết** - Đóng X giờ sau khi đánh dấu "Đã giải quyết"
+- **Thông báo Trước khi Đóng** - Cảnh báo trước khi tự động đóng
+
+## Thiết Lập Quyền
+
+Quyền yêu cầu cho SylaBot:
+
+- **Quản lý Kênh** - Tạo/xóa kênh phiếu
+- **Quản lý Vai trò** - Kiểm soát quyền truy cập kênh
+- **Gửi Tin nhắn** - Gửi thông báo
+- **Nhúng Link** - Hiển thị tin nhắn được định dạng
+
+## Tùy Chỉnh
+
+### Tin Nhắn Chào Mừng
+
+Tùy chỉnh tin nhắn được gửi khi phiếu được tạo:
+
+```
+Cảm ơn bạn đã tạo phiếu!
+Nhân viên sẽ hỗ trợ bạn sớm.
+
+Vui lòng mô tả vấn đề chi tiết.
+```
+
+### Biến Có Sẵn
+
+- `{user}` - Đề cập người tạo phiếu
+- `{ticket}` - Tên kênh phiếu
+- `{staff}` - Đề cập vai trò hỗ trợ
+
+## Khắc Phục Sự Cố
+
+**Phiếu Không Tạo**: Kiểm tra quyền bot trong danh mục phiếu.
+
+**Không Thể Đóng Phiếu**: Đảm bảo bạn có quyền "Quản lý Kênh".
+
+**Thiếu Bản ghi**: Xác minh kết nối cơ sở dữ liệu và cài đặt lưu trữ.
+
+## Tính Năng Liên Quan
+
+- **[Kiểm duyệt](/document/wiki/moderation)** - Tích hợp tự động kiểm duyệt
+- **[Chào mừng](/document/wiki/welcome)** - Hướng dẫn người dùng đến phiếu

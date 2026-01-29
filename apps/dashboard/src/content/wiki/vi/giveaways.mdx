@@ -1,0 +1,210 @@
+# Giveaway
+
+Tạo giveaway hấp dẫn để thưởng cho các thành viên cộng đồng của bạn.
+
+## Tổng Quan
+
+Hệ thống giveaway cho phép bạn tổ chức giveaway tự động với yêu cầu, thời gian và lựa chọn người thắng có thể tùy chỉnh.
+
+## Tạo Giveaway
+
+### Sử Dụng Bảng Điều Khiển
+
+1. Điều hướng đến **Bảng điều khiển** → **Giveaway**
+2. Nhấp nút **"Tạo Giveaway"**
+3. Điền thông tin yêu cầu
+4. Nhấp **"Bắt đầu Giveaway"**
+
+### Sử Dụng Lệnh
+
+Tạo giveaway nhanh:
+
+```
+/giveaway create
+```
+
+Trình hướng dẫn thiết lập tương tác sẽ dẫn bạn qua:
+- Mô tả giải thưởng
+- Thời gian
+- Số người thắng
+- Chọn kênh
+- Yêu cầu tham gia
+
+## Cấu Hình Giveaway
+
+### Cài Đặt Cơ Bản
+
+**Giải thưởng**: Thành viên sẽ thắng gì
+```
+Ví dụ: Discord Nitro (1 tháng)
+```
+
+**Thời gian**: Giveaway chạy bao lâu
+```
+Ví dụ: 1h, 3d, 1w
+```
+
+**Người thắng**: Số người thắng được chọn
+```
+Mặc định: 1
+Tối đa: 20
+```
+
+**Kênh**: Nơi đăng giveaway
+```
+Chọn từ danh sách
+```
+
+### Yêu Cầu Nâng Cao
+
+**Yêu Cầu Vai trò**:
+- Yêu cầu vai trò cụ thể để tham gia
+- Loại trừ một số vai trò
+
+**Yêu Cầu Cấp độ**:
+- Cấp độ tối thiểu để tham gia
+- Thưởng cho thành viên tích cực
+
+**Yêu Cầu Tuổi**:
+- Tuổi tài khoản tối thiểu
+- Ngày tham gia máy chủ tối thiểu
+
+## Quản Lý Giveaway Đang Chạy
+
+### Tổng Quan Bảng Điều Khiển
+
+Xem tất cả giveaway:
+- **Đang chạy** - Hiện đang chạy
+- **Đã lên lịch** - Bắt đầu trong tương lai
+- **Đã kết thúc** - Giveaway đã hoàn thành
+
+### Chỉnh Sửa Giveaway
+
+Sửa đổi giveaway đang chạy:
+1. Nhấp vào giveaway trong bảng điều khiển
+2. Chỉnh sửa cài đặt
+3. Lưu thay đổi
+4. Tin nhắn giveaway tự động cập nhật
+
+### Kết Thúc Sớm
+
+Kết thúc giveaway trước thời gian đã lên lịch:
+
+```
+/giveaway end [giveaway-id]
+```
+
+Hoặc sử dụng nút **"Kết thúc Ngay"** trong bảng điều khiển.
+
+### Chọn Lại Người Thắng
+
+Nếu người thắng không nhận hoặc không hợp lệ:
+
+```
+/giveaway reroll [giveaway-id]
+```
+
+Chọn người thắng mới từ các mục hợp lệ.
+
+## Tính Năng Giveaway
+
+### Theo Dõi Tham Gia
+
+- Xem tổng số tham gia theo thời gian thực
+- Xem danh sách tham gia trong bảng điều khiển
+- Kiểm tra xem người dùng cụ thể đã tham gia chưa
+
+### Thông Báo
+
+Thông báo tự động cho:
+- Bắt đầu giveaway
+- Chọn người thắng
+- Nhắc nhở người thắng nhận
+- Hủy giveaway
+
+### Lựa Chọn Người Thắng
+
+Công bằng và minh bạch:
+- Lựa chọn ngẫu nhiên mật mã
+- Xác thực yêu cầu trước khi chọn
+- Tự động loại bỏ các mục không hợp lệ
+- Công bố công khai người thắng
+
+## Mẫu Giveaway
+
+Lưu cấu hình phổ biến dưới dạng mẫu:
+
+1. Tạo giveaway với cài đặt mong muốn
+2. Nhấp **"Lưu làm Mẫu"**
+3. Đặt tên cho mẫu
+4. Sử dụng lại cho giveaway trong tương lai
+
+### Mẫu Phổ Biến
+
+**Giveaway Nhanh**:
+- Thời gian: 1 giờ
+- Người thắng: 1
+- Không có yêu cầu
+
+**Sự Kiện Hàng Tuần**:
+- Thời gian: 7 ngày
+- Người thắng: 3
+- Yêu cầu cấp 10+
+
+**Giveaway VIP**:
+- Thời gian: 3 ngày
+- Người thắng: 1
+- Yêu cầu vai trò VIP
+
+## Thực Hành Tốt Nhất
+
+1. **Mô tả Giải Thưởng Rõ Ràng** - Cụ thể về những gì người thắng nhận được
+2. **Thời gian Hợp Lý** - Không quá ngắn (cho mọi người cơ hội) hoặc quá dài (duy trì sự phấn khích)
+3. **Yêu Cầu Phù Hợp** - Đừng làm cho việc tham gia quá khó
+4. **Nhiều Người Thắng** - Tăng sự tham gia cho giải thưởng lớn hơn
+5. **Lịch Trình Đều Đặn** - Giveaway hàng tuần/tháng xây dựng sự mong đợi
+
+## Phân Tích Giveaway
+
+Theo dõi hiệu suất giveaway:
+
+- **Tổng Tham Gia** - Tỷ lệ tham gia
+- **Tăng Trưởng Tham Gia** - Tham gia theo thời gian
+- **Tỷ Lệ Hoàn Thành** - Người thắng đã nhận giải
+- **Tăng Sự Tham Gia** - Hoạt động máy chủ trong giveaway
+
+## Khắc Phục Sự Cố
+
+**Không Có Tham Gia**: Kiểm tra yêu cầu không quá nghiêm ngặt, xác minh quyền bot.
+
+**Không Thể Chọn Người Thắng**: Đảm bảo đủ mục hợp lệ đáp ứng yêu cầu.
+
+**Người Thắng Không Được Thông Báo**: Kiểm tra bot có thể DM người thắng hoặc đề cập trong kênh.
+
+## Tính Năng Nâng Cao
+
+### Giveaway Tài Trợ
+
+Theo dõi thông tin nhà tài trợ:
+- Thêm tên nhà tài trợ
+- Bao gồm tin nhắn nhà tài trợ
+- Theo dõi ROI cho nhà tài trợ
+
+### Nhân Tham Gia
+
+Cho thêm lượt tham gia cho:
+- Server booster (2x lượt tham gia)
+- Lời mời (1 lượt tham gia mỗi lời mời)
+- Tham gia sự kiện
+
+### Tự Động Tổ Chức Lại
+
+Tự động tạo giveaway lặp lại:
+- Đặt tần suất (hàng tuần, hàng tháng)
+- Cùng giải thưởng và yêu cầu
+- Tự động lên lịch giveaway tiếp theo
+
+## Tính Năng Liên Quan
+
+- **[Cấp độ](/document/wiki/leveling)** - Yêu cầu tham gia dựa trên cấp độ
+- **[Chào mừng](/document/wiki/welcome)** - Thông báo giveaway cho thành viên mới

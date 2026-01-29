@@ -1,0 +1,271 @@
+# Hệ Thống Cấp Độ
+
+Khuyến khích sự tham gia của thành viên với hệ thống cấp độ dựa trên XP.
+
+## Tổng Quan
+
+Hệ thống cấp độ thưởng cho thành viên XP khi gửi tin nhắn và tham gia vào máy chủ của bạn. Khi họ tích lũy XP, họ lên cấp và có thể mở khóa các vai trò và đặc quyền đặc biệt.
+
+## Bật Cấp Độ
+
+1. Điều hướng đến **Bảng điều khiển** → **Cấp độ**
+2. Bật nút **"Bật Cấp độ"**
+3. Cấu hình cài đặt XP
+4. Lưu thay đổi
+
+## Cấu Hình XP
+
+### XP Mỗi Tin Nhắn
+
+Kiểm soát thành viên kiếm được bao nhiêu XP:
+
+**Min XP**: XP tối thiểu được trao mỗi tin nhắn (mặc định: 15)
+
+**Max XP**: XP tối đa được trao mỗi tin nhắn (mặc định: 25)
+
+Mỗi tin nhắn trao một lượng ngẫu nhiên giữa min và max để ngăn chặn lạm dụng.
+
+### Thời Gian Chờ
+
+**Thời gian Chờ**: Thời gian giữa các tin nhắn kiếm XP (mặc định: 60 giây)
+
+Điều này ngăn chặn spam và đảm bảo cuộc trò chuyện tự nhiên được thưởng.
+
+## Công Thức XP
+
+```
+XP yêu cầu cho cấp N = 5 * (N^2) + 50 * N + 100
+```
+
+Ví dụ yêu cầu cấp độ:
+- **Cấp 1**: 155 XP
+- **Cấp 5**: 525 XP
+- **Cấp 10**: 1,100 XP
+- **Cấp 20**: 3,100 XP
+- **Cấp 50**: 15,100 XP
+
+## Vai Trò Cấp Độ
+
+Thưởng cho thành viên các vai trò khi họ lên cấp.
+
+### Tạo Vai Trò Cấp Độ
+
+1. Tạo vai trò trong Discord (ví dụ: "Cấp 5", "Cấp 10")
+2. Đi đến **Cấp độ** → **Vai trò Cấp độ**
+3. Nhấp **"Thêm Vai trò Cấp độ"**
+4. Cấu hình:
+   - **Cấp độ**: Cấp độ yêu cầu
+   - **Vai trò**: Vai trò để gán
+   - **Xóa Thấp hơn**: Xóa vai trò cấp độ trước
+
+### Xếp Chồng Vai Trò vs Thay Thế
+
+**Xếp Chồng** (Xóa Thấp hơn = TẮT):
+- Thành viên giữ tất cả vai trò cấp độ
+- Hiển thị lịch sử tiến trình
+
+**Thay Thế** (Xóa Thấp hơn = BẬT):
+- Chỉ giữ vai trò cấp độ cao nhất
+- Danh sách vai trò sạch hơn
+
+### Ví Dụ Thiết Lập
+
+```
+Cấp 5  → Thành viên Đồng
+Cấp 10 → Thành viên Bạc
+Cấp 20 → Thành viên Vàng
+Cấp 50 → Thành viên Kim Cương
+```
+
+## Bảng Xếp Hạng
+
+### Xem Bảng Xếp Hạng
+
+**Bảng điều khiển**: Xem trong trang **Tổng quan**
+- 10 thành viên hàng đầu
+- XP và cấp độ hiển thị
+- Cập nhật theo thời gian thực
+
+**Lệnh Discord**:
+```
+/leaderboard
+```
+
+Hiển thị 10 thành viên hàng đầu với:
+- Vị trí xếp hạng
+- Tên người dùng
+- Cấp độ hiện tại
+- Tổng XP
+
+### Tính Năng Bảng Xếp Hạng
+
+- Phân trang cho máy chủ lớn
+- Lọc theo vai trò
+- Xem hàng tuần/tháng/mọi thời đại
+- Xuất sang CSV
+
+## Quản Lý XP Thành Viên
+
+### Xem XP Thành Viên
+
+Kiểm tra XP và cấp độ của bất kỳ thành viên nào:
+
+```
+/level @user
+```
+
+Hoặc xem trong bảng điều khiển:
+1. Đi đến **Cấp độ** → **Thành viên**
+2. Tìm kiếm thành viên
+3. Xem thống kê chi tiết
+
+### Điều Chỉnh XP
+
+**Thêm XP**:
+```
+/xp add @user 500
+```
+
+**Xóa XP**:
+```
+/xp remove @user 200
+```
+
+**Đặt XP**:
+```
+/xp set @user 1000
+```
+
+**Đặt Lại XP**:
+```
+/xp reset @user
+```
+
+### Thao Tác Hàng Loạt
+
+Đặt lại toàn bộ máy chủ:
+```
+/xp reset-all
+```
+
+⚠️ Cảnh báo: Điều này không thể hoàn tác!
+
+## Phần Thưởng Cấp Độ
+
+### Tin Nhắn Thông Báo
+
+Tùy chỉnh tin nhắn lên cấp:
+
+1. Đi đến **Cấp độ** → **Thông báo**
+2. Bật thông báo lên cấp
+3. Chọn kênh thông báo
+4. Tùy chỉnh mẫu tin nhắn
+
+**Biến Có Sẵn**:
+- `{user}` - Đề cập thành viên
+- `{level}` - Số cấp độ mới
+- `{xp}` - Tổng XP
+- `{role}` - Vai trò mới (nếu kiếm được)
+
+**Ví Dụ Tin Nhắn**:
+```
+🎉 Chúc mừng {user}! Bạn đã đạt **Cấp {level}**!
+{role}
+```
+
+### Phần Thưởng Cột Mốc
+
+Đặt phần thưởng đặc biệt cho cấp độ cột mốc:
+
+```
+Cấp 25  → Vai trò màu đặc biệt + Quyền truy cập kênh
+Cấp 50  → Đặc quyền VIP + Emoji tùy chỉnh
+Cấp 100 → Vai trò độc quyền + Tham gia Giveaway
+```
+
+## Hệ Số Nhân XP
+
+### Hệ Số Nhân Kênh
+
+Cho XP thưởng trong các kênh cụ thể:
+
+1. Đi đến **Cấp độ** → **Hệ số nhân**
+2. Thêm kênh
+3. Đặt hệ số nhân (ví dụ: 2x, 0.5x, 0x)
+
+**Trường Hợp Sử Dụng**:
+- 2x XP trong các kênh thảo luận tích cực
+- 0x XP trong kênh bot/spam
+- 0.5x XP trong kênh văn bản thoại
+
+### Hệ Số Nhân Vai Trò
+
+Tăng XP cho một số vai trò:
+
+```
+Server Booster: 1.5x XP
+VIP: 1.25x XP
+Người đóng góp: 1.2x XP
+```
+
+### XP Thoại
+
+Trao XP cho hoạt động kênh thoại:
+
+1. Bật **XP Thoại** trong cài đặt
+2. Đặt XP mỗi phút (mặc định: 2 XP/phút)
+3. Đặt thời gian tối thiểu trong kênh (ngăn lạm dụng)
+
+## Cài Đặt Nâng Cao
+
+### Kênh Bị Bỏ Qua
+
+Vô hiệu hóa XP trong các kênh cụ thể:
+- Kênh lệnh bot
+- Kênh spam
+- Kênh quản trị
+
+### Vai Trò Bị Bỏ Qua
+
+Ngăn một số vai trò kiếm XP:
+- Bot
+- Thành viên bị tắt tiếng
+- Vai trò hình phạt cụ thể
+
+### Xếp Chồng Hệ Số Nhân
+
+Khi nhiều hệ số nhân áp dụng:
+- Hệ số nhân kênh: 2x
+- Hệ số nhân vai trò: 1.5x
+- **Tổng**: 3x XP
+
+## Phân Tích
+
+Theo dõi chỉ số tham gia:
+
+- **Tổng XP Kiếm Được** - XP toàn máy chủ
+- **Thành Viên Hoạt Động** - Thành viên kiếm XP tuần này
+- **Cấp Độ Trung Bình** - Cấp độ trung bình máy chủ
+- **Người Kiếm Nhiều Nhất** - Thành viên lên cấp nhanh nhất
+
+## Thực Hành Tốt Nhất
+
+1. **Tỷ Lệ XP Cân Bằng** - Không quá nhanh (làm giảm giá trị cấp độ) hoặc quá chậm (làm nản lòng tham gia)
+2. **Phần Thưởng Có Ý Nghĩa** - Làm cho vai trò cấp độ thực sự có giá trị
+3. **Ngăn Chặn Spam** - Sử dụng thời gian chờ đủ (60-120 giây)
+4. **Loại Trừ Kênh Bot** - Đừng thưởng spam lệnh
+5. **XP Thoại** - Thưởng hoạt động thoại như nhau
+6. **Sự Kiện Thường Xuyên** - Sự kiện tăng XP để thúc đẩy tham gia
+
+## Khắc Phục Sự Cố
+
+**Thành Viên Không Kiếm XP**: Kiểm tra xem cấp độ đã bật và thành viên không ở vai trò bị bỏ qua.
+
+**XP Không Hiển Thị**: Xác minh kết nối cơ sở dữ liệu và kiểm tra thời gian chờ.
+
+**Vai Trò Cấp Độ Không Được Gán**: Đảm bảo bot có quyền Quản lý Vai trò và vai trò bot ở trên vai trò cấp độ.
+
+## Tính Năng Liên Quan
+
+- **[Giveaway](/document/wiki/giveaways)** - Yêu cầu tham gia dựa trên cấp độ
+- **[Kiểm duyệt](/document/wiki/moderation)** - Hình phạt XP cho vi phạm

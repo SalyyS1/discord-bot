@@ -7,7 +7,10 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "pnpm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently -n redis,bot,web -c red,blue,green \"pnpm redis:start\" \"pnpm bot:dev\" \"pnpm dashboard:dev\"",
     "dev:apps": "turbo dev",

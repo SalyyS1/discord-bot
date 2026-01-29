@@ -3,22 +3,24 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const glassCardVariants = cva(
-  'rounded-xl backdrop-blur-xl transition-all duration-200',
+  'rounded-xl backdrop-blur-xl transition-all duration-300 will-change-transform relative overflow-hidden',
   {
     variants: {
       variant: {
         default: 'bg-black/40 border border-white/10',
         hover:
-          'bg-black/40 border border-white/10 hover:border-white/20 hover:shadow-lg hover:-translate-y-0.5',
+          'bg-black/40 border border-white/10 hover:border-white/20 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]',
         active:
-          'bg-black/50 border border-aqua-500/30 shadow-[0_0_15px_rgba(20,184,166,0.15)]',
+          'bg-black/50 border border-aqua-500/30 shadow-[0_0_20px_rgba(20,184,166,0.2)]',
         solid: 'bg-card border border-border',
+        noise: 'bg-black/40 border border-white/10 before:absolute before:inset-0 before:bg-noise before:opacity-[0.015] before:pointer-events-none',
       },
       glow: {
         none: '',
-        aqua: 'shadow-[0_0_20px_rgba(20,184,166,0.2)]',
-        purple: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]',
-        pink: 'shadow-[0_0_20px_rgba(236,72,153,0.2)]',
+        aqua: 'shadow-[0_0_25px_rgba(20,184,166,0.25)] hover:shadow-[0_0_35px_rgba(20,184,166,0.35)]',
+        purple: 'shadow-[0_0_25px_rgba(168,85,247,0.25)] hover:shadow-[0_0_35px_rgba(168,85,247,0.35)]',
+        pink: 'shadow-[0_0_25px_rgba(236,72,153,0.25)] hover:shadow-[0_0_35px_rgba(236,72,153,0.35)]',
+        blue: 'shadow-[0_0_25px_rgba(59,130,246,0.25)] hover:shadow-[0_0_35px_rgba(59,130,246,0.35)]',
       },
       padding: {
         none: '',
@@ -26,11 +28,17 @@ const glassCardVariants = cva(
         md: 'p-6',
         lg: 'p-8',
       },
+      depth: {
+        flat: '',
+        raised: 'shadow-2xl',
+        floating: 'shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.5)]',
+      },
     },
     defaultVariants: {
       variant: 'default',
       glow: 'none',
       padding: 'md',
+      depth: 'flat',
     },
   }
 );
@@ -39,15 +47,23 @@ export interface GlassCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof glassCardVariants> {
   asChild?: boolean;
+  shimmer?: boolean;
 }
 
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, variant, glow, padding, ...props }, ref) => (
+  ({ className, variant, glow, padding, depth, shimmer = false, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(glassCardVariants({ variant, glow, padding }), className)}
+      className={cn(glassCardVariants({ variant, glow, padding, depth }), className)}
       {...props}
-    />
+    >
+      {shimmer && (
+        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent bg-[length:200%_100%]" />
+        </div>
+      )}
+      {children}
+    </div>
   )
 );
 GlassCard.displayName = 'GlassCard';

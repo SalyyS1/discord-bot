@@ -8,6 +8,7 @@ import { prisma } from '@repo/database';
 import { ApiResponse, getCurrentUserId } from '@/lib/session';
 import { canOperateBot, AuditAction, getRateLimitHeaders } from '@repo/security';
 import { logger } from '@/lib/logger';
+import { managerApi } from '@/lib/manager-api-client';
 
 export async function POST(
   request: NextRequest,
@@ -46,28 +47,46 @@ export async function POST(
       return ApiResponse.error('Bot has failed too many times. Please check your credentials.', 400);
     }
 
-    // TODO: In production, this will call the bot manager service
-    // For now, just update the database status
-    await prisma.tenant.update({
-      where: { id },
-      data: {
-        status: 'ACTIVE',
-        isRunning: true,
-        lastStartedAt: new Date(),
-        lastError: null,
-      },
-    });
+    try {
+      // Call Manager API to start bot
+      await managerApi.startBot(id);
 
-    // Log audit
-    await prisma.tenantAuditLog.create({
-      data: {
-        tenantId: id,
-        userId,
-        action: AuditAction.TENANT_STARTED,
-      },
-    });
+      // Update database status
+      await prisma.tenant.update({
+        where: { id },
+        data: {
+          status: 'ACTIVE',
+          isRunning: true,
+          lastStartedAt: new Date(),
+          lastError: null,
+        },
+      });
 
-    return ApiResponse.success({ started: true });
+      // Log audit
+      await prisma.tenantAuditLog.create({
+        data: {
+          tenantId: id,
+          userId,
+          action: AuditAction.TENANT_STARTED,
+        },
+      });
+
+      return ApiResponse.success({ started: true });
+    } catch (managerError) {
+      const errorMsg = managerError instanceof Error ? managerError.message : 'Failed to communicate with bot manager';
+      logger.error(`Manager API error: ${errorMsg}`);
+
+      await prisma.tenant.update({
+        where: { id },
+        data: {
+          status: 'ERROR',
+          lastError: errorMsg,
+          errorCount: { increment: 1 },
+        },
+      });
+
+      return ApiResponse.error(`Failed to start bot: ${errorMsg}`, 500);
+    }
   } catch (error) {
     logger.error(`Failed to start tenant: ${error}`);
     return ApiResponse.serverError();

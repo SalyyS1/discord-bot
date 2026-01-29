@@ -11,11 +11,13 @@
     }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@repo/database": "workspace:*",
-    "ioredis": "^5.9.2"
+    "ioredis": "^5.9.2",
+    "prom-client": "^15.1.3"
   },
   "devDependencies": {
     "@types/node": "^22.15.19",

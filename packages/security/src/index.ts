@@ -16,6 +16,9 @@ export {
   generateEncryptionKey,
 } from './encryption';
 
+// Encryption migration
+export { migrateEncryptedTokens } from './encryption-key-rotation-migration';
+
 // Token validation
 export {
   validateDiscordToken,
@@ -45,4 +48,16 @@ export {
   canAccessApi,
   getRateLimitHeaders,
   type RateLimitResult,
+  type RateLimitOptions,
 } from './ratelimit';
+
+// Rate limiting internals
+export { MemoryRateLimitStore, memoryStore } from './rate-limit-memory-fallback-store';
+export { CircuitBreaker, redisCircuitBreaker } from './circuit-breaker-for-redis';
+
+// Prometheus metrics
+export {
+  getMetrics,
+  getMetricsContentType,
+  securityMetricsRegistry,
+} from './prometheus-metrics-registry';

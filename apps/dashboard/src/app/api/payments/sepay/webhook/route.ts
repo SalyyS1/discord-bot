@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, SubscriptionStatus } from '@repo/database';
 import crypto from 'crypto';
+import { verifySepaySignature } from '@/lib/webhook-signature-verification';
 
 /**
  * SePay Webhook handler for bank transfer notifications
@@ -36,13 +37,34 @@ const PRICING_VND = {
 
 export async function POST(request: NextRequest) {
     try {
-        // Verify webhook signature
-        const signature = request.headers.get('x-sepay-signature');
+        // Get raw body for signature verification
         const body = await request.text();
+        const signature = request.headers.get('x-sepay-signature') || '';
+        const secret = process.env.SEPAY_WEBHOOK_SECRET;
 
-        if (!verifySignature(body, signature)) {
-            console.error('Invalid SePay webhook signature');
-            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+        // ALWAYS verify signature in production
+        if (process.env.NODE_ENV === 'production') {
+            if (!secret) {
+                console.error('[Webhook] SEPAY_WEBHOOK_SECRET not configured');
+                return NextResponse.json(
+                    { error: 'Webhook not configured' },
+                    { status: 500 }
+                );
+            }
+
+            const verification = verifySepaySignature(body, signature, secret);
+            if (!verification.valid) {
+                console.warn(`[Webhook] Signature verification failed: ${verification.error}`);
+                return NextResponse.json(
+                    { error: 'Invalid signature' },
+                    { status: 401 }
+                );
+            }
+        } else {
+            // Development: warn but allow
+            if (!signature) {
+                console.warn('[Webhook] No signature in development mode');
+            }
         }
 
         const payload: SepayWebhookPayload = JSON.parse(body);
@@ -98,20 +120,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
-function verifySignature(body: string, signature: string | null): boolean {
-    if (!signature || !process.env.SEPAY_WEBHOOK_SECRET) {
-        return process.env.NODE_ENV === 'development'; // Allow in dev
-    }
-
-    const expectedSignature = crypto
-        .createHmac('sha256', process.env.SEPAY_WEBHOOK_SECRET)
-        .update(body)
-        .digest('hex');
-
-    return crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature)
-    );
 }

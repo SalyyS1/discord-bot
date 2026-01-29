@@ -1,0 +1,28 @@
+[
+  {
+    "domain": "sylabot.site",
+    "expirationDate": 1769542261.467531,
+    "hostOnly": true,
+    "httpOnly": true,
+    "name": "__Secure-better-auth.session_data",
+    "path": "/",
+    "sameSite": "lax",
+    "secure": true,
+    "session": false,
+    "storeId": null,
+    "value": "eyJzZXNzaW9uIjp7InNlc3Npb24iOnsiZXhwaXJlc0F0IjoiMjAyNi0wMi0wM1QxOToyNTo1My41MjlaIiwidG9rZW4iOiJ5aXlxNWphTkxkY3BLTEZtTjlXbUhBVW9oVGFLeGc4biIsImNyZWF0ZWRBdCI6IjIwMjYtMDEtMjdUMTk6MjU6NTMuNTI5WiIsInVwZGF0ZWRBdCI6IjIwMjYtMDEtMjdUMTk6MjU6NTMuNTI5WiIsImlwQWRkcmVzcyI6IjExOC42OC4xMjIuMjI2IiwidXNlckFnZW50IjoiTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzE0NC4wLjAuMCBTYWZhcmkvNTM3LjM2IiwidXNlcklkIjoiaHNZNk5DQmdnWEJxaG01dGg5YXJ0YnVqVTZ1REhpdEYiLCJpZCI6Ikl5eUZHMEhmR2ZWREltNnZaMjhQQkJtcXhhT1RMMDJiIn0sInVzZXIiOnsibmFtZSI6IlNhbHl5eSIsImVtYWlsIjoiZ2dnaDQyMDE1QGdtYWlsLmNvbSIsImVtYWlsVmVyaWZpZWQiOnRydWUsImltYWdlIjoiaHR0cHM6Ly9jZG4uZGlzY29yZGFwcC5jb20vYXZhdGFycy83ODQ3Mjg3MjI0NTk5ODM4NzQvOThlN2FkYWQ1ODQ4OTRkMzZmZGVkOGZiOWI3MmNjMTAucG5nIiwiY3JlYXRlZEF0IjoiMjAyNi0wMS0yNlQxODowOTozMS4wOTdaIiwidXBkYXRlZEF0IjoiMjAyNi0wMS0yNlQxODowOTozMS4wOTdaIiwiaWQiOiJoc1k2TkNCZ2dYQnFobTV0aDlhcnRidWpVNnVESGl0RiJ9LCJ1cGRhdGVkQXQiOjE3Njk1NDE5NTM1MzcsInZlcnNpb24iOiIxIn0sImV4cGlyZXNBdCI6MTc2OTU0MjI1MzUzNywic2lnbmF0dXJlIjoiVU9OZTcxVjl1OGUyN084U3VwaHBCTXNmdHVmT0FYb2dUdzhlUW1DUzZvSSJ9"
+  },
+  {
+    "domain": "sylabot.site",
+    "expirationDate": 1770146761.467494,
+    "hostOnly": true,
+    "httpOnly": true,
+    "name": "__Secure-better-auth.session_token",
+    "path": "/",
+    "sameSite": "lax",
+    "secure": true,
+    "session": false,
+    "storeId": null,
+    "value": "yiyq5jaNLdcpKLFmN9WmHAUohTaKxg8n.KxazJrCjda8ix19LjcwC1UemePcGbVdVCVpc3suf7rE%3D"
+  }
+]

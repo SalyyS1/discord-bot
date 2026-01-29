@@ -22,6 +22,9 @@ import {
   Mic,
   Music,
   User,
+  ShieldAlert,
+  Server,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ServerSelector } from '@/components/server-selector';
@@ -45,6 +48,7 @@ interface NavItem {
 interface NavSection {
   title: string;
   items: NavItem[];
+  adminOnly?: boolean;
 }
 
 // ═══════════════════════════════════════════════
@@ -62,13 +66,26 @@ export function SidebarV2() {
   const t = useTranslations('nav');
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Load collapsed state from localStorage
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     if (stored === 'true') setCollapsed(true);
+
+    // Check admin status
+    checkAdminStatus();
   }, []);
+
+  async function checkAdminStatus() {
+    try {
+      const res = await fetch('/api/admin/stats');
+      setIsAdmin(res.ok && res.status !== 403);
+    } catch {
+      setIsAdmin(false);
+    }
+  }
 
   // Persist collapsed state
   const toggleCollapsed = () => {
@@ -121,6 +138,16 @@ export function SidebarV2() {
         { href: '/dashboard/music', label: 'Music', icon: Music },
       ],
     },
+    {
+      title: 'Admin',
+      adminOnly: true,
+      items: [
+        { href: '/admin', label: 'Overview', icon: ShieldAlert },
+        { href: '/admin/tenants', label: 'Tenants', icon: Server },
+        { href: '/admin/users', label: 'Users', icon: Users },
+        { href: '/admin/system', label: 'System Health', icon: Activity },
+      ],
+    },
   ];
 
   // Don't render collapsed state until mounted (prevents hydration mismatch)
@@ -133,17 +160,19 @@ export function SidebarV2() {
       <aside
         className={cn(
           'fixed left-0 top-0 z-40 h-screen border-r border-white/10',
-          'bg-black/40 backdrop-blur-xl text-white transition-[width] duration-300',
+          'bg-black/60 backdrop-blur-2xl text-white transition-[width] duration-300',
+          'shadow-2xl shadow-black/50',
+          'before:absolute before:inset-0 before:bg-noise before:opacity-[0.02] before:pointer-events-none',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className={cn(
-            'flex items-center border-b border-white/10 p-4',
+            'flex items-center border-b border-white/10 p-4 bg-gradient-to-b from-white/5 to-transparent',
             collapsed ? 'justify-center' : 'gap-2'
           )}>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-aqua-400 to-blue-600 shadow-lg shadow-aqua-500/20">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-aqua-400 to-blue-600 shadow-lg shadow-aqua-500/25 hover:shadow-aqua-500/40 transition-shadow">
               <Bot className="h-5 w-5 text-white" />
             </div>
             {!collapsed && (
@@ -173,36 +202,41 @@ export function SidebarV2() {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto custom-scrollbar py-2">
-            {navSections.map((section) => (
-              <div key={section.title} className="mb-2">
-                {!collapsed && (
-                  <h3 className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    {section.title}
-                  </h3>
-                )}
-                <div className={cn('space-y-0.5', collapsed ? 'px-1' : 'px-2')}>
-                  {section.items.map((item) => (
-                    <NavItemComponent
-                      key={item.href}
-                      item={item}
-                      pathname={pathname}
-                      collapsed={collapsed}
-                    />
-                  ))}
+            {navSections.map((section) => {
+              // Hide admin section if not admin
+              if (section.adminOnly && !isAdmin) return null;
+
+              return (
+                <div key={section.title} className="mb-2">
+                  {!collapsed && (
+                    <h3 className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {section.title}
+                    </h3>
+                  )}
+                  <div className={cn('space-y-0.5', collapsed ? 'px-1' : 'px-2')}>
+                    {section.items.map((item) => (
+                      <NavItemComponent
+                        key={item.href}
+                        item={item}
+                        pathname={pathname}
+                        collapsed={collapsed}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </nav>
 
           {/* Premium Section */}
           <div className={cn(
-            'border-t border-white/10 bg-black/20',
+            'border-t border-white/10 bg-gradient-to-b from-black/30 to-black/10',
             collapsed ? 'p-2' : 'p-3'
           )}>
             {collapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 cursor-pointer hover:from-purple-500/30 hover:to-pink-500/30 transition-colors mx-auto">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 cursor-pointer hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-200 mx-auto shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20">
                     <Crown className="h-5 w-5 text-purple-400" />
                   </div>
                 </TooltipTrigger>
@@ -211,7 +245,7 @@ export function SidebarV2() {
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <div className="rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-3 border border-purple-500/20">
+              <div className="rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-3 border border-purple-500/20 shadow-lg shadow-purple-500/5 hover:shadow-purple-500/10 transition-shadow">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-4 w-4 text-purple-400" />
                   <span className="text-sm font-medium text-white">Upgrade to Premium</span>
@@ -219,7 +253,7 @@ export function SidebarV2() {
                 <p className="text-xs text-gray-400 mb-3">
                   Unlock advanced features and priority support.
                 </p>
-                <button className="w-full px-3 py-1.5 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium hover:opacity-90 transition-opacity">
+                <button className="w-full px-3 py-1.5 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40">
                   Upgrade Now
                 </button>
               </div>
@@ -277,11 +311,11 @@ function NavItemComponent({
     <Link
       href={item.href}
       className={cn(
-        'group flex items-center rounded-lg text-sm font-medium transition-all duration-200',
+        'group flex items-center rounded-lg text-sm font-medium transition-all duration-200 will-change-transform',
         collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-3 px-3 py-2',
         isActive
-          ? 'bg-aqua-500/10 text-aqua-400 shadow-[0_0_15px_rgba(20,184,166,0.15)] border border-aqua-500/20'
-          : 'text-gray-400 hover:bg-white/5 hover:text-white'
+          ? 'bg-aqua-500/10 text-aqua-400 shadow-[0_0_20px_rgba(20,184,166,0.2)] border border-aqua-500/20 hover:shadow-[0_0_25px_rgba(20,184,166,0.25)]'
+          : 'text-gray-400 hover:bg-white/5 hover:text-white hover:scale-[1.02]'
       )}
     >
       <Icon className={cn(

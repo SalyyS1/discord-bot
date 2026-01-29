@@ -1,0 +1,324 @@
+# Tin Nhắn Chào Mừng
+
+Tạo tin nhắn chào mừng và tạm biệt hấp dẫn để chào đón các thành viên cộng đồng của bạn.
+
+## Tổng Quan
+
+Hệ thống chào mừng gửi tin nhắn tùy chỉnh khi thành viên tham gia hoặc rời khỏi máy chủ của bạn. Bao gồm hình ảnh, embed và văn bản được cá nhân hóa để tạo ấn tượng ban đầu tuyệt vời.
+
+## Thiết Lập Cơ Bản
+
+### Bước 1: Bật Tin Nhắn Chào Mừng
+
+1. Điều hướng đến **Bảng điều khiển** → **Chào mừng**
+2. Bật **"Bật Tin nhắn Chào mừng"**
+3. Chọn kênh chào mừng
+4. Cấu hình cài đặt tin nhắn
+5. Lưu thay đổi
+
+### Bước 2: Bật Tin Nhắn Tạm Biệt
+
+1. Bật **"Bật Tin nhắn Tạm biệt"**
+2. Chọn kênh tạm biệt (có thể giống chào mừng)
+3. Cấu hình tin nhắn tạm biệt
+4. Lưu thay đổi
+
+## Cấu Hình Tin Nhắn Chào Mừng
+
+### Chọn Kênh
+
+Chọn nơi tin nhắn chào mừng xuất hiện:
+- `#chào-mừng` - Kênh chào mừng chuyên dụng
+- `#chung` - Kênh trò chuyện chính
+- `#đến-đi` - Kênh kết hợp
+
+### Nội Dung Tin Nhắn
+
+Tùy chỉnh văn bản tin nhắn chào mừng của bạn:
+
+**Ví Dụ Tin Nhắn**:
+
+**Đơn Giản**:
+```
+Chào mừng {{user}} đến {{server}}! 🎉
+```
+
+**Chi Tiết**:
+```
+👋 Chào mừng đến **{{server}}**, {{user}}!
+
+Chúng tôi rất vui khi có bạn ở đây. Hãy chắc chắn:
+✅ Đọc quy tắc trong #quy-tắc
+✅ Lấy vai trò trong #vai-trò
+✅ Chào hỏi trong #chung
+
+Chúc bạn vui vẻ!
+```
+
+**Vui Nhộn**:
+```
+🎊 {{user}} vừa tham gia bữa tiệc!
+Chúng ta hiện có {{memberCount}} thành viên!
+
+Thả 👋 để chào hỏi!
+```
+
+### Biến Có Sẵn
+
+Sử dụng các placeholder này trong tin nhắn:
+
+- `{{user}}` - Đề cập thành viên mới
+- `{{username}}` - Tên người dùng thành viên (không đề cập)
+- `{{server}}` - Tên máy chủ
+- `{{memberCount}}` - Tổng số thành viên
+- `{{date}}` - Ngày hiện tại
+- `{{time}}` - Thời gian hiện tại
+
+## Hình Ảnh Chào Mừng
+
+### Bật Hình Ảnh Tùy Chỉnh
+
+1. Bật **"Bật Hình ảnh Chào mừng"**
+2. Tải lên hình nền (tùy chọn)
+3. Cấu hình lớp phủ văn bản
+4. Xem trước và lưu
+
+### Cài Đặt Hình Ảnh
+
+**Nền**:
+- Hình ảnh tải lên tùy chỉnh
+- Nền màu đồng nhất
+- Nền gradient
+
+**Lớp Phủ Văn Bản**:
+- Tin nhắn chào mừng
+- Tên người dùng
+- Số thành viên
+- Ngày tham gia
+
+**Tạo Kiểu**:
+- Chọn phông chữ
+- Màu văn bản
+- Bóng/viền
+- Vị trí (trên, giữa, dưới)
+
+### Mẫu Hình Ảnh
+
+Chọn từ các mẫu có sẵn:
+- **Hiện đại** - Nền gradient sạch
+- **Chơi Game** - Chủ đề chơi game năng động
+- **Tối giản** - Văn bản đơn giản trên màu
+- **Lễ kỷ niệm** - Thiết kế lễ hội
+- **Tùy chỉnh** - Tải lên của bạn
+
+## Tin Nhắn Tạm Biệt
+
+### Cấu Hình
+
+Tương tự như tin nhắn chào mừng nhưng cho sự rời đi:
+
+**Ví Dụ Tin Nhắn**:
+
+**Đơn Giản**:
+```
+{{username}} đã rời khỏi máy chủ. 👋
+```
+
+**Chi Tiết**:
+```
+😢 {{username}} đã rời khỏi chúng ta.
+Chúng ta hiện có {{memberCount}} thành viên.
+
+Chúng tôi hy vọng sẽ gặp lại bạn!
+```
+
+**Hài Hước**:
+```
+{{username}} không thể chịu đựng sự tuyệt vời. 😎
+```
+
+### Hình Ảnh Tạm Biệt
+
+Bật hình ảnh tạm biệt:
+1. Bật **"Bật Hình ảnh Tạm biệt"**
+2. Chọn mẫu hoặc tải lên tùy chỉnh
+3. Cấu hình lớp phủ văn bản
+4. Lưu cài đặt
+
+## Tính Năng Nâng Cao
+
+### Tin Nhắn Embed
+
+Sử dụng embed Discord để định dạng phong phú:
+
+1. Bật tùy chọn **"Sử dụng Embed"**
+2. Cấu hình cài đặt embed:
+   - Tiêu đề
+   - Mô tả
+   - Màu
+   - Hình thu nhỏ
+   - Chân trang
+
+**Ví Dụ Embed**:
+```
+Tiêu đề: Chào mừng đến {{server}}!
+Mô tả: Xin chào {{user}}, chào mừng lên tàu! 🚀
+Màu: Cyan (#00FFFF)
+Hình thu nhỏ: Biểu tượng máy chủ
+Chân trang: Thành viên #{{memberCount}}
+```
+
+### Vai Trò Tự Động
+
+Gán vai trò tự động khi tham gia:
+
+1. Đi đến **Chào mừng** → **Vai trò Tự động**
+2. Chọn vai trò để gán
+3. Cấu hình độ trễ (tùy chọn)
+4. Lưu cài đặt
+
+**Trường Hợp Sử Dụng**:
+- Vai trò thành viên
+- Vai trò chưa xác minh
+- Vai trò khu vực
+- Tùy chọn thông báo
+
+### DM Chào Mừng
+
+Gửi tin nhắn chào mừng riêng tư:
+
+1. Bật **"DM Thành Viên Mới"**
+2. Viết nội dung tin nhắn DM
+3. Cấu hình độ trễ (tùy chọn)
+
+**Ví Dụ DM**:
+```
+Chào mừng đến {{server}}!
+
+Dưới đây là một số liên kết quan trọng:
+📜 Quy tắc: discord.gg/rules
+🎫 Phiếu: discord.gg/support
+🎁 Giveaway: discord.gg/giveaways
+
+Nếu bạn cần trợ giúp, hãy tạo phiếu!
+```
+
+⚠️ Lưu ý: Một số người dùng đã tắt DM.
+
+### Xác Minh Tham Gia
+
+Kết hợp với hệ thống xác minh:
+
+1. Thành viên mới nhận vai trò "Chưa xác minh"
+2. Tin nhắn chào mừng bao gồm hướng dẫn xác minh
+3. Sau khi xác minh, gán vai trò "Thành viên"
+4. Gửi tin nhắn chào mừng đã xác minh
+
+## Tùy Chọn Tùy Chỉnh
+
+### Thời Gian Tin Nhắn
+
+Cấu hình khi tin nhắn gửi:
+- **Ngay lập tức** - Ngay khi thành viên tham gia
+- **Trì hoãn** - Đợi X giây/phút
+- **Có điều kiện** - Chỉ khi thành viên ở lại X phút
+
+### Lọc Thành Viên
+
+Kiểm soát ai nhận tin nhắn chào mừng:
+- Bỏ qua bot
+- Bỏ qua thành viên tham gia lại (trong vòng 24 giờ)
+- Bỏ qua thành viên dưới ngưỡng tuổi tài khoản
+- Bỏ qua thành viên có hoạt động đáng ngờ
+
+### Quyền Kênh
+
+Đảm bảo quyền phù hợp:
+- Bot có thể **Gửi Tin nhắn** trong kênh chào mừng
+- Bot có thể **Nhúng Link** cho embed
+- Bot có thể **Đính kèm Tệp** cho hình ảnh
+- Bot có thể **Quản lý Vai trò** cho vai trò tự động
+
+## Kiểm Tra
+
+Kiểm tra tin nhắn chào mừng:
+
+```
+/welcome test
+```
+
+Gửi tin nhắn chào mừng thử nghiệm để xác minh:
+- Nội dung tin nhắn
+- Biến hoạt động
+- Hiển thị hình ảnh
+- Định dạng embed
+
+## Phân Tích
+
+Theo dõi hiệu suất hệ thống chào mừng:
+
+- **Tổng Lời Chào** - Tin nhắn chào mừng đã gửi mọi thời đại
+- **Tuần Này** - Thành viên tham gia gần đây
+- **Tham Gia Hàng Ngày Trung Bình** - Tốc độ tăng trưởng
+- **Tỷ Lệ Duy Trì** - Thành viên ở lại 7+ ngày
+
+## Thực Hành Tốt Nhất
+
+1. **Giữ Thân Thiện** - Giọng điệu ấm áp, mời gọi
+2. **Cung Cấp Hướng Dẫn** - Liên kết đến quy tắc, vai trò và các kênh chính
+3. **Sử Dụng Hình Ảnh** - Hấp dẫn thị giác tăng sự tham gia
+4. **Kiểm Tra Kỹ** - Xác minh biến và định dạng hoạt động
+5. **Cập Nhật Thường Xuyên** - Giữ thông tin hiện tại (sự kiện, cập nhật)
+6. **Xem Xét Di Động** - Đảm bảo tin nhắn trông đẹp trên di động
+7. **Tránh Spam** - Đừng làm tin nhắn quá dài hoặc đề cập quá nhiều vai trò
+
+## Ví Dụ Theo Loại Máy Chủ
+
+### Cộng Đồng Chơi Game
+```
+🎮 {{user}} đã tham gia trò chơi!
+
+Lấy vai trò của bạn trong #vai-trò để truy cập kênh trò chơi
+Kiểm tra #tìm-nhóm để tìm đồng đội
+Tham gia thoại để bắt đầu chơi!
+
+Người chơi hiện tại: {{memberCount}}
+```
+
+### Học Tập/Giáo Dục
+```
+📚 Chào mừng đến nhóm học tập, {{user}}!
+
+Tài nguyên: #tài-liệu-học-tập
+Phòng Học: #kênh-thoại
+Trợ giúp: Tạo phiếu
+
+Hãy cùng học tập! 🎓
+```
+
+### Cộng Đồng Nghệ Thuật
+```
+🎨 {{user}} vừa tham gia xưởng vẽ!
+
+Chia sẻ nghệ thuật của bạn trong #trưng-bày
+Nhận phản hồi trong #phê-bình
+Tham gia thử thách nghệ thuật trong #sự-kiện
+
+Chúng ta hiện có {{memberCount}} nghệ sĩ mạnh mẽ!
+```
+
+## Khắc Phục Sự Cố
+
+**Tin Nhắn Không Gửi**: Kiểm tra quyền bot và lựa chọn kênh.
+
+**Biến Không Hoạt Động**: Đảm bảo cú pháp đúng với `{{variable}}`.
+
+**Hình Ảnh Không Hiển Thị**: Xác minh bot có quyền Đính kèm Tệp.
+
+**DM Không Gửi**: Người dùng có thể đã tắt DM (điều này bình thường).
+
+## Tính Năng Liên Quan
+
+- **[Kiểm duyệt](/document/wiki/moderation)** - Tự động kiểm duyệt cho thành viên mới
+- **[Cấp độ](/document/wiki/leveling)** - XP thưởng chào mừng
+- **[Phiếu hỗ trợ](/document/wiki/tickets)** - Hỗ trợ cho thành viên mới

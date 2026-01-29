@@ -5,6 +5,7 @@ import { ensureGuild } from '../../lib/settings.js';
 import { ModerationService } from '../../services/moderation.js';
 import { LoggingService } from '../../services/logging.js';
 import { logger } from '../../utils/logger.js';
+import { TTLMap } from '../../lib/ttl-map-with-auto-cleanup.js';
 
 interface SpamConfig {
   maxMessages: number; // Messages per interval
@@ -23,28 +24,21 @@ const DEFAULT_CONFIG: SpamConfig = {
 };
 
 // Memory fallback for rate limiting when Redis unavailable
-const memoryRateLimit = new Map<string, number[]>();
-const memoryDuplicates = new Map<string, string[]>();
-const memoryViolations = new Map<string, number>();
+// Using TTLMap to prevent unbounded memory growth
+const memoryRateLimit = new TTLMap<string, number[]>({
+  defaultTtlMs: 5 * 60 * 1000, // 5 minutes
+  cleanupIntervalMs: 60 * 1000,
+});
 
-// Cleanup memory maps periodically (every 5 minutes)
-setInterval(() => {
-  const now = Date.now();
-  const maxAge = 5 * 60 * 1000; // 5 minutes
-  
-  for (const [key, timestamps] of memoryRateLimit.entries()) {
-    const recent = timestamps.filter(t => now - t < maxAge);
-    if (recent.length === 0) {
-      memoryRateLimit.delete(key);
-    } else {
-      memoryRateLimit.set(key, recent);
-    }
-  }
-  
-  // Clear old violations after 1 hour
-  memoryViolations.clear();
-  memoryDuplicates.clear();
-}, 5 * 60 * 1000);
+const memoryDuplicates = new TTLMap<string, string[]>({
+  defaultTtlMs: 5 * 60 * 1000, // 5 minutes
+  cleanupIntervalMs: 60 * 1000,
+});
+
+const memoryViolations = new TTLMap<string, number>({
+  defaultTtlMs: 60 * 60 * 1000, // 1 hour
+  cleanupIntervalMs: 5 * 60 * 1000,
+});
 
 /**
  * Anti-spam protection module using token bucket algorithm

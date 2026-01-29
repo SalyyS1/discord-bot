@@ -8,6 +8,7 @@ import { loadEvents } from './handlers/eventHandler.js';
 import { setupGlobalErrorHandlers } from './handlers/errorHandler.js';
 import { initConfigSync, stopConfigSync } from './lib/configSync.js';
 import { initDashboardCommands, stopDashboardCommands } from './lib/dashboardCommands.js';
+import { initBotCommandsSubscriber, stopBotCommandsSubscriber } from './services/bot-redis-command-subscriber.js';
 import { startHealthServer, stopHealthServer } from './lib/health.js';
 import { initIPC, sendReady, sendError, isChildProcess } from './lib/ipc.js';
 
@@ -40,8 +41,10 @@ async function main() {
   } else {
     // Initialize config sync for dashboard-to-bot real-time updates
     await initConfigSync();
-    // Initialize dashboard commands subscriber
+    // Initialize dashboard commands subscriber (legacy)
     await initDashboardCommands();
+    // Initialize bot commands subscriber (real-time sync)
+    await initBotCommandsSubscriber();
   }
 
   await loadCommands();
@@ -89,6 +92,13 @@ async function shutdown() {
   // Stop dashboard commands subscriber
   try {
     await stopDashboardCommands();
+  } catch {
+    // Ignore
+  }
+
+  // Stop bot commands subscriber
+  try {
+    await stopBotCommandsSubscriber();
   } catch {
     // Ignore
   }

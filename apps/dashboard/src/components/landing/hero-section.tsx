@@ -104,14 +104,15 @@ export function HeroSection() {
                 key={i}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: item.delay + 0.5, duration: 0.5, type: 'spring' }}
+                transition={{ delay: item.delay + 0.5, duration: 0.5, type: 'spring', stiffness: 200, damping: 15 }}
                 className="absolute top-1/2 left-1/2"
                 style={{ transform: `translate(${item.x}px, ${item.y}px)` }}
               >
                 <motion.div
                   animate={{ y: [0, -15, 0] }}
                   transition={{ duration: 4, repeat: Infinity, delay: item.delay, ease: 'easeInOut' }}
-                  className={`p-3.5 rounded-2xl ${item.bg} backdrop-blur-sm border border-white/10 shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer`}
+                  whileHover={{ scale: 1.15, rotate: 5 }}
+                  className={`p-3.5 rounded-2xl ${item.bg} backdrop-blur-sm border border-white/10 shadow-2xl hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 cursor-pointer will-change-transform`}
                 >
                   <item.icon className={`w-6 h-6 ${item.color}`} />
                 </motion.div>
@@ -197,7 +198,7 @@ export function HeroSection() {
             <Link href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1462790510883110965'}&scope=bot%20applications.commands&permissions=8`} target="_blank">
               <Button
                 size="lg"
-                className="h-14 px-8 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-2xl shadow-[0_0_40px_rgba(6,182,212,0.3)] hover:shadow-[0_0_60px_rgba(6,182,212,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
+                className="h-14 px-8 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-2xl shadow-[0_0_40px_rgba(6,182,212,0.3)] hover:shadow-[0_0_60px_rgba(6,182,212,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group will-change-transform"
               >
                 <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                 Add to Discord — Free
@@ -208,7 +209,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 px-8 text-base font-semibold border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 text-white rounded-2xl backdrop-blur-sm hover:scale-105 active:scale-95 transition-all duration-300 group"
+                className="h-14 px-8 text-base font-semibold border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 text-white rounded-2xl backdrop-blur-sm hover:scale-105 active:scale-95 transition-all duration-300 group shadow-lg hover:shadow-xl will-change-transform"
               >
                 Open Dashboard
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -271,13 +272,13 @@ export function HeroSection() {
           <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/20 via-transparent to-transparent blur-3xl -z-10" />
           <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl -z-10" />
 
-          <div className="relative rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl p-2 shadow-2xl hover:border-white/20 transition-all duration-500 group">
+          <div className="relative rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl p-2 shadow-2xl hover:border-white/20 transition-all duration-500 group will-change-transform">
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
               <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors cursor-pointer" />
-                <div className="w-3 h-3 rounded-full bg-green-500/80 hover:bg-green-500 transition-colors cursor-pointer" />
+                <div className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer hover:scale-110 will-change-transform" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors cursor-pointer hover:scale-110 will-change-transform" />
+                <div className="w-3 h-3 rounded-full bg-green-500/80 hover:bg-green-500 transition-colors cursor-pointer hover:scale-110 will-change-transform" />
               </div>
               <div className="flex-1 mx-4">
                 <div className="h-6 bg-white/5 rounded-lg max-w-md mx-auto flex items-center px-3 hover:bg-white/10 transition-colors">

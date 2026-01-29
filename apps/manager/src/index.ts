@@ -1,6 +1,6 @@
 /**
  * Bot Manager Service Entry Point
- * 
+ *
  * Manages multiple tenant bot instances.
  * Handles spawning, monitoring, and lifecycle management.
  */
@@ -10,11 +10,15 @@ import { HealthMonitor } from './health.js';
 import { createApi } from './api.js';
 import { prisma } from '@repo/database';
 import { logger } from './logger.js';
+import { validateSecurityEnvOrExit } from './env-validation.js';
 
 const PORT = parseInt(process.env.MANAGER_PORT || '3001', 10);
 const AUTO_START = process.env.AUTO_START_BOTS === 'true';
 
 async function main() {
+  // Fail-fast: validate security env vars before any initialization
+  validateSecurityEnvOrExit();
+
   logger.info('Starting Bot Manager Service...');
 
   // Create instances

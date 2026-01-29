@@ -8,6 +8,7 @@ import { prisma } from '@repo/database';
 import { ApiResponse, getCurrentUserId } from '@/lib/session';
 import { canOperateBot, AuditAction, getRateLimitHeaders } from '@repo/security';
 import { logger } from '@/lib/logger';
+import { managerApi } from '@/lib/manager-api-client';
 
 export async function POST(
   request: NextRequest,
@@ -42,28 +43,36 @@ export async function POST(
       return ApiResponse.error('Bot is not running', 400);
     }
 
-    // TODO: In production, this will call the bot manager service to gracefully stop
-    // For now, just update the database status
-    await prisma.tenant.update({
-      where: { id },
-      data: {
-        status: 'SUSPENDED',
-        isRunning: false,
-        processId: null,
-        lastStoppedAt: new Date(),
-      },
-    });
+    try {
+      // Call Manager API to stop bot
+      await managerApi.stopBot(id);
 
-    // Log audit
-    await prisma.tenantAuditLog.create({
-      data: {
-        tenantId: id,
-        userId,
-        action: AuditAction.TENANT_STOPPED,
-      },
-    });
+      // Update database status
+      await prisma.tenant.update({
+        where: { id },
+        data: {
+          status: 'SUSPENDED',
+          isRunning: false,
+          processId: null,
+          lastStoppedAt: new Date(),
+        },
+      });
 
-    return ApiResponse.success({ stopped: true });
+      // Log audit
+      await prisma.tenantAuditLog.create({
+        data: {
+          tenantId: id,
+          userId,
+          action: AuditAction.TENANT_STOPPED,
+        },
+      });
+
+      return ApiResponse.success({ stopped: true });
+    } catch (managerError) {
+      const errorMsg = managerError instanceof Error ? managerError.message : 'Failed to communicate with bot manager';
+      logger.error(`Manager API error: ${errorMsg}`);
+      return ApiResponse.error(`Failed to stop bot: ${errorMsg}`, 500);
+    }
   } catch (error) {
     logger.error(`Failed to stop tenant: ${error}`);
     return ApiResponse.serverError();

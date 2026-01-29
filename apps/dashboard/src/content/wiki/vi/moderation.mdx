@@ -1,0 +1,121 @@
+# Kiểm Duyệt
+
+Giữ an toàn cho máy chủ Discord của bạn với các tính năng tự động kiểm duyệt mạnh mẽ của SylaBot.
+
+## Tổng Quan
+
+Hệ thống kiểm duyệt giúp bạn tự động phát hiện và xử lý vi phạm quy tắc, spam và nội dung không mong muốn mà không cần can thiệp thủ công.
+
+## Bảo Vệ Chống Spam
+
+Ngăn chặn tin nhắn spam làm tràn ngập máy chủ của bạn.
+
+### Cách Hoạt Động
+
+Hệ thống chống spam giám sát tần suất tin nhắn và tự động thực hiện hành động khi người dùng vượt quá ngưỡng đã cấu hình.
+
+### Cấu Hình
+
+1. Điều hướng đến **Bảng điều khiển** → **Kiểm duyệt**
+2. Bật nút **Chống Spam**
+3. Cấu hình các cài đặt sau:
+   - **Ngưỡng Tin nhắn** - Số lượng tin nhắn (mặc định: 5)
+   - **Khoảng Thời gian** - Khoảng thời gian tính bằng mili giây (mặc định: 5000ms)
+
+### Ví Dụ Cấu Hình
+
+```
+Ngưỡng Tin nhắn: 5
+Khoảng Thời gian: 5000ms
+```
+
+Điều này có nghĩa là nếu người dùng gửi 5 tin nhắn trong vòng 5 giây, chống spam sẽ kích hoạt.
+
+### Hành Động Được Thực Hiện
+
+Khi chống spam kích hoạt:
+- Xóa tin nhắn
+- Tạm thời tắt tiếng (thời gian có thể cấu hình)
+- Cảnh báo được ghi vào nhật ký kiểm tra
+- Thông báo cho người kiểm duyệt (tùy chọn)
+
+## Bảo Vệ Chống Link
+
+Kiểm soát chia sẻ link trong các kênh máy chủ của bạn.
+
+### Tính Năng
+
+- Phát hiện và xóa link không được phép
+- Danh sách trắng các tên miền đáng tin cậy
+- Miễn trừ các vai trò cụ thể (như người kiểm duyệt)
+
+### Thiết Lập
+
+1. Đi đến cài đặt **Kiểm duyệt**
+2. Bật nút **Chống Link**
+3. Cấu hình các tên miền được phép (tùy chọn)
+4. Đặt các vai trò được miễn trừ
+
+### Danh Sách Trắng Tên Miền
+
+Thêm các tên miền đáng tin cậy để cho phép:
+```
+youtube.com
+discord.gg
+website-cua-ban.com
+```
+
+## Hệ Thống Cảnh Báo
+
+Theo dõi vi phạm của thành viên và thực hiện hành động tiến bộ.
+
+### Ngưỡng Cảnh Báo
+
+Cấu hình hành động tự động dựa trên số lượng cảnh báo:
+
+- **3 Cảnh báo** - Tạm ngừng 24 giờ
+- **5 Cảnh báo** - Tạm ngừng 7 ngày
+- **10 Cảnh báo** - Đuổi khỏi máy chủ
+
+## Nhật Ký Kiểm Duyệt
+
+Tất cả các hành động kiểm duyệt được ghi lại trong hệ thống kiểm tra:
+
+- Xem trong **Bảng điều khiển** → **Kiểm tra**
+- Lọc theo loại hành động
+- Xuất nhật ký để xem xét
+
+## Thực Hành Tốt Nhất
+
+1. **Bắt đầu Nhẹ nhàng** - Bắt đầu với ngưỡng cao hơn và điều chỉnh dựa trên hoạt động máy chủ
+2. **Miễn trừ Vai trò Đáng tin cậy** - Không áp dụng quy tắc nghiêm ngặt cho người kiểm duyệt và thành viên đáng tin cậy
+3. **Giám sát Nhật ký** - Thường xuyên xem xét các hành động kiểm duyệt để tinh chỉnh cài đặt
+4. **Truyền đạt Quy tắc** - Đảm bảo thành viên biết quy tắc máy chủ
+
+## Cài Đặt Nâng Cao
+
+### Từ Lọc Tùy Chỉnh
+
+Thêm từ hoặc cụm từ tùy chỉnh để tự động kiểm duyệt:
+
+1. Đi đến cài đặt **Tự động Phản hồi**
+2. Tạo kích hoạt cho từ bị lọc
+3. Đặt hành động xóa tin nhắn
+
+### Miễn trừ Theo Vai trò
+
+Loại trừ các vai trò cụ thể khỏi kiểm duyệt:
+- Vai trò người kiểm duyệt
+- Thành viên VIP
+- Người đóng góp đáng tin cậy
+
+## Khắc Phục Sự Cố
+
+**Dương tính giả**: Nếu tin nhắn hợp pháp bị đánh dấu, hãy tăng ngưỡng hoặc thêm miễn trừ.
+
+**Không Hoạt động**: Đảm bảo SylaBot có quyền phù hợp (Quản lý Tin nhắn, Tạm ngừng Thành viên).
+
+## Tính Năng Liên Quan
+
+- **[Phiếu hỗ trợ](/document/wiki/tickets)** - Hệ thống hỗ trợ
+- **[Chào mừng](/document/wiki/welcome)** - Quy tắc máy chủ trong tin nhắn chào mừng

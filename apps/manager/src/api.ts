@@ -1,6 +1,6 @@
 /**
  * REST API for Bot Manager
- * 
+ *
  * Internal API for controlling bot instances.
  * Not exposed publicly - used by dashboard.
  */
@@ -11,6 +11,9 @@ import { BotSpawner } from './spawner.js';
 import { HealthMonitor } from './health.js';
 import { prisma } from '@repo/database';
 import { ApiResponse, BotStatusResponse, BotListResponse } from './types.js';
+import { apiKeyAuthMiddleware } from './middleware/api-key-auth-middleware.js';
+import { corsOptions } from './config/cors-allowed-origins-configuration.js';
+import { getMetrics, getMetricsContentType } from '@repo/security';
 
 // Request interface with typed params
 interface TenantParams {
@@ -28,8 +31,10 @@ function buildTenantDatabaseUrl(tenantId: string): string {
 export function createApi(spawner: BotSpawner, healthMonitor: HealthMonitor): express.Application {
   const app = express();
 
-  app.use(cors());
+  // Restricted CORS - only allow known origins
+  app.use(cors(corsOptions));
   app.use(express.json());
+  app.use(apiKeyAuthMiddleware);
 
   // Error handler with generic param types
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,6 +47,17 @@ export function createApi(spawner: BotSpawner, healthMonitor: HealthMonitor): ex
   // Health check endpoint
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Prometheus metrics endpoint (no auth - internal network only)
+  app.get('/metrics', async (_req, res) => {
+    try {
+      const metrics = await getMetrics();
+      res.set('Content-Type', getMetricsContentType());
+      res.send(metrics);
+    } catch (error) {
+      res.status(500).send('Error collecting metrics');
+    }
   });
 
   // List all bots

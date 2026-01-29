@@ -20,3 +20,7 @@ export * from '@prisma/client';
 // Multi-tenant exports
 export * from './schema-manager';
 export * from './tenant-prisma';
+
+// Middleware exports
+export * from './middleware/tenant-isolation-middleware';
+export * from './middleware/database-mutation-audit-logger';

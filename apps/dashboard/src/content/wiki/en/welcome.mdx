@@ -1,0 +1,324 @@
+# Welcome Messages
+
+Create engaging welcome and goodbye messages to greet your community members.
+
+## Overview
+
+The welcome system sends customized messages when members join or leave your server. Include images, embeds, and personalized text to make a great first impression.
+
+## Basic Setup
+
+### Step 1: Enable Welcome Messages
+
+1. Navigate to **Dashboard** → **Welcome**
+2. Toggle **"Enable Welcome Messages"**
+3. Select welcome channel
+4. Configure message settings
+5. Save changes
+
+### Step 2: Enable Goodbye Messages
+
+1. Toggle **"Enable Goodbye Messages"**
+2. Select goodbye channel (can be same as welcome)
+3. Configure goodbye message
+4. Save changes
+
+## Welcome Message Configuration
+
+### Channel Selection
+
+Choose where welcome messages appear:
+- `#welcome` - Dedicated welcome channel
+- `#general` - Main chat channel
+- `#arrivals-departures` - Combined channel
+
+### Message Content
+
+Customize your welcome message text:
+
+**Example Messages**:
+
+**Simple**:
+```
+Welcome {{user}} to {{server}}! 🎉
+```
+
+**Detailed**:
+```
+👋 Welcome to **{{server}}**, {{user}}!
+
+We're glad to have you here. Make sure to:
+✅ Read the rules in #rules
+✅ Get roles in #roles
+✅ Say hi in #general
+
+Enjoy your stay!
+```
+
+**Fun**:
+```
+🎊 {{user}} just joined the party!
+We now have {{memberCount}} members!
+
+Drop a 👋 to say hello!
+```
+
+### Available Variables
+
+Use these placeholders in messages:
+
+- `{{user}}` - Mentions the new member
+- `{{username}}` - Member's username (no mention)
+- `{{server}}` - Server name
+- `{{memberCount}}` - Total member count
+- `{{date}}` - Current date
+- `{{time}}` - Current time
+
+## Welcome Images
+
+### Enable Custom Images
+
+1. Toggle **"Enable Welcome Image"**
+2. Upload background image (optional)
+3. Configure text overlay
+4. Preview and save
+
+### Image Settings
+
+**Background**:
+- Custom uploaded image
+- Solid color background
+- Gradient background
+
+**Text Overlay**:
+- Welcome message
+- Username
+- Member count
+- Join date
+
+**Styling**:
+- Font selection
+- Text color
+- Shadow/outline
+- Position (top, center, bottom)
+
+### Image Templates
+
+Choose from pre-made templates:
+- **Modern** - Clean gradient background
+- **Gaming** - Dynamic gaming theme
+- **Minimal** - Simple text on color
+- **Celebration** - Festive design
+- **Custom** - Upload your own
+
+## Goodbye Messages
+
+### Configuration
+
+Similar to welcome messages but for departures:
+
+**Example Messages**:
+
+**Simple**:
+```
+{{username}} has left the server. 👋
+```
+
+**Detailed**:
+```
+😢 {{username}} has left us.
+We now have {{memberCount}} members.
+
+We hope to see you again!
+```
+
+**Humorous**:
+```
+{{username}} couldn't handle the greatness. 😎
+```
+
+### Goodbye Images
+
+Enable goodbye images:
+1. Toggle **"Enable Goodbye Image"**
+2. Choose template or upload custom
+3. Configure text overlay
+4. Save settings
+
+## Advanced Features
+
+### Embed Messages
+
+Use Discord embeds for rich formatting:
+
+1. Enable **"Use Embed"** option
+2. Configure embed settings:
+   - Title
+   - Description
+   - Color
+   - Thumbnail
+   - Footer
+
+**Example Embed**:
+```
+Title: Welcome to {{server}}!
+Description: Hey {{user}}, welcome aboard! 🚀
+Color: Cyan (#00FFFF)
+Thumbnail: Server icon
+Footer: Member #{{memberCount}}
+```
+
+### Auto-Roles
+
+Assign roles automatically on join:
+
+1. Go to **Welcome** → **Auto-Roles**
+2. Select roles to assign
+3. Configure delay (optional)
+4. Save settings
+
+**Use Cases**:
+- Member role
+- Unverified role
+- Regional roles
+- Notification preferences
+
+### Welcome DM
+
+Send private welcome message:
+
+1. Enable **"DM New Members"**
+2. Write DM message content
+3. Configure delay (optional)
+
+**Example DM**:
+```
+Welcome to {{server}}!
+
+Here are some important links:
+📜 Rules: discord.gg/rules
+🎫 Tickets: discord.gg/support
+🎁 Giveaways: discord.gg/giveaways
+
+If you need help, create a ticket!
+```
+
+⚠️ Note: Some users have DMs disabled.
+
+### Join Verification
+
+Combine with verification system:
+
+1. New members get "Unverified" role
+2. Welcome message includes verification instructions
+3. After verification, assign "Member" role
+4. Send verified welcome message
+
+## Customization Options
+
+### Message Timing
+
+Configure when messages send:
+- **Immediate** - Right when member joins
+- **Delayed** - Wait X seconds/minutes
+- **Conditional** - Only if member stays X minutes
+
+### Member Filtering
+
+Control who gets welcome messages:
+- Skip bots
+- Skip rejoining members (within 24 hours)
+- Skip members below account age threshold
+- Skip members with suspicious activity
+
+### Channel Permissions
+
+Ensure proper permissions:
+- Bot can **Send Messages** in welcome channel
+- Bot can **Embed Links** for embeds
+- Bot can **Attach Files** for images
+- Bot can **Manage Roles** for auto-roles
+
+## Testing
+
+Test welcome messages:
+
+```
+/welcome test
+```
+
+Sends a test welcome message to verify:
+- Message content
+- Variables working
+- Image rendering
+- Embed formatting
+
+## Analytics
+
+Track welcome system performance:
+
+- **Total Welcomes** - All-time welcome messages sent
+- **This Week** - Recent member joins
+- **Average Daily Joins** - Growth rate
+- **Retention Rate** - Members who stay 7+ days
+
+## Best Practices
+
+1. **Keep It Friendly** - Warm, inviting tone
+2. **Provide Direction** - Link to rules, roles, and key channels
+3. **Use Images** - Visual appeal increases engagement
+4. **Test Thoroughly** - Verify variables and formatting work
+5. **Update Regularly** - Keep info current (events, updates)
+6. **Consider Mobile** - Ensure messages look good on mobile
+7. **Avoid Spam** - Don't make messages too long or mention too many roles
+
+## Examples by Server Type
+
+### Gaming Community
+```
+🎮 {{user}} has joined the game!
+
+Get your roles in #roles to access game channels
+Check #lfg to find teammates
+Join voice to start playing!
+
+Current players: {{memberCount}}
+```
+
+### Study/Educational
+```
+📚 Welcome to the study group, {{user}}!
+
+Resources: #study-materials
+Study Rooms: #voice-channels
+Help: Create a ticket
+
+Let's learn together! 🎓
+```
+
+### Art Community
+```
+🎨 {{user}} just joined the studio!
+
+Share your art in #showcase
+Get feedback in #critique
+Join art challenges in #events
+
+We're now {{memberCount}} artists strong!
+```
+
+## Troubleshooting
+
+**Messages Not Sending**: Check bot permissions and channel selection.
+
+**Variables Not Working**: Ensure correct syntax with `{{variable}}`.
+
+**Images Not Showing**: Verify bot has Attach Files permission.
+
+**DMs Not Sending**: User likely has DMs disabled (this is normal).
+
+## Related Features
+
+- **[Moderation](/document/wiki/moderation)** - Auto-mod for new members
+- **[Leveling](/document/wiki/leveling)** - Welcome bonus XP
+- **[Tickets](/document/wiki/tickets)** - Support for new members

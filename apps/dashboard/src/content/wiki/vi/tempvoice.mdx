@@ -1,0 +1,307 @@
+# Kênh Thoại Tạm Thời
+
+Bật kênh thoại tạm thời tham gia-để-tạo cho thành viên của bạn.
+
+## Tổng Quan
+
+Temp Voice cho phép thành viên tạo kênh thoại tạm thời của riêng họ tự động xóa khi trống. Hoàn hảo cho phiên chơi game, nhóm học tập hoặc cuộc trò chuyện riêng tư.
+
+## Thiết Lập Ban Đầu
+
+### Bước 1: Tạo Danh Mục Thoại
+
+1. Trong Discord, tạo danh mục cho kênh tạm thời (ví dụ: "Phòng Thoại")
+2. Nhấp chuột phải vào danh mục → **Copy ID**
+3. Lưu ID danh mục
+
+### Bước 2: Tạo Kênh Tham Gia
+
+1. Tạo kênh thoại có tên "➕ Tham gia để Tạo" (hoặc tương tự)
+2. Đặt nó trong danh mục
+3. Nhấp chuột phải vào kênh → **Copy ID**
+4. Lưu ID kênh
+
+### Bước 3: Cấu Hình Bảng Điều Khiển
+
+1. Điều hướng đến **Bảng điều khiển** → **Kênh Thoại Tạm**
+2. Nhập **ID Kênh Tạo** (kênh tham gia)
+3. Nhập **ID Danh Mục** (nơi kênh mới xuất hiện)
+4. Cấu hình cài đặt mặc định
+5. Lưu thay đổi
+
+## Tùy Chọn Cấu Hình
+
+### Tên Kênh Mặc Định
+
+Mẫu cho tên kênh mới:
+
+**Biến Có Sẵn**:
+- `{user}` - Tên người dùng người tạo kênh
+- `{count}` - Số tuần tự
+- `{game}` - Hoạt động/trò chơi hiện tại
+
+**Ví Dụ**:
+```
+Phòng của {user}
+Phòng #{count}
+{game} của {user}
+Phòng Riêng
+```
+
+### Giới Hạn Người Dùng Mặc Định
+
+Đặt giới hạn thành viên mặc định cho kênh mới:
+
+```
+0  = Không giới hạn (không giới hạn)
+2  = Chỉ đôi
+4  = Nhóm nhỏ
+10 = Nhóm trung bình
+```
+
+Thành viên có thể thay đổi điều này sau khi tạo kênh của họ.
+
+### Khu Vực Mặc Định
+
+Chọn khu vực thoại:
+- Tự động (khuyến nghị)
+- US East/West
+- Europe
+- Asia
+- Và nhiều hơn nữa...
+
+## Cách Thành Viên Sử Dụng
+
+### Tạo Kênh
+
+1. Tham gia kênh thoại "➕ Tham gia để Tạo"
+2. Một kênh mới được tự động tạo
+3. Thành viên được di chuyển đến kênh mới của họ
+4. Tên kênh và cài đặt được áp dụng
+
+### Quản Lý Kênh Của Bạn
+
+Sau khi tạo, chủ sở hữu kênh có toàn quyền kiểm soát:
+
+**Lệnh Kênh**:
+
+**Đổi Tên Kênh**:
+```
+/voice rename [tên-mới]
+```
+
+**Thay Đổi Giới Hạn**:
+```
+/voice limit [số]
+```
+
+**Khóa Kênh**:
+```
+/voice lock
+```
+
+**Mở Khóa Kênh**:
+```
+/voice unlock
+```
+
+**Mời Người Dùng**:
+```
+/voice invite @user
+```
+
+**Đuổi Người Dùng**:
+```
+/voice kick @user
+```
+
+**Chuyển Quyền Sở Hữu**:
+```
+/voice transfer @user
+```
+
+**Nhận Quyền Sở Hữu** (nếu chủ sở hữu rời đi):
+```
+/voice claim
+```
+
+### Xóa Kênh
+
+Kênh tự động xóa khi:
+- Thành viên cuối cùng rời đi
+- Kênh trống trong 5 giây
+
+Tất cả cài đặt và quyền bị mất khi xóa.
+
+## Tính Năng Nâng Cao
+
+### Mẫu Kênh
+
+Lưu cấu hình kênh dưới dạng mẫu:
+
+1. Cấu hình kênh của bạn hoàn hảo
+2. Sử dụng `/voice save-template [tên]`
+3. Tải mẫu: `/voice load-template [tên]`
+
+### Phòng Vĩnh Viễn
+
+Làm cho kênh tạm thời vĩnh viễn:
+
+```
+/voice permanent
+```
+
+Yêu cầu quyền quản trị. Kênh sẽ không tự động xóa.
+
+### Bảng Giao Diện
+
+Tạo bảng điều khiển kênh:
+
+```
+/voice panel
+```
+
+Tạo tin nhắn với các nút cho:
+- Khóa/Mở khóa
+- Thay đổi giới hạn
+- Đổi tên
+- Đuổi thành viên
+
+## Hệ Thống Quyền
+
+### Quyền Mặc Định
+
+Kênh mới kế thừa:
+- Người tạo có toàn quyền kiểm soát
+- Mọi người khác có thể tham gia (trừ khi bị khóa)
+- Quyền thoại tiêu chuẩn
+
+### Quyền Tùy Chỉnh
+
+Chủ sở hữu kênh có thể:
+- Cấp quyền truy cập cho người dùng cụ thể (danh sách trắng)
+- Chặn người dùng cụ thể (danh sách đen)
+- Đặt quyền dựa trên vai trò
+- Làm kênh riêng tư
+
+### Ghi Đè Quản Trị
+
+Quản trị viên máy chủ có thể:
+- Tham gia bất kỳ kênh tạm thời nào
+- Xóa bất kỳ kênh tạm thời nào
+- Buộc mở khóa kênh
+- Chuyển quyền sở hữu
+
+## Quản Lý Bảng Điều Khiển
+
+Xem tất cả kênh tạm thời:
+
+### Kênh Hoạt Động
+
+- Xem tất cả kênh tạm thời hiện đang hoạt động
+- Xem chủ sở hữu kênh
+- Kiểm tra số thành viên
+- Giám sát thời gian tạo
+
+### Thống Kê
+
+Theo dõi việc sử dụng thoại tạm thời:
+- **Tổng Đã Tạo** - Tất cả kênh tạm thời mọi thời đại
+- **Hiện Đang Hoạt Động** - Kênh ngay bây giờ
+- **Thời Gian Trung Bình** - Kênh tồn tại bao lâu
+- **Sử Dụng Cao Điểm** - Nhiều kênh nhất cùng một lúc
+
+### Phân Tích
+
+Xem dữ liệu tham gia:
+- Người tạo hoạt động nhất
+- Khoảng thời gian phổ biến
+- Thành viên trung bình mỗi kênh
+- xu hướng tăng trưởng
+
+## Tùy Chỉnh
+
+### Quyền Kênh
+
+Cấu hình quyền mặc định:
+1. Đi đến **Kênh Thoại Tạm** → **Quyền**
+2. Đặt quyền kênh mặc định
+3. Cấu hình quyền người tạo
+4. Lưu cài đặt
+
+### Quy Tắc Đặt Tên
+
+Thực thi tiêu chuẩn đặt tên:
+- Độ dài tối thiểu/tối đa
+- Bộ lọc từ bị cấm
+- Tiền tố bắt buộc
+- Định dạng chữ hoa chữ thường
+
+### Kiểm Soát Truy Cập
+
+Giới hạn ai có thể tạo kênh:
+- Yêu cầu cấp độ tối thiểu
+- Vai trò yêu cầu
+- Vai trò bị cấm
+- Thời gian chờ giữa các lần tạo
+
+## Trường Hợp Sử Dụng
+
+**Cộng Đồng Chơi Game**:
+- Kênh cụ thể theo trò chơi
+- Hình thành đội nhanh
+- Trận đấu cạnh tranh riêng tư
+
+**Nhóm Học Tập**:
+- Phòng dựa trên chủ đề
+- Phiên học yên tĩnh
+- Cuộc họp dự án nhóm
+
+**Sự Kiện Cộng Đồng**:
+- Phòng breakout sự kiện
+- Phiên hội thảo
+- Kênh hỏi đáp
+
+**Sử Dụng Chung**:
+- Cuộc trò chuyện riêng tư
+- Bữa tiệc nghe nhạc
+- Bữa tiệc xem
+
+## Thực Hành Tốt Nhất
+
+1. **Đặt Tên Rõ Ràng** - Làm cho kênh tham gia rõ ràng ("Tham gia để Tạo")
+2. **Danh Mục Có Tổ Chức** - Giữ kênh tạm thời trong danh mục chuyên dụng
+3. **Giới Hạn Hợp Lý** - Giới hạn 4-10 thành viên mặc định ngăn lạm dụng
+4. **Xóa Nhanh** - Bộ hẹn giờ trống ngắn (5-10 giây) giữ danh mục sạch
+5. **Giáo Dục Người Dùng** - Giải thích thoại tạm thời trong kênh chào mừng/quy tắc
+
+## Khắc Phục Sự Cố
+
+**Kênh Không Tạo**: Kiểm tra quyền bot (Quản lý Kênh, Di chuyển Thành viên).
+
+**Không Thể Xóa Kênh**: Đảm bảo bot có quyền Quản lý Kênh.
+
+**Thành Viên Không Thể Tham Gia**: Kiểm tra xem kênh có bị khóa hoặc người dùng bị đưa vào danh sách đen.
+
+**Kênh Trùng Lặp**: Xác minh chỉ có một kênh tham gia được cấu hình.
+
+## Cấu Hình Nâng Cao
+
+### Giới Hạn Kênh
+
+Đặt giới hạn toàn cầu:
+- Kênh tối đa mỗi người dùng (mặc định: 1)
+- Tổng kênh tạm thời tối đa (mặc định: 50)
+- Thời gian chờ giữa các lần tạo (mặc định: 5s)
+
+### Tự Động Kiểm Duyệt
+
+Tích hợp với kiểm duyệt:
+- Thành viên bị tắt tiếng không thể tạo kênh
+- Thành viên bị tạm ngừng mất quyền truy cập kênh
+- Kênh của thành viên bị cấm tự động xóa
+
+## Tính Năng Liên Quan
+
+- **[Cấp độ](/document/wiki/leveling)** - Yêu cầu cấp độ cho thoại tạm thời
+- **[Kiểm duyệt](/document/wiki/moderation)** - Kiểm duyệt kênh tạm thời

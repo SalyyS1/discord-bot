@@ -114,12 +114,13 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
               onMouseEnter={() => setActiveFeature(index)}
               onMouseLeave={() => setActiveFeature(null)}
-              className={`group relative p-8 rounded-3xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-all duration-500 ${feature.glow} hover:shadow-2xl cursor-default`}
+              className={`group relative p-8 rounded-3xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-all duration-500 ${feature.glow} hover:shadow-2xl cursor-default will-change-transform`}
             >
               {/* Hover gradient overlay */}
-              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
+              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500`} />
 
               {/* Free/Premium badge */}
               <div className="absolute top-6 right-6">
@@ -136,10 +137,10 @@ export function FeaturesSection() {
               </div>
 
               {/* Icon */}
-              <div className={`relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+              <div className={`relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-2xl will-change-transform`}>
                 <feature.icon className="w-7 h-7 text-white" />
                 {/* Icon glow */}
-                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300`} />
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-300`} />
               </div>
 
               {/* Content */}
@@ -166,10 +167,10 @@ export function FeaturesSection() {
               </div>
 
               {/* Bottom accent line */}
-              <div className={`absolute bottom-0 left-8 right-8 h-[2px] bg-gradient-to-r ${feature.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full origin-left`} />
+              <div className={`absolute bottom-0 left-8 right-8 h-[3px] bg-gradient-to-r ${feature.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full origin-left shadow-lg`} />
 
               {/* Corner decoration */}
-              <div className={`absolute -bottom-2 -right-2 w-16 h-16 ${feature.bgGlow} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+              <div className={`absolute -bottom-2 -right-2 w-20 h-20 ${feature.bgGlow} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
             </motion.div>
           ))}
         </div>
@@ -196,7 +197,7 @@ export function FeaturesSection() {
             <div className="h-px w-full sm:h-12 sm:w-px bg-white/10" />
 
             <Link href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1462790510883110965'}&scope=bot%20applications.commands&permissions=8`} target="_blank">
-              <Button className="h-12 px-6 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-xl font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 group">
+              <Button className="h-12 px-6 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-xl font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/50 group will-change-transform">
                 <Sparkles className="mr-2 w-4 h-4 group-hover:rotate-12 transition-transform" />
                 Try Free Now
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />

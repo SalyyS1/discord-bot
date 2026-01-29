@@ -1,0 +1,156 @@
+# Ticket System
+
+Provide efficient member support with SylaBot's ticket system.
+
+## Overview
+
+The ticket system allows members to create private support channels where they can get help from your moderation team.
+
+## Initial Setup
+
+### Step 1: Create Ticket Category
+
+1. In Discord, create a new category named **"Tickets"** or similar
+2. Right-click the category → **Copy ID**
+3. Paste the ID in dashboard settings
+
+### Step 2: Configure Dashboard
+
+1. Navigate to **Dashboard** → **Tickets**
+2. Paste **Ticket Category ID**
+3. Configure ticket settings:
+   - Maximum open tickets per user
+   - Support role mentions
+   - Auto-close timer
+
+### Step 3: Create Ticket Panel
+
+Use the bot command to create a ticket panel:
+
+```
+/ticket-panel create
+```
+
+Configure the panel message and reaction emoji.
+
+## How Members Create Tickets
+
+Members can create tickets in two ways:
+
+1. **React to Panel** - Click the 📩 reaction on the ticket panel
+2. **Use Command** - Type `/ticket create [reason]`
+
+## Ticket Workflow
+
+### When a Ticket is Created
+
+1. Private channel created in ticket category
+2. Member and support staff get access
+3. Notification sent to support role
+4. Ticket logged in dashboard
+
+### Managing Tickets
+
+**Add Members**:
+```
+/ticket add @user
+```
+
+**Remove Members**:
+```
+/ticket remove @user
+```
+
+**Close Ticket**:
+```
+/ticket close [reason]
+```
+
+**Claim Ticket**:
+```
+/ticket claim
+```
+
+## Dashboard Management
+
+View and manage all tickets from the dashboard:
+
+### Open Tickets
+
+- See all currently open tickets
+- View ticket creation time
+- Check assigned staff
+- Quick access to close tickets
+
+### Closed Tickets
+
+- Browse ticket history
+- View closure reasons
+- Export ticket transcripts
+- Analytics on resolution time
+
+## Ticket Statistics
+
+Track support efficiency:
+
+- **Total Tickets** - All tickets created
+- **Open Tickets** - Currently active
+- **Average Response Time** - Time to first staff response
+- **Average Resolution Time** - Time to ticket closure
+
+## Best Practices
+
+1. **Set Clear Guidelines** - Tell members what tickets are for
+2. **Response Time Goals** - Aim to respond within 24 hours
+3. **Use Categories** - Organize tickets by type (Support, Reports, Appeals)
+4. **Archive Transcripts** - Keep records of important tickets
+5. **Staff Training** - Ensure support team knows ticket commands
+
+## Auto-Close Settings
+
+Configure automatic ticket closure:
+
+- **Inactivity Timer** - Close after X days of no messages
+- **Resolution Timer** - Close X hours after marking "Resolved"
+- **Notification Before Close** - Warn before auto-closing
+
+## Permissions Setup
+
+Required permissions for SylaBot:
+
+- **Manage Channels** - Create/delete ticket channels
+- **Manage Roles** - Control channel access
+- **Send Messages** - Send notifications
+- **Embed Links** - Display formatted messages
+
+## Customization
+
+### Welcome Message
+
+Customize the message sent when tickets are created:
+
+```
+Thank you for creating a ticket!
+A staff member will assist you shortly.
+
+Please describe your issue in detail.
+```
+
+### Variables Available
+
+- `{user}` - Ticket creator mention
+- `{ticket}` - Ticket channel name
+- `{staff}` - Support role mention
+
+## Troubleshooting
+
+**Tickets Not Creating**: Check bot permissions in ticket category.
+
+**Can't Close Tickets**: Ensure you have "Manage Channels" permission.
+
+**Missing Transcripts**: Verify database connection and storage settings.
+
+## Related Features
+
+- **[Moderation](/document/wiki/moderation)** - Auto-mod integration
+- **[Welcome](/document/wiki/welcome)** - Direct users to tickets
