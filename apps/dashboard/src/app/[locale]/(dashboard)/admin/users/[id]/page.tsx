@@ -30,12 +30,12 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
       },
       sessions: {
         where: {
-          expires: {
+          expiresAt: {
             gte: new Date(),
           },
         },
         orderBy: {
-          expires: 'desc',
+          expiresAt: 'desc',
         },
         take: 5,
       },
@@ -249,7 +249,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                     {session.sessionToken.slice(0, 32)}...
                   </p>
                   <p className="text-xs text-white/60 mt-1">
-                    Expires {new Date(session.expires).toLocaleDateString()}
+                    Expires {new Date(session.expiresAt).toLocaleDateString()}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" className="text-red-400 border-red-400/30">
