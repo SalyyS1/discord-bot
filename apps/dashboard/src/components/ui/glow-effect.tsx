@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface GlowEffectProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -49,27 +49,27 @@ export const GlowEffect = React.forwardRef<HTMLDivElement, GlowEffectProps>(
     const glowSize = intensityScale[intensity];
     const glowColor = glowColors[color];
 
-    const glowVariants = hover
+    const glowVariants: Variants = hover
       ? {
-          rest: { opacity: 0, scale: 0.8 },
-          hover: { opacity: 1, scale: 1.1 },
-        }
+        rest: { opacity: 0, scale: 0.8 },
+        hover: { opacity: 1, scale: 1.1 },
+      }
       : pulse
-      ? {
+        ? {
           pulse: {
             opacity: [0.5, 1, 0.5],
             scale: [0.95, 1.05, 0.95],
           },
         }
-      : {
+        : {
           static: { opacity: 1, scale: 1 },
         };
 
     const glowTransition = pulse
       ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
       : hover
-      ? { duration: 0.3, ease: 'easeOut' }
-      : {};
+        ? { duration: 0.3, ease: 'easeOut' }
+        : {};
 
     return (
       <div ref={ref} className={cn('relative', className)} {...props}>
