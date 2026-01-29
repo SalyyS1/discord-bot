@@ -53,7 +53,7 @@ export function RealtimeToast({ guildId, token, enabled = true }: RealtimeToastP
 
       case 'TICKET_CLOSE':
         toast.info('Ticket closed', {
-          description: event.data.reason || 'No reason provided',
+          description: (event.data as { reason?: string }).reason || 'No reason provided',
         });
         break;
 
@@ -69,8 +69,9 @@ export function RealtimeToast({ guildId, token, enabled = true }: RealtimeToastP
 
       case 'MOD_ACTION':
         const action = event.data.action as string;
-        toast.warning(`${action}: ${event.data.targetName}`, {
-          description: `By ${event.data.moderatorName}: ${event.data.reason || 'No reason'}`,
+        const data = event.data as { targetName: string; moderatorName: string; reason?: string };
+        toast.warning(`${action}: ${data.targetName}`, {
+          description: `By ${data.moderatorName}: ${data.reason || 'No reason'}`,
         });
         break;
 
