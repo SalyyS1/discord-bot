@@ -21,17 +21,19 @@ interface FetchResult<T> {
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<FetchResult<T>> {
   try {
     // Add CSRF token for mutating requests
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    };
+    const headers = new Headers(options?.headers);
+
+    // Default Content-Type if not provided
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
 
     // Add CSRF token for POST, PUT, DELETE, PATCH
     const method = options?.method?.toUpperCase();
     if (method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
       const csrfToken = getCsrfToken();
       if (csrfToken) {
-        headers['x-csrf-token'] = csrfToken;
+        headers.set('x-csrf-token', csrfToken);
       }
     }
 
