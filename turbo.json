@@ -1,21 +1,37 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env"],
-  "globalEnv": ["DATABASE_URL", "REDIS_URL", "DISCORD_TOKEN", "DISCORD_CLIENT_ID"],
+  "globalDependencies": [
+    ".env"
+  ],
+  "globalEnv": [
+    "DATABASE_URL",
+    "REDIS_URL",
+    "DISCORD_TOKEN",
+    "DISCORD_CLIENT_ID"
+  ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "db:generate": {
       "cache": false
@@ -25,10 +41,14 @@
     },
     "db:migrate": {
       "cache": false
-    }
+    },
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["test-results/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "test-results/**"
+      ]
     }
   }
 }
