@@ -4,8 +4,14 @@ import { getServerSession } from '@/lib/session';
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
+export const dynamic = 'force-dynamic';
+
 // Admin Discord IDs
 const ADMIN_DISCORD_IDS = ['784728722459983874'];
+
+export const dynamic = 'force-dynamic';
 
 // Generate random code
 function generateCode(): string {

@@ -10,6 +10,8 @@ const MANAGE_GUILD_PERMISSION = BigInt(0x20);
 // Admin Discord IDs - these users can see ALL guilds
 const ADMIN_DISCORD_IDS = ['784728722459983874']; // saly.0105
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // Check session - require authentication

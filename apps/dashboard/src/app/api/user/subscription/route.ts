@@ -6,6 +6,8 @@ import { logger } from '@/lib/logger';
 // Admin Discord IDs
 const ADMIN_DISCORD_IDS = ['784728722459983874'];
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const session = await getServerSession();
