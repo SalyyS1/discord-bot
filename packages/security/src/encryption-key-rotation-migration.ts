@@ -3,7 +3,7 @@
  */
 
 import { prisma } from '@repo/database';
-import { getEncryptionService } from './encryption.js';
+import { getEncryptionService } from './encryption';
 
 interface MigrationResult {
   total: number;

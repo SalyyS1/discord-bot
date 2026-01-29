@@ -5,9 +5,9 @@
  */
 
 import Redis from 'ioredis';
-import { memoryStore } from './rate-limit-memory-fallback-store.js';
-import { redisCircuitBreaker } from './circuit-breaker-for-redis.js';
-import { rateLimitRequestsTotal, rateLimitRejectedTotal } from './prometheus-metrics-registry.js';
+import { memoryStore } from './rate-limit-memory-fallback-store';
+import { redisCircuitBreaker } from './circuit-breaker-for-redis';
+import { rateLimitRequestsTotal, rateLimitRejectedTotal } from './prometheus-metrics-registry';
 
 // Lazy-initialized Redis client
 let redis: Redis | null = null;

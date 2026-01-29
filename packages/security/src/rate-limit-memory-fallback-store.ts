@@ -4,7 +4,7 @@
  * Uses LRU eviction to prevent unbounded memory growth
  */
 
-import { memoryStoreEntries, memoryStoreMaxSize } from './prometheus-metrics-registry.js';
+import { memoryStoreEntries, memoryStoreMaxSize } from './prometheus-metrics-registry';
 
 interface RateLimitEntry {
   count: number;

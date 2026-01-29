@@ -12,7 +12,7 @@ import {
   circuitBreakerState,
   circuitBreakerFailures,
   CIRCUIT_STATE_VALUES,
-} from './prometheus-metrics-registry.js';
+} from './prometheus-metrics-registry';
 
 type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
