@@ -222,7 +222,7 @@ export async function updateWithOptimisticLock<T>(
 ): Promise<T> {
   return retryTransaction(prisma, async (tx) => {
     // Get current record
-    const current = await tx[model].findUnique({
+    const current = await (tx as any)[model].findUnique({
       where: { id },
       select: { version: true },
     });
