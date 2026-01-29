@@ -23,11 +23,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
     where: { id },
     include: {
       accounts: true,
-      tenantMemberships: {
-        include: {
-          tenant: true,
-        },
-      },
+      tenants: true,
       sessions: {
         where: {
           expiresAt: {
@@ -199,31 +195,31 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
       <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Building2 className="w-5 h-5" />
-          Tenant Memberships ({user.tenantMemberships.length})
+          Tenants ({user.tenants.length})
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {user.tenantMemberships.map((membership) => (
+          {user.tenants.map((tenant) => (
             <Link
-              key={membership.id}
-              href={`/admin/tenants/${membership.tenantId}`}
+              key={tenant.id}
+              href={`/admin/tenants/${tenant.id}`}
               className="p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-white">
-                    {membership.tenant.name}
+                    {tenant.name}
                   </p>
                   <p className="text-xs text-white/60 mt-1">
-                    Joined {new Date(membership.joinedAt).toLocaleDateString()}
+                    Created {new Date(tenant.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {membership.role}
+                  {tenant.status}
                 </Badge>
               </div>
             </Link>
           ))}
-          {user.tenantMemberships.length === 0 && (
+          {user.tenants.length === 0 && (
             <p className="text-sm text-white/60 col-span-full text-center py-8">
               No tenant memberships
             </p>
@@ -246,7 +242,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
               >
                 <div>
                   <p className="text-sm text-white font-mono text-xs">
-                    {session.sessionToken.slice(0, 32)}...
+                    {session.token.slice(0, 32)}...
                   </p>
                   <p className="text-xs text-white/60 mt-1">
                     Expires {new Date(session.expiresAt).toLocaleDateString()}
