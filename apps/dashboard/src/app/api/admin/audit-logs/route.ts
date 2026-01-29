@@ -9,27 +9,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    const logs = await prisma.auditLog.findMany({
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            email: true,
-          },
-        },
-      },
-    });
-
-    const formattedLogs = logs.map((log) => ({
-      id: log.id,
-      action: log.action,
-      userId: log.userId,
-      userEmail: log.user.email || 'Unknown',
-      metadata: log.metadata,
-      ipAddress: log.ipAddress,
-      createdAt: log.createdAt.toISOString(),
-    }));
+    // AuditLog model not yet implemented in schema
+    // TODO: Add AuditLog model to Prisma schema
+    const formattedLogs: Array<{
+      id: string;
+      action: string;
+      userId: string;
+      userEmail: string;
+      metadata: unknown;
+      ipAddress: string | null;
+      createdAt: string;
+    }> = [];
 
     return NextResponse.json({
       logs: formattedLogs,
