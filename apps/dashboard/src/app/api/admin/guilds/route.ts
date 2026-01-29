@@ -28,13 +28,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         orderBy: { joinedAt: 'desc' },
-        include: {
-          tenant: {
-            select: {
-              name: true,
-            },
-          },
-        },
+        // Note: tenant relation not defined in Guild model, only tenantId field
       }),
       prisma.guild.count({ where }),
     ]);
