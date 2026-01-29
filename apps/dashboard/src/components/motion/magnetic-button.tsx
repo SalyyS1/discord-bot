@@ -1,13 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useSpring, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MagneticButtonProps extends Omit<HTMLMotionProps<'button'>, 'onMouseMove' | 'onMouseLeave'> {
   children: React.ReactNode;
   strength?: number;
-  asChild?: boolean;
 }
 
 /**
@@ -17,7 +16,7 @@ interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
  * Optimized for 60fps with spring animations.
  */
 export const MagneticButton = React.forwardRef<HTMLButtonElement, MagneticButtonProps>(
-  ({ children, className, strength = 20, onDrag, onDragStart, onDragEnd, ...props }, ref) => {
+  ({ children, className, strength = 20, ...props }, ref) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
