@@ -68,7 +68,7 @@ export function TenantAuditLogViewer({ logs, title = 'Audit Logs' }: TenantAudit
                   {log.ipAddress && (
                     <div className="text-xs text-gray-500 mt-1">IP: {log.ipAddress}</div>
                   )}
-                  {log.metadata && typeof log.metadata === 'object' && Object.keys(log.metadata).length > 0 && (
+                  {log.metadata && typeof log.metadata === 'object' && Object.keys(log.metadata as object).length > 0 && (
                     <details className="mt-2">
                       <summary className="text-xs text-cyan-400 cursor-pointer hover:text-cyan-300">
                         View metadata
