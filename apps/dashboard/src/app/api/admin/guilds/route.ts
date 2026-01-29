@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
 
     const where = search
       ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' as const } },
-            { id: { contains: search, mode: 'insensitive' as const } },
-          ],
-        }
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as const } },
+          { id: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }
       : {};
 
     const [guilds, total] = await Promise.all([
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { joinedAt: 'desc' },
         include: {
           tenant: {
             select: {
