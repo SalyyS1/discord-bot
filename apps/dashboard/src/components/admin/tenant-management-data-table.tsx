@@ -128,7 +128,7 @@ export function TenantDataTable({ tenants, onView, onUpdateStatus, onDelete }: T
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleAction(() => onUpdateStatus(tenant.id, 'ACTIVE'), tenant.id)}
+                        onClick={() => handleAction(async () => { onUpdateStatus(tenant.id, 'ACTIVE'); }, tenant.id)}
                         disabled={loading === tenant.id}
                         className="text-emerald-400 hover:text-emerald-300"
                       >
@@ -138,7 +138,7 @@ export function TenantDataTable({ tenants, onView, onUpdateStatus, onDelete }: T
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleAction(() => onUpdateStatus(tenant.id, 'SUSPENDED'), tenant.id)}
+                        onClick={() => handleAction(async () => { onUpdateStatus(tenant.id, 'SUSPENDED'); }, tenant.id)}
                         disabled={loading === tenant.id}
                         className="text-orange-400 hover:text-orange-300"
                       >
@@ -148,7 +148,7 @@ export function TenantDataTable({ tenants, onView, onUpdateStatus, onDelete }: T
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleAction(() => onDelete(tenant.id), tenant.id)}
+                      onClick={() => handleAction(async () => { onDelete(tenant.id); }, tenant.id)}
                       disabled={loading === tenant.id}
                       className="text-red-400 hover:text-red-300"
                     >
