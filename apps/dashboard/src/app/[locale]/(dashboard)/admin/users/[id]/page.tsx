@@ -85,7 +85,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             <div>
               <p className="text-sm text-white/60">Tenants</p>
               <p className="text-2xl font-bold text-white mt-1">
-                {user.tenantMemberships.length}
+                {user.tenants.length}
               </p>
             </div>
             <Building2 className="w-8 h-8 text-blue-400" />
