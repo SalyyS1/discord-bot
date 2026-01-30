@@ -26,8 +26,8 @@ export class EncryptionService {
     const encryptionKey = typeof config === 'string' ? config : config.encryptionKey;
     const installationSalt = typeof config === 'string' ? undefined : config.installationSalt;
 
-    if (!encryptionKey || encryptionKey.length < 16) {
-      throw new Error('Encryption key must be at least 16 characters');
+    if (!encryptionKey || encryptionKey.length < 32) {
+      throw new Error('Encryption key must be at least 32 characters for AES-256 security');
     }
 
     // Current key with dynamic salt
@@ -44,7 +44,15 @@ export class EncryptionService {
    * @private
    */
   private generateInstallationSalt(): string {
-    // Generate a random salt and log warning
+    // In production, require explicit salt configuration
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'TENANT_ENCRYPTION_SALT is required in production to ensure encryption consistency across restarts. ' +
+        'Generate a secure salt and add it to your environment configuration.'
+      );
+    }
+
+    // Development mode: generate random salt with warning
     const randomSalt = randomBytes(16).toString('hex');
     console.warn(
       '[SECURITY WARNING] TENANT_ENCRYPTION_SALT not set. Generated random salt. ' +
@@ -146,10 +154,8 @@ export class EncryptionService {
 
       return decrypted;
     } catch (error: any) {
-      if (error.message.includes('Unsupported state')) {
-        throw new Error('Decryption failed: data may be corrupted or key is wrong');
-      }
-      throw error;
+      // Sanitize error messages to prevent information leakage
+      throw new Error('Decryption failed: invalid or corrupted data');
     }
   }
 
@@ -184,10 +190,8 @@ export class EncryptionService {
 
       return decrypted;
     } catch (error: any) {
-      if (error.message.includes('Unsupported state')) {
-        throw new Error('Decryption failed: data may be corrupted or key is wrong');
-      }
-      throw error;
+      // Sanitize error messages to prevent information leakage
+      throw new Error('Decryption failed: invalid or corrupted data');
     }
   }
 

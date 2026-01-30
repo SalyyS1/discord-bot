@@ -83,7 +83,7 @@ export async function retryTransaction<T>(
   let lastError: Error;
   let delay = retryDelay;
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await prisma.$transaction(fn, {
         isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
@@ -127,14 +127,14 @@ export async function getNextTicketNumber(
   guildId: string
 ): Promise<number> {
   return retryTransaction(prisma, async (tx) => {
-    // Get max ticket number for guild
-    const maxTicket = await tx.ticket.findFirst({
-      where: { guildId },
-      orderBy: { number: 'desc' },
-      select: { number: true },
-    });
-
-    return (maxTicket?.number ?? 0) + 1;
+    // Use raw query with FOR UPDATE to prevent race conditions
+    const result = await tx.$queryRaw<[{ max_number: number | null }]>`
+      SELECT MAX(number) as max_number
+      FROM "Ticket"
+      WHERE "guildId" = ${guildId}
+      FOR UPDATE
+    `;
+    return (result[0]?.max_number ?? 0) + 1;
   });
 }
 

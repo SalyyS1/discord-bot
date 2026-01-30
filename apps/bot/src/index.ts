@@ -78,43 +78,43 @@ async function shutdown() {
   // Stop health check server
   try {
     await stopHealthServer();
-  } catch {
-    // Ignore
+  } catch (err) {
+    logger.warn(`${tenantLabel} Failed to stop health server during shutdown`, err);
   }
 
   // Stop config sync subscriber
   try {
     await stopConfigSync();
-  } catch {
-    // Ignore
+  } catch (err) {
+    logger.warn(`${tenantLabel} Failed to stop config sync during shutdown`, err);
   }
 
   // Stop dashboard commands subscriber
   try {
     await stopDashboardCommands();
-  } catch {
-    // Ignore
+  } catch (err) {
+    logger.warn(`${tenantLabel} Failed to stop dashboard commands during shutdown`, err);
   }
 
   // Stop bot commands subscriber
   try {
     await stopBotCommandsSubscriber();
-  } catch {
-    // Ignore
+  } catch (err) {
+    logger.warn(`${tenantLabel} Failed to stop bot commands subscriber during shutdown`, err);
   }
 
   try {
     await prisma.$disconnect();
     logger.info(`${tenantLabel} Database disconnected`);
-  } catch {
-    // Ignore
+  } catch (err) {
+    logger.warn(`${tenantLabel} Failed to disconnect database during shutdown`, err);
   }
 
   try {
     redis.disconnect();
     logger.info(`${tenantLabel} Redis disconnected`);
-  } catch {
-    // Ignore
+  } catch (err) {
+    logger.warn(`${tenantLabel} Failed to disconnect Redis during shutdown`, err);
   }
 
   client.destroy();
@@ -123,8 +123,16 @@ async function shutdown() {
   process.exit(0);
 }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+let isShuttingDown = false;
+
+async function shutdownWithProtection() {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  await shutdown();
+}
+
+process.on('SIGINT', shutdownWithProtection);
+process.on('SIGTERM', shutdownWithProtection);
 
 main().catch((err) => {
   logger.error('Fatal error:', err);

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/navigation';
+import crypto from 'crypto';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -26,6 +27,19 @@ function getLocale(pathname: string): string {
   return 'vi';
 }
 
+/**
+ * Timing-safe string comparison to prevent timing attacks
+ * Uses constant-time comparison to avoid leaking information about string contents
+ */
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  } catch {
+    return false;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -39,7 +53,7 @@ export async function middleware(request: NextRequest) {
       const csrfCookie = request.cookies.get(CSRF_COOKIE_NAME)?.value;
       const csrfHeader = request.headers.get(CSRF_HEADER_NAME);
 
-      if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+      if (!csrfCookie || !csrfHeader || !timingSafeCompare(csrfCookie, csrfHeader)) {
         return NextResponse.json(
           { success: false, error: 'Invalid CSRF token' },
           { status: 403 }
@@ -61,7 +75,8 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.includes('/admin');
   const isProtectedRoute = isDashboardRoute || isProfileRoute || isAdminRoute;
 
-  // Check for session cookie (better-auth uses different names in secure/non-secure contexts)
+  // Check for session cookie
+  // Priority order: 1) __Secure- prefix (HTTPS), 2) better-auth.session_data (fallback), 3) legacy session_token
   const sessionCookie =
     request.cookies.get('__Secure-better-auth.session_data') ||
     request.cookies.get('better-auth.session_data') ||

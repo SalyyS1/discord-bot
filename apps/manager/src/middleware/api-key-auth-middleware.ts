@@ -52,6 +52,16 @@ export function apiKeyAuthMiddleware(req: Request, res: Response, next: NextFunc
     .update(payload)
     .digest('hex');
 
+  // Ensure buffers are same length before timing-safe comparison
+  // Prevents timingSafeEqual() from throwing when signature lengths differ
+  if (signature.length !== expectedSignature.length) {
+    console.warn(`[API Auth] Signature length mismatch for ${req.method} ${req.path}`);
+    return res.status(401).json({
+      success: false,
+      error: 'Invalid signature'
+    });
+  }
+
   // Timing-safe comparison to prevent timing attacks
   if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
     console.warn(`[API Auth] Invalid signature for ${req.method} ${req.path}`);

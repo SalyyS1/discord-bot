@@ -56,13 +56,25 @@ export class BotSpawner extends EventEmitter {
   async spawn(config: TenantConfig): Promise<void> {
     const { tenantId } = config;
 
-    // Check if already running
-    if (this.processes.has(tenantId)) {
-      const existing = this.processes.get(tenantId)!;
+    // Atomic check-and-reserve to prevent race conditions
+    const existing = this.processes.get(tenantId);
+    if (existing) {
       if (existing.status === 'running' || existing.status === 'starting') {
         throw new Error(`Bot for tenant ${tenantId} is already running`);
       }
     }
+
+    // Preserve restart count from previous attempts
+    const preservedRestartCount = existing?.restartCount ?? 0;
+
+    // Reserve slot immediately to prevent concurrent spawns
+    this.processes.set(tenantId, {
+      process: null as any, // Will be set after fork
+      config,
+      status: 'starting',
+      startedAt: new Date(),
+      restartCount: preservedRestartCount,
+    });
 
     // Decrypt token securely - only here at spawn time
     let decryptedToken: string;
@@ -73,6 +85,8 @@ export class BotSpawner extends EventEmitter {
     } catch (err) {
       const error = err as Error;
       logger.error(`Failed to decrypt token: ${error.message}`, { tenantId });
+      // Cleanup reserved slot on failure
+      this.processes.delete(tenantId);
       throw new Error(`Token decryption failed for tenant ${tenantId}`);
     }
 
@@ -96,15 +110,9 @@ export class BotSpawner extends EventEmitter {
       detached: false,
     });
 
-    const botProcess: BotProcess = {
-      process: child,
-      config,
-      status: 'starting',
-      startedAt: new Date(),
-      restartCount: 0,
-    };
-
-    this.processes.set(tenantId, botProcess);
+    // Update the reserved slot with actual process
+    const botProcess = this.processes.get(tenantId)!;
+    botProcess.process = child;
 
     // Handle process events
     this.setupProcessHandlers(tenantId, child, config);
@@ -179,14 +187,16 @@ export class BotSpawner extends EventEmitter {
     const botProcess = this.processes.get(tenantId);
     if (!botProcess) return;
 
-    botProcess.restartCount++;
-    logger.info(`Scheduling restart ${botProcess.restartCount}/${this.maxRestarts}`, { tenantId });
+    // Increment restart count before deletion
+    const currentRestartCount = botProcess.restartCount + 1;
+    logger.info(`Scheduling restart ${currentRestartCount}/${this.maxRestarts}`, { tenantId });
+
+    // Update restart count in place so spawn() can preserve it
+    botProcess.restartCount = currentRestartCount;
 
     setTimeout(async () => {
       try {
-        // Remove old process entry
-        this.processes.delete(tenantId);
-        // Respawn
+        // Don't delete - spawn() will preserve restartCount from existing entry
         await this.spawn(config);
       } catch (error) {
         logger.error(`Failed to restart bot: ${error}`, { tenantId });

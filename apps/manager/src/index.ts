@@ -140,10 +140,17 @@ async function main() {
 
 // Helper to build tenant database URL
 function buildTenantDatabaseUrl(tenantId: string): string {
-  const baseUrl = process.env.DATABASE_URL || '';
-  const url = new URL(baseUrl);
-  url.searchParams.set('schema', `tenant_${tenantId}`);
-  return url.toString();
+  const baseUrl = process.env.DATABASE_URL;
+  if (!baseUrl) {
+    throw new Error('DATABASE_URL environment variable is required');
+  }
+  try {
+    const url = new URL(baseUrl);
+    url.searchParams.set('schema', `tenant_${tenantId}`);
+    return url.toString();
+  } catch (err) {
+    throw new Error(`Invalid DATABASE_URL format: ${(err as Error).message}`);
+  }
 }
 
 main().catch((err) => {

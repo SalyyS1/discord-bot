@@ -216,14 +216,14 @@ export async function canUpdateCredentials(userId: string): Promise<RateLimitRes
 /**
  * Check API rate limit for a user
  * Limit: 100 requests per minute
- * Non-critical: Fail-open (allow if Redis unavailable)
+ * CRITICAL: Fail-closed to prevent abuse when Redis is unavailable
  */
 export async function canAccessApi(userId: string): Promise<RateLimitResult> {
   return checkRateLimit(
     `api:access:${userId}`,
     100, // 100 requests
     60, // per minute
-    { failClosed: false } // Non-critical - prefer availability
+    { failClosed: true } // SECURITY FIX: Prevent abuse during Redis outage
   );
 }
 

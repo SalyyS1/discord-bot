@@ -28,12 +28,17 @@ export default new Command({
   permissions: [PermissionFlagsBits.BanMembers],
   botPermissions: [PermissionFlagsBits.BanMembers],
   async execute(interaction) {
+    if (!interaction.guild) {
+      await interaction.reply({ content: '❌ This command can only be used in a server.', ephemeral: true });
+      return;
+    }
+
     const user = interaction.options.getUser('user', true);
     const reason = interaction.options.getString('reason') ?? 'No reason provided';
     const deleteDays = interaction.options.getInteger('delete_messages') ?? 0;
 
     const moderator = interaction.member as GuildMember;
-    const target = interaction.guild!.members.cache.get(user.id);
+    const target = interaction.guild.members.cache.get(user.id);
 
     // If member is in server, check hierarchy
     if (target && !ModerationService.canModerate(moderator, target)) {
@@ -47,7 +52,7 @@ export default new Command({
     await interaction.deferReply();
 
     const result = await ModerationService.ban(
-      interaction.guild!,
+      interaction.guild,
       user.id,
       moderator,
       reason,
@@ -63,14 +68,14 @@ export default new Command({
       .setColor(0xff0000)
       .setTitle('🔨 User Banned')
       .addFields(
-        { name: 'User', value: `${user.tag}`, inline: true },
-        { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },
+        { name: 'User', value: `${user.username}`, inline: true },
+        { name: 'Moderator', value: `${interaction.user.username}`, inline: true },
         { name: 'Reason', value: reason },
         { name: 'Messages Deleted', value: `${deleteDays} days`, inline: true }
       )
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
-    await LoggingService.sendModLog(interaction.guild!, embed);
+    await LoggingService.sendModLog(interaction.guild, embed);
   },
 });
