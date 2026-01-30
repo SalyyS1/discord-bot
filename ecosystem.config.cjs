@@ -46,6 +46,7 @@ module.exports = {
       args: 'src/index.ts',
       cwd: './apps/manager',
       interpreter: 'none',
+      env_file: '../.env',
       env: {
         NODE_ENV: 'production',
         MANAGER_PORT: 3001,
