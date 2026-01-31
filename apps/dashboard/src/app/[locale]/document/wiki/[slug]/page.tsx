@@ -1,18 +1,47 @@
 import { notFound } from 'next/navigation';
 import { GlassCard } from '@/components/ui/glass-card';
 import { mdxComponents } from '@/components/docs/mdx-content-components';
-import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
-const validSlugs = [
-  'getting-started',
-  'moderation',
-  'tickets',
-  'giveaways',
-  'leveling',
-  'tempvoice',
-  'welcome',
-];
+// Static imports for MDX content - avoids DYNAMIC_SERVER_USAGE errors
+import GettingStartedEn from '@/content/wiki/en/getting-started.mdx';
+import ModerationEn from '@/content/wiki/en/moderation.mdx';
+import TicketsEn from '@/content/wiki/en/tickets.mdx';
+import GiveawaysEn from '@/content/wiki/en/giveaways.mdx';
+import LevelingEn from '@/content/wiki/en/leveling.mdx';
+import TempvoiceEn from '@/content/wiki/en/tempvoice.mdx';
+import WelcomeEn from '@/content/wiki/en/welcome.mdx';
+
+import GettingStartedVi from '@/content/wiki/vi/getting-started.mdx';
+import ModerationVi from '@/content/wiki/vi/moderation.mdx';
+import TicketsVi from '@/content/wiki/vi/tickets.mdx';
+import GiveawaysVi from '@/content/wiki/vi/giveaways.mdx';
+import LevelingVi from '@/content/wiki/vi/leveling.mdx';
+import TempvoiceVi from '@/content/wiki/vi/tempvoice.mdx';
+import WelcomeVi from '@/content/wiki/vi/welcome.mdx';
+
+const wikiContent: Record<string, Record<string, React.ComponentType<{ components?: Record<string, React.ComponentType> }>>> = {
+  en: {
+    'getting-started': GettingStartedEn,
+    moderation: ModerationEn,
+    tickets: TicketsEn,
+    giveaways: GiveawaysEn,
+    leveling: LevelingEn,
+    tempvoice: TempvoiceEn,
+    welcome: WelcomeEn,
+  },
+  vi: {
+    'getting-started': GettingStartedVi,
+    moderation: ModerationVi,
+    tickets: TicketsVi,
+    giveaways: GiveawaysVi,
+    leveling: LevelingVi,
+    tempvoice: TempvoiceVi,
+    welcome: WelcomeVi,
+  },
+};
+
+const validSlugs = Object.keys(wikiContent.en);
 
 interface WikiPageProps {
   params: Promise<{ slug: string; locale: string }>;
@@ -37,20 +66,10 @@ export async function generateMetadata({ params }: WikiPageProps): Promise<Metad
   };
 }
 
-async function getWikiContent(slug: string, locale: string) {
-  try {
-    // Dynamic import of MDX content based on locale and slug
-    const content = await import(`@/content/wiki/${locale}/${slug}.mdx`);
-    return content;
-  } catch (error) {
-    // Fallback to English if locale version doesn't exist
-    try {
-      const content = await import(`@/content/wiki/en/${slug}.mdx`);
-      return content;
-    } catch {
-      return null;
-    }
-  }
+function getWikiContent(slug: string, locale: string) {
+  // Get content from static import map
+  const localeContent = wikiContent[locale] || wikiContent.en;
+  return localeContent[slug] || wikiContent.en[slug] || null;
 }
 
 export default async function WikiPage({ params }: WikiPageProps) {
@@ -60,13 +79,11 @@ export default async function WikiPage({ params }: WikiPageProps) {
     notFound();
   }
 
-  const content = await getWikiContent(slug, locale);
+  const Component = getWikiContent(slug, locale);
 
-  if (!content) {
+  if (!Component) {
     notFound();
   }
-
-  const Component = content.default;
 
   return (
     <div className="space-y-6">
