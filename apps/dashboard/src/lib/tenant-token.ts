@@ -2,7 +2,7 @@
  * Tenant Token Resolution Layer
  *
  * Resolves the correct bot token for a guild by looking up its tenant association.
- * Handles token decryption, caching, and fallback to default DISCORD_TOKEN.
+ * Handles token decryption, caching, and fallback to default DISCORD_BOT_TOKEN.
  */
 
 import { prisma } from '@repo/database';
@@ -41,7 +41,7 @@ export async function getGuildBotToken(guildId: string): Promise<string | null> 
 
     if (!guild?.tenantId) {
       // No tenant - use default token
-      return process.env.DISCORD_TOKEN || null;
+      return process.env.DISCORD_BOT_TOKEN || null;
     }
 
     // Get tenant's encrypted token
@@ -52,7 +52,7 @@ export async function getGuildBotToken(guildId: string): Promise<string | null> 
 
     if (!tenant || tenant.status !== 'ACTIVE') {
       logger.warn(`Tenant not active for guild ${guildId}`);
-      return process.env.DISCORD_TOKEN || null;
+      return process.env.DISCORD_BOT_TOKEN || null;
     }
 
     // Decrypt token with explicit error handling
@@ -69,7 +69,7 @@ export async function getGuildBotToken(guildId: string): Promise<string | null> 
         action: 'Investigate tenant token configuration',
       });
       // Fallback to default token on decryption failure
-      return process.env.DISCORD_TOKEN || null;
+      return process.env.DISCORD_BOT_TOKEN || null;
     }
 
     // Cache the result
@@ -82,7 +82,7 @@ export async function getGuildBotToken(guildId: string): Promise<string | null> 
   } catch (error) {
     logger.error(`Failed to resolve token for guild ${guildId}: ${error}`);
     // Fallback to default token
-    return process.env.DISCORD_TOKEN || null;
+    return process.env.DISCORD_BOT_TOKEN || null;
   }
 }
 
