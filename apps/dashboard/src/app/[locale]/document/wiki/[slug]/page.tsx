@@ -42,15 +42,21 @@ const wikiContent: Record<string, Record<string, React.ComponentType<{ component
 };
 
 const validSlugs = Object.keys(wikiContent.en);
+const validLocales = ['en', 'vi'];
 
 interface WikiPageProps {
   params: Promise<{ slug: string; locale: string }>;
 }
 
 export async function generateStaticParams() {
-  return validSlugs.map((slug) => ({
-    slug,
-  }));
+  // Generate all combinations of locale and slug
+  const params: { locale: string; slug: string }[] = [];
+  for (const locale of validLocales) {
+    for (const slug of validSlugs) {
+      params.push({ locale, slug });
+    }
+  }
+  return params;
 }
 
 export async function generateMetadata({ params }: WikiPageProps): Promise<Metadata> {
