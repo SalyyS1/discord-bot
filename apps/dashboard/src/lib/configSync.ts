@@ -62,3 +62,33 @@ export async function publishTempVoiceUpdate(
 ): Promise<void> {
   await getPublisher().publishTempVoice(guildId, action);
 }
+
+/**
+ * Publish a giveaway config update
+ */
+export async function publishGiveawayUpdate(
+  guildId: string,
+  action: 'update' | 'delete' | 'create' = 'update'
+): Promise<void> {
+  await getPublisher().publishGiveaway(guildId, action);
+}
+
+/**
+ * Publish a tickets config update
+ */
+export async function publishTicketsUpdate(
+  guildId: string,
+  action: 'update' | 'delete' | 'create' = 'update'
+): Promise<void> {
+  await getPublisher().publishTickets(guildId, action);
+}
+
+/**
+ * Publish a music config update
+ */
+export async function publishMusicUpdate(
+  guildId: string,
+  action: 'update' | 'delete' = 'update'
+): Promise<void> {
+  await getPublisher().publishMusic(guildId, action);
+}

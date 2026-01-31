@@ -22,6 +22,7 @@ model User {
   accounts     Account[]
   tenants      Tenant[]
   subscription UserSubscription?
+  reviews      Review[]
 
   @@map("user")
 }
@@ -174,6 +175,32 @@ model UpgradeCode {
 enum UserTier {
   FREE
   PREMIUM
+}
+
+// ============ REVIEWS (Dashboard Landing Page) ============
+
+model Review {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating     Int // 1-5
+  text       String       @db.Text
+  status     ReviewStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  approvedAt DateTime?
+  approvedBy String? // Admin userId who approved
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("review")
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ============ CORE ============
@@ -357,6 +384,15 @@ model GuildSettings {
   voiceLockByDefault      Boolean @default(false) // Lock new channels by default
   voiceAutoDeleteEmpty    Boolean @default(true) // Delete empty channels
 
+  // Voice customization settings
+  panelImageUrl    String? // Custom image for voice control panel
+  panelLayout      String  @default("compact") // Layout: compact, expanded, minimal
+  autoLockTimeout  Int     @default(0) // Minutes before auto-lock (0 = disabled)
+  idleKickEnabled  Boolean @default(false) // Enable idle kick
+  idleKickTimeout  Int     @default(30) // Minutes before idle kick
+  buttonColor      String  @default("#3b82f6") // Button color for voice panel
+  customIconUrl    String? // Custom icon URL for voice controls
+
   autoResponderEnabled  Boolean @default(false)
   stickyMessagesEnabled Boolean @default(false)
 
@@ -492,6 +528,7 @@ model Giveaway {
   embedColor  String @default("#14b8a6")
   buttonText  String @default("🎉 Enter Giveaway")
   buttonStyle String @default("PRIMARY") // PRIMARY, SUCCESS, SECONDARY
+
   entryMethod String @default("BUTTON") // BUTTON, REACTION, DROP
 
   // Requirements (Entry)

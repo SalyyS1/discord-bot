@@ -163,6 +163,18 @@ export interface GiveawayStartEvent extends SyncEvent {
 }
 
 /**
+ * Giveaway end event
+ */
+export interface GiveawayEndEvent extends SyncEvent {
+  type: 'GIVEAWAY_END';
+  data: {
+    giveawayId: string;
+    prize: string;
+    winnerIds: string[];
+  };
+}
+
+/**
  * Settings update event
  */
 export interface SettingsUpdateEvent extends SyncEvent {
@@ -186,6 +198,7 @@ export type AnySyncEvent =
   | LevelUpEvent
   | ModActionEvent
   | GiveawayStartEvent
+  | GiveawayEndEvent
   | SettingsUpdateEvent
   | SyncEvent;
 

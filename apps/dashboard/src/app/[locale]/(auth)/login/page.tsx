@@ -29,6 +29,7 @@ export default function LoginPage() {
     // Get callback URL from query params
     const callback = searchParams.get('callbackUrl');
     if (callback) {
+      console.log('[Login Debug] Callback URL from params:', callback);
       setCallbackUrl(callback);
     }
   }, [searchParams]);
@@ -37,13 +38,17 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
+    console.log('[Login Debug] Starting Discord OAuth flow');
+    console.log('[Login Debug] Callback URL:', callbackUrl);
+
     try {
       await signIn.social({
         provider: 'discord',
         callbackURL: callbackUrl,
       });
+      console.log('[Login Debug] OAuth redirect initiated');
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('[Login Error]', err);
       setError('Failed to connect to Discord. Please try again.');
       setLoading(false);
     }

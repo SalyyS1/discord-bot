@@ -249,6 +249,26 @@ class RedisPublisherService {
   }
 
   /**
+   * Publish giveaway end event
+   */
+  async publishGiveawayEnd(
+    guildId: string,
+    giveawayId: string,
+    prize: string,
+    winnerIds: string[]
+  ): Promise<boolean> {
+    return this.publish({
+      type: 'GIVEAWAY_END',
+      guildId,
+      data: {
+        giveawayId,
+        prize,
+        winnerIds,
+      },
+    });
+  }
+
+  /**
    * Publish settings update event
    */
   async publishSettingsUpdate(

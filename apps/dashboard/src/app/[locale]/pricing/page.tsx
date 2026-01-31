@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Check, X, Sparkles, Zap, Shield, HelpCircle } from 'lucide-react';
 import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
+import { ReviewCarouselSection } from '@/components/reviews/review-carousel-section';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -107,14 +108,14 @@ function FeatureCheck({ included }: { included: boolean }) {
 
 export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
-  
+
   const price = billingPeriod === 'monthly' ? 4.99 : 49.99;
   const savings = billingPeriod === 'yearly' ? 'Save 17%' : null;
 
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-      
+
       <main className="pt-24 pb-16">
         {/* Header */}
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -326,6 +327,9 @@ export default function PricingPage() {
             </table>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ReviewCarouselSection />
 
         {/* FAQ */}
         <div className="max-w-3xl mx-auto px-4 mt-24">

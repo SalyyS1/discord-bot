@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { z } from 'zod';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { publishTicketsUpdate } from '@/lib/configSync';
 
 const ticketSettingsSchema = z.object({
   ticketCategoryId: z.string().optional().nullable(),
@@ -96,6 +97,13 @@ export async function PATCH(
       },
       select: { ticketCategoryId: true },
     });
+
+    // Notify bot of ticket settings change
+    try {
+      await publishTicketsUpdate(guildId);
+    } catch (publishError) {
+      logger.error(`Failed to publish tickets update: ${publishError}`);
+    }
 
     return ApiResponse.success(settings);
   } catch (error) {

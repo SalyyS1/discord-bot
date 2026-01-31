@@ -19,6 +19,7 @@ export const CONFIG_CHANNELS = {
   TICKETS: 'bot:config:tickets',
   AUTORESPONDER: 'bot:config:autoresponder',
   TEMPVOICE: 'bot:config:tempvoice',
+  MUSIC: 'bot:config:music',
 } as const;
 
 export type ConfigChannel = typeof CONFIG_CHANNELS[keyof typeof CONFIG_CHANNELS];

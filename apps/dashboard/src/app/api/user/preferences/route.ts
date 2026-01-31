@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 /**
  * User Preferences API Route
  *
- * Stores user notification preferences in localStorage-like manner via cookies
+ * Stores user preferences including locale in cookies
  * Since the User model doesn't have preference fields, we use cookies for persistence
  */
 
@@ -14,6 +14,7 @@ interface UserPreferences {
   securityAlerts: boolean;
   botUpdates: boolean;
   timezone: string;
+  locale?: string; // Add locale preference
 }
 
 const DEFAULT_PREFERENCES: UserPreferences = {
@@ -21,6 +22,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   securityAlerts: true,
   botUpdates: false,
   timezone: 'utc',
+  locale: 'vi',
 };
 
 const PREFERENCES_COOKIE = 'user_preferences';
@@ -81,6 +83,14 @@ export async function PATCH(request: Request) {
   try {
     const updates = await request.json();
 
+    // Validate locale if provided
+    if (updates.locale && !['vi', 'en'].includes(updates.locale)) {
+      return NextResponse.json(
+        { error: 'Invalid locale. Must be "vi" or "en"' },
+        { status: 400 }
+      );
+    }
+
     // Read existing preferences from cookie
     const headersList = await headers();
     const cookieHeader = headersList.get('cookie') || '';
@@ -111,7 +121,7 @@ export async function PATCH(request: Request) {
     // Create response with updated cookie
     const response = NextResponse.json({ data: newPreferences });
 
-    // Set cookie with 1 year expiry
+    // Set preferences cookie with 1 year expiry
     const cookieValue = encodeURIComponent(JSON.stringify(newPreferences));
     response.cookies.set(PREFERENCES_COOKIE, cookieValue, {
       path: '/',
@@ -120,6 +130,17 @@ export async function PATCH(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
+
+    // Also set NEXT_LOCALE cookie if locale was updated
+    if (updates.locale) {
+      response.cookies.set('NEXT_LOCALE', updates.locale, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365, // 1 year
+        httpOnly: false, // Allow JS access for client-side routing
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+    }
 
     return response;
   } catch (error) {

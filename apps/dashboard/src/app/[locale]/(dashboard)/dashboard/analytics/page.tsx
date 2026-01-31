@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Users,
-  MessageSquare,
   Ticket,
   Star,
   TrendingUp,
@@ -14,6 +13,9 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { TopMembersList } from '@/components/analytics/top-members-list';
+import { LevelDistributionChart } from '@/components/analytics/level-distribution-chart';
+import { RecentModerationList } from '@/components/analytics/recent-moderation-list';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -158,10 +160,10 @@ export default function AnalyticsPage() {
   const guildId = params?.guildId as string;
   const [period, setPeriod] = useState<Period>('30d');
 
-  // In a real implementation, get guildId from context
   const { data, isLoading, error: _error } = useSWR(
     guildId ? `/api/guilds/${guildId}/analytics?period=${period}` : null,
-    fetcher
+    fetcher,
+    { refreshInterval: 60000 } // Refresh every 60 seconds
   );
 
   const analytics = data?.data;
@@ -206,20 +208,14 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Key Metrics - Removed Messages metric */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
           title="Total Members"
           value={analytics?.currentMembers ?? '-'}
           change={analytics?.memberChange}
           changePercent={analytics?.memberChangePercent}
           icon={Users}
-          loading={isLoading}
-        />
-        <MetricCard
-          title="Messages"
-          value={analytics?.totalMessages ?? '-'}
-          icon={MessageSquare}
           loading={isLoading}
         />
         <MetricCard
@@ -315,6 +311,27 @@ export default function AnalyticsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* New Components Grid */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Top Members */}
+        <TopMembersList
+          members={analytics?.topMembers || []}
+          loading={isLoading}
+        />
+
+        {/* Level Distribution */}
+        <LevelDistributionChart
+          data={analytics?.levelDistribution || []}
+          loading={isLoading}
+        />
+      </div>
+
+      {/* Recent Moderation - Full Width */}
+      <RecentModerationList
+        actions={analytics?.recentModeration || []}
+        loading={isLoading}
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import { useQueue } from 'discord-player';
 import { Command } from '../../structures/Command.js';
+import { generateMusicEmbed } from '../../services/music-embed-generator.js';
 
 export default new Command({
     data: new SlashCommandBuilder()
@@ -29,26 +30,9 @@ export default new Command({
         }
 
         const track = queue.currentTrack;
-        const progress = queue.node.createProgressBar({
-            length: 20,
-            timecodes: true,
-            queue: false,
-        });
 
-        const embed = new EmbedBuilder()
-            .setColor(0x5865f2)
-            .setTitle('🎵 Now Playing')
-            .setDescription(`**[${track.title}](${track.url})**`)
-            .setThumbnail(track.thumbnail)
-            .addFields(
-                { name: '👤 Artist', value: track.author, inline: true },
-                { name: '⏱️ Duration', value: track.duration, inline: true },
-                { name: '🔊 Volume', value: `${queue.node.volume}%`, inline: true },
-                { name: '📊 Progress', value: progress || '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬', inline: false }
-            )
-            .setFooter({
-                text: `Requested by ${track.requestedBy?.username || 'Unknown'} • ${queue.tracks.size} songs in queue`,
-            });
+        // Use platform-specific embed
+        const embed = generateMusicEmbed(track, queue);
 
         // Control buttons
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

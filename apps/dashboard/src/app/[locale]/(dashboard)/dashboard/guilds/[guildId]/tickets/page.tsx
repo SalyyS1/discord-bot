@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRealtimeTickets } from '@/hooks/use-realtime-tickets';
 
 interface TicketData {
   id: string;
@@ -34,7 +35,15 @@ export default function TicketsPage() {
   const t = useTranslations('common');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [tickets, setTickets] = useState<TicketData[]>([]);
+
+  const {
+    data: ticketsData,
+    isLoading: ticketsLoading,
+  } = useRealtimeTickets(guildId, {
+    refetchInterval: 30000, // Poll every 30 seconds
+  });
+
+  const tickets = ticketsData?.tickets ?? [];
 
   const {
     register,
@@ -45,27 +54,21 @@ export default function TicketsPage() {
   });
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchSettings() {
       try {
-        const [settingsRes, ticketsRes] = await Promise.all([
-          fetch(`/api/guilds/${guildId}/tickets?type=settings`),
-          fetch(`/api/guilds/${guildId}/tickets`),
-        ]);
-        
+        const settingsRes = await fetch(`/api/guilds/${guildId}/tickets?type=settings`);
         const settings = await settingsRes.json();
-        const ticketsData = await ticketsRes.json();
-        
+
         if (settings.data) {
           setValue('ticketCategoryId', settings.data.ticketCategoryId || '');
         }
-        setTickets(ticketsData.data || []);
       } catch {
-        toast.error('Failed to load data');
+        toast.error('Failed to load settings');
       } finally {
         setLoading(false);
       }
     }
-    fetchData();
+    fetchSettings();
   }, [guildId, setValue]);
 
   const onSubmit = async (data: TicketSettingsFormData) => {
@@ -89,7 +92,7 @@ export default function TicketsPage() {
     }
   };
 
-  if (loading) {
+  if (loading || ticketsLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -186,9 +189,9 @@ export default function TicketsPage() {
                   className="flex items-center justify-between rounded-lg border p-3"
                 >
                   <div>
-                    <p className="font-medium">{ticket.subject || 'No subject'}</p>
+                    <p className="font-medium">Ticket #{ticket.id.slice(0, 8)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {ticket.category} • {new Date(ticket.createdAt).toLocaleDateString()}
+                      User: {ticket.member.discordId} • {new Date(ticket.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <span className="rounded-full bg-blue-500/10 px-2 py-1 text-xs text-blue-500">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Shield, Search, Loader2, X, Check } from 'lucide-react';
 import {
   Select,
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useGuildDataOptional } from '@/context/guild-data-provider';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -28,7 +29,6 @@ interface RoleSelectorProps {
   onChange?: (value: string | string[]) => void;
   onValueChange?: (value: string) => void;
   roles?: Role[];
-  guildId?: string;
   placeholder?: string;
   disabled?: boolean;
   multiple?: boolean;
@@ -91,7 +91,6 @@ export function RoleSelector({
   onChange,
   onValueChange,
   roles: propRoles,
-  guildId,
   placeholder = 'Select role',
   disabled = false,
   multiple = false,
@@ -99,27 +98,11 @@ export function RoleSelector({
   excludeEveryone = true,
 }: RoleSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [fetchedRoles, setFetchedRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(false);
+  const guildData = useGuildDataOptional();
 
-  // Fetch roles if guildId is provided
-  useEffect(() => {
-    if (guildId && !propRoles) {
-      setLoading(true);
-      fetch(`/api/guilds/${guildId}/roles`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.data) {
-            setFetchedRoles(data.data);
-          }
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }
-  }, [guildId, propRoles]);
-
-  // Use provided roles or fetched roles
-  const roles = propRoles || fetchedRoles;
+  // Use provided roles, context roles, or empty array
+  const roles = propRoles ?? guildData?.roles ?? [];
+  const loading = !propRoles && guildData?.isLoading;
 
   // Filter roles
   const filtered = useMemo(() => {

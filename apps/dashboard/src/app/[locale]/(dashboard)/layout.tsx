@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/sidebar';
 import { Header } from '@/components/header';
 import { GuildProvider } from '@/context/guild-context';
+import { GuildDataProvider } from '@/context/guild-data-provider';
 import { SidebarProvider } from '@/context/sidebar-context';
 import { LoadingProvider } from '@/context/loading-context';
 import { AnimatedContent } from '@/components/layout/animated-content';
@@ -17,7 +18,8 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <GuildProvider>
-        <LoadingProvider>
+        <GuildDataProvider>
+          <LoadingProvider>
           <CommandPalette />
           <LoadingOverlay />
           <div className="min-h-screen bg-[hsl(200_25%_12%)] dark:bg-[hsl(200_25%_12%)] light:bg-[hsl(180_20%_97%)] text-foreground">
@@ -32,6 +34,7 @@ export default function DashboardLayout({
             </DashboardShell>
           </div>
         </LoadingProvider>
+        </GuildDataProvider>
       </GuildProvider>
     </SidebarProvider>
   );

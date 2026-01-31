@@ -21,6 +21,11 @@ export const queryKeys = {
   guildStats: (guildId: string) => ['guild', guildId, 'stats'] as const,
   guildAutoresponders: (guildId: string) => ['guild', guildId, 'autoresponders'] as const,
 
+  // Module-specific settings
+  guildVoice: (guildId: string) => ['guild', guildId, 'voice'] as const,
+  guildMusic: (guildId: string) => ['guild', guildId, 'music'] as const,
+  guildGiveawaySettings: (guildId: string) => ['guild', guildId, 'giveaways', 'settings'] as const,
+
   // User-scoped queries
   userPreferences: ['user', 'preferences'] as const,
 } as const;

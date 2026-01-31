@@ -24,10 +24,11 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import { useGuildContext } from '@/context/guild-context';
 import { useGuilds } from '@/hooks';
+import { useUpdateMusic } from '@/hooks/use-mutations';
 import { PanelSender } from '@/components/panels/panel-sender';
+import { PlaylistManager } from '@/components/music/playlist-manager';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -61,7 +62,6 @@ interface TopTrack {
 
 export default function MusicPage() {
     const [activeTab, setActiveTab] = useState('settings');
-    const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const [settings, setSettings] = useState<MusicSettings>({
@@ -83,6 +83,7 @@ export default function MusicPage() {
 
     const { selectedGuildId, setSelectedGuildId } = useGuildContext();
     const { data: guilds, isLoading: guildsLoading, error: guildsError } = useGuilds();
+    const updateMusic = useUpdateMusic(selectedGuildId);
 
     const fetchSettings = useCallback(async () => {
         if (!selectedGuildId) return;
@@ -115,27 +116,8 @@ export default function MusicPage() {
         fetchSettings();
     }, [fetchSettings]);
 
-    const handleSave = async () => {
-        if (!selectedGuildId) return;
-        setSaving(true);
-
-        try {
-            const res = await fetch(`/api/guilds/${selectedGuildId}/music`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings),
-            });
-
-            if (res.ok) {
-                toast.success('Music settings saved!');
-            } else {
-                toast.error('Failed to save settings');
-            }
-        } catch {
-            toast.error('Failed to save settings');
-        } finally {
-            setSaving(false);
-        }
+    const handleSave = () => {
+        updateMusic.mutate(settings as unknown as Record<string, unknown>);
     };
 
     if (guildsLoading || loading) {
@@ -174,10 +156,10 @@ export default function MusicPage() {
                 <div className="flex items-center gap-3">
                     <Button
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={updateMusic.isPending}
                         className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold"
                     >
-                        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {updateMusic.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         <Save className="mr-2 h-4 w-4" />
                         Save Changes
                     </Button>
@@ -261,6 +243,9 @@ export default function MusicPage() {
                     <TabsTrigger value="stats" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-md">
                         <Music className="w-4 h-4 mr-2" /> Top Tracks
                     </TabsTrigger>
+                    <TabsTrigger value="playlists" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-md">
+                        <List className="w-4 h-4 mr-2" /> Playlists
+                    </TabsTrigger>
                     <TabsTrigger value="commands" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-md">
                         <Crown className="w-4 h-4 mr-2" /> Commands
                     </TabsTrigger>
@@ -301,7 +286,6 @@ export default function MusicPage() {
                                 <div className="space-y-2">
                                     <Label className="text-gray-300">DJ Role (optional)</Label>
                                     <RoleSelector
-                                        guildId={selectedGuildId || ''}
                                         value={settings.djRoleId || ''}
                                         onChange={(value) => setSettings(s => ({ ...s, djRoleId: (typeof value === 'string' ? value : null) }))}
                                         placeholder="Everyone can use..."
@@ -312,7 +296,6 @@ export default function MusicPage() {
                                 <div className="space-y-2">
                                     <Label className="text-gray-300">Request Channel (optional)</Label>
                                     <ChannelSelector
-                                        guildId={selectedGuildId || ''}
                                         value={settings.requestChannelId || ''}
                                         onChange={(value) => setSettings(s => ({ ...s, requestChannelId: value || null }))}
                                         types={['text']}
@@ -453,6 +436,11 @@ export default function MusicPage() {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                {/* Playlists Tab */}
+                <TabsContent value="playlists" className="space-y-6 mt-6">
+                    <PlaylistManager guildId={selectedGuildId || ''} />
                 </TabsContent>
 
                 {/* Top Tracks Tab */}

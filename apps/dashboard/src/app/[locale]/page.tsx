@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/landing/hero-section';
 import { FeaturesSection } from '@/components/landing/features-section';
 import { StatsSection } from '@/components/landing/stats-section';
 import { TestimonialsSection } from '@/components/landing/testimonials-section';
+import { ReviewCarouselSection } from '@/components/reviews/review-carousel-section';
 import { PricingCTASection } from '@/components/landing/pricing-cta-section';
 import { Footer } from '@/components/landing/footer';
 
@@ -15,6 +16,7 @@ export default function LandingPage() {
         <HeroSection />
         <StatsSection />
         <FeaturesSection />
+        <ReviewCarouselSection />
         <PricingCTASection />
         <TestimonialsSection />
       </main>

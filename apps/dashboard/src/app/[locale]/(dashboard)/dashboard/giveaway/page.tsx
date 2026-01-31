@@ -45,6 +45,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useSelectedGuild } from '@/hooks/use-selected-guild';
 import { useGuildContext } from '@/context/guild-context';
+import { useUpdateGiveawaySettings } from '@/hooks/use-mutations';
+import { useRealtimeGiveaways, useInvalidateGiveaways } from '@/hooks/use-realtime-giveaways';
 import { ChannelSelector, Channel } from '@/components/selectors/channel-selector';
 import { RoleSelector } from '@/components/selectors/role-selector';
 
@@ -114,21 +116,32 @@ export default function GiveawayPage() {
   const [dataLoading, setDataLoading] = useState(false);
   const loading = guildsLoading || dataLoading;
   const [activeTab, setActiveTab] = useState('overview');
-  const [savingSettings, setSavingSettings] = useState(false);
+  const updateGiveawaySettings = useUpdateGiveawaySettings(guildId);
+  const invalidateGiveaways = useInvalidateGiveaways();
+
+  // Realtime giveaways with polling (15s interval for near-realtime updates)
+  const {
+    data: giveawaysData,
+    isLoading: giveawaysLoading,
+  } = useRealtimeGiveaways(guildId, {
+    refetchInterval: 15000,
+  });
 
   // Guild data
   const [channels, setChannels] = useState<Channel[]>([]);
   const [roles, setRoles] = useState<Array<{ id: string; name: string; color: number }>>([]);
 
-  // Giveaways
-  const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
-  const [stats, setStats] = useState<GuildStats>({
-    activeGiveaways: 0,
-    totalGiveaways: 0,
-    totalEntries: 0,
-    completedGiveaways: 0,
-    averageEntries: 0,
-  });
+  // Giveaways - now primarily from realtime hook
+  const giveaways = (giveawaysData?.giveaways ?? []) as unknown as Giveaway[];
+  const stats: GuildStats = {
+    activeGiveaways: giveaways.filter((g) => g.status === 'ACTIVE').length,
+    totalGiveaways: giveaways.length,
+    totalEntries: giveaways.reduce((sum, g) => sum + g.entries, 0),
+    completedGiveaways: giveaways.filter((g) => g.status === 'ENDED').length,
+    averageEntries: giveaways.length > 0
+      ? Math.round(giveaways.reduce((sum, g) => sum + g.entries, 0) / giveaways.length)
+      : 0,
+  };
 
   // Settings
   const [settings, setSettings] = useState({
@@ -181,15 +194,14 @@ export default function GiveawayPage() {
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  // Fetch guild data
+  // Fetch guild data (channels, roles, settings - giveaways handled by useRealtimeGiveaways)
   const fetchGuildData = useCallback(async () => {
     if (!guildId) return;
     setDataLoading(true);
     try {
-      const [channelsRes, rolesRes, giveawaysRes, settingsRes] = await Promise.all([
+      const [channelsRes, rolesRes, settingsRes] = await Promise.all([
         fetch(`/api/guilds/${guildId}/channels`),
         fetch(`/api/guilds/${guildId}/roles`),
-        fetch(`/api/guilds/${guildId}/giveaways`),
         fetch(`/api/guilds/${guildId}/giveaways/settings`),
       ]);
 
@@ -206,18 +218,6 @@ export default function GiveawayPage() {
       if (rolesRes.ok) {
         const { data } = await rolesRes.json();
         setRoles(data || []);
-      }
-
-      if (giveawaysRes.ok) {
-        const { data } = await giveawaysRes.json();
-        setGiveaways(data?.giveaways || []);
-        setStats({
-          activeGiveaways: data?.giveaways?.filter((g: Giveaway) => g.status === 'ACTIVE').length || 0,
-          totalGiveaways: data?.giveaways?.length || 0,
-          totalEntries: data?.giveaways?.reduce((sum: number, g: Giveaway) => sum + g.entries, 0) || 0,
-          completedGiveaways: data?.giveaways?.filter((g: Giveaway) => g.status === 'ENDED').length || 0,
-          averageEntries: 0,
-        });
       }
 
       if (settingsRes.ok) {
@@ -243,21 +243,8 @@ export default function GiveawayPage() {
     fetchGuildData();
   }, [fetchGuildData]);
 
-  const handleSaveSettings = async () => {
-    if (!guildId) return;
-    setSavingSettings(true);
-    try {
-      await fetch(`/api/guilds/${guildId}/giveaways/settings`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-      toast.success('Settings saved successfully!');
-    } catch {
-      toast.error('Failed to save settings');
-    } finally {
-      setSavingSettings(false);
-    }
+  const handleSaveSettings = () => {
+    updateGiveawaySettings.mutate(settings);
   };
 
   const handleCreateGiveaway = async () => {
@@ -309,7 +296,7 @@ export default function GiveawayPage() {
           autoReroll: false,
           pingRoleId: '',
         });
-        fetchGuildData();
+        invalidateGiveaways(guildId);
       } else {
         const error = await res.json();
         toast.error(error.message || 'Failed to create giveaway');
@@ -331,7 +318,7 @@ export default function GiveawayPage() {
 
       if (res.ok) {
         toast.success('Giveaway deleted');
-        setGiveaways(prev => prev.filter(g => g.id !== deleteId));
+        invalidateGiveaways(guildId);
       } else {
         toast.error('Failed to delete giveaway');
       }
@@ -352,7 +339,7 @@ export default function GiveawayPage() {
 
       if (res.ok) {
         toast.success('Giveaway ended!');
-        fetchGuildData();
+        invalidateGiveaways(guildId);
       } else {
         toast.error('Failed to end giveaway');
       }
@@ -371,7 +358,7 @@ export default function GiveawayPage() {
 
       if (res.ok) {
         toast.success('Winner re-rolled!');
-        fetchGuildData();
+        invalidateGiveaways(guildId);
       } else {
         toast.error('Failed to re-roll');
       }
@@ -1022,10 +1009,10 @@ export default function GiveawayPage() {
                 <CardContent>
                   <Button
                     onClick={handleSaveSettings}
-                    disabled={savingSettings}
+                    disabled={updateGiveawaySettings.isPending}
                     className="w-full bg-gradient-to-r from-[hsl(174_72%_45%)] to-[hsl(180_70%_35%)] hover:from-[hsl(174_72%_40%)] hover:to-[hsl(180_70%_30%)] text-white shadow-lg"
                   >
-                    {savingSettings && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+                    {updateGiveawaySettings.isPending && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
                     <Save className="mr-2 h-4 w-4" />
                     Save Configuration
                   </Button>

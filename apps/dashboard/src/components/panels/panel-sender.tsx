@@ -86,6 +86,9 @@ export function PanelSender({ guildId, type }: PanelSenderProps) {
 
             if (res.ok) {
                 toast.success(`${type === 'voice' ? 'Voice' : 'Music'} panel sent!`);
+                // Reset form after successful send
+                handleReset();
+                setChannelId('');
             } else {
                 const data = await res.json();
                 toast.error(data.error || 'Failed to send panel');
@@ -120,7 +123,6 @@ export function PanelSender({ guildId, type }: PanelSenderProps) {
                     <div className="space-y-2">
                         <Label className="text-gray-300">Target Channel</Label>
                         <ChannelSelector
-                            guildId={guildId}
                             value={channelId}
                             onChange={setChannelId}
                             placeholder="Select a text channel..."

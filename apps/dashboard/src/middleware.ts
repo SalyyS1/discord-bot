@@ -19,11 +19,32 @@ const protectedApiPatterns = ['/api/guilds'];
 // Supported locales
 const locales = ['vi', 'en'];
 
-function getLocale(pathname: string): string {
+function getLocaleFromRequest(request: NextRequest): string {
+  // Priority: 1. Cookie, 2. URL path, 3. Accept-Language header, 4. Default
+
+  // 1. Check NEXT_LOCALE cookie first
+  const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
+  if (localeCookie && locales.includes(localeCookie)) {
+    return localeCookie;
+  }
+
+  // 2. Check URL path
+  const pathname = request.nextUrl.pathname;
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length > 0 && locales.includes(segments[0])) {
     return segments[0];
   }
+
+  // 3. Check Accept-Language header
+  const acceptLanguage = request.headers.get('accept-language');
+  if (acceptLanguage) {
+    const preferredLocale = acceptLanguage.split(',')[0].split('-')[0];
+    if (locales.includes(preferredLocale)) {
+      return preferredLocale;
+    }
+  }
+
+  // 4. Default to Vietnamese
   return 'vi';
 }
 
@@ -82,6 +103,17 @@ export async function middleware(request: NextRequest) {
     request.cookies.get('better-auth.session_data') ||
     request.cookies.get('better-auth.session_token');
 
+  // Debug logging for authentication flow
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Auth Debug]', {
+      pathname,
+      hasSession: !!sessionCookie,
+      sessionCookie: sessionCookie?.name,
+      isProtectedRoute,
+      isPublicRoute,
+    });
+  }
+
   // Check auth for protected API routes (guild-related endpoints)
   if (isProtectedApiRoute && !sessionCookie) {
     return NextResponse.json(
@@ -92,7 +124,7 @@ export async function middleware(request: NextRequest) {
 
   // If no session and trying to access protected route, redirect to login BEFORE i18n middleware
   if (!sessionCookie && isProtectedRoute) {
-    const locale = getLocale(pathname);
+    const locale = getLocaleFromRequest(request);
     const loginUrl = new URL(`/${locale}/login`, request.url);
     // Store the original URL to redirect back after login
     loginUrl.searchParams.set('callbackUrl', pathname);
@@ -100,7 +132,19 @@ export async function middleware(request: NextRequest) {
   }
 
   // Apply i18n middleware for all other routes
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+
+  // Preserve NEXT_LOCALE cookie if it exists
+  const localeCookie = request.cookies.get('NEXT_LOCALE');
+  if (localeCookie && response instanceof NextResponse) {
+    response.cookies.set('NEXT_LOCALE', localeCookie.value, {
+      path: '/',
+      maxAge: 31536000, // 1 year
+      sameSite: 'lax',
+    });
+  }
+
+  return response;
 }
 
 export const config = {

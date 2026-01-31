@@ -22,6 +22,7 @@ import { ensureGuild } from '../../lib/settings.js';
 import { TranscriptService } from './transcripts.js';
 import { RatingService } from './rating.js';
 import { logger } from '../../utils/logger.js';
+import { redisPublisher } from '../../services/bot-redis-event-publisher.js';
 
 interface FormQuestion {
   id: string;
@@ -414,6 +415,16 @@ export class TicketV2Module {
         await logChannel.send({ embeds: [logEmbed] }).catch(() => {});
       }
     }
+
+    // Publish event to dashboard via Redis
+    await redisPublisher.publishTicketCreate(
+      guild.id,
+      ticket.id,
+      channel.id,
+      member.id,
+      member.user.username,
+      category.name
+    );
 
     logger.info(`Ticket #${ticketNumber} created for ${member.user.tag} in category "${category.name}"`);
     return channel;

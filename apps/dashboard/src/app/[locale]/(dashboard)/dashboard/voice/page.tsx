@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ChannelSelector } from '@/components/selectors/channel-selector';
+import { CategorySelector } from '@/components/selectors/category-selector';
 import {
     Select,
     SelectContent,
@@ -22,10 +23,13 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import { useGuildContext } from '@/context/guild-context';
 import { useGuilds } from '@/hooks';
+import { useUpdateVoice } from '@/hooks/use-mutations';
 import { PanelSender } from '@/components/panels/panel-sender';
+import { ImageUploader } from '@/components/voice/image-uploader';
+import { VoicePanelLayoutSelector, VoicePanelLayout } from '@/components/voice/voice-panel-layout-selector';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -41,6 +45,14 @@ interface VoiceSettings {
     voiceLockByDefault: boolean;
     voiceAutoDeleteEmpty: boolean;
     activeSessions: number;
+    // New customization settings
+    panelImageUrl: string | null;
+    panelLayout: VoicePanelLayout;
+    autoLockTimeout: number; // minutes, 0 = disabled
+    idleKickEnabled: boolean;
+    idleKickTimeout: number; // minutes
+    buttonColor: string;
+    customIconUrl: string | null;
 }
 
 // ═══════════════════════════════════════════════
@@ -78,7 +90,6 @@ const VOICE_REGIONS = [
 
 export default function VoicePage() {
     const [activeTab, setActiveTab] = useState('settings');
-    const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const [settings, setSettings] = useState<VoiceSettings>({
@@ -91,10 +102,19 @@ export default function VoicePage() {
         voiceLockByDefault: false,
         voiceAutoDeleteEmpty: true,
         activeSessions: 0,
+        // New customization settings
+        panelImageUrl: null,
+        panelLayout: 'compact',
+        autoLockTimeout: 0,
+        idleKickEnabled: false,
+        idleKickTimeout: 30,
+        buttonColor: '#3b82f6',
+        customIconUrl: null,
     });
 
     const { selectedGuildId, setSelectedGuildId } = useGuildContext();
     const { data: guilds, isLoading: guildsLoading, error: guildsError } = useGuilds();
+    const updateVoice = useUpdateVoice(selectedGuildId);
 
     // Fetch settings
     const fetchSettings = useCallback(async () => {
@@ -116,6 +136,14 @@ export default function VoicePage() {
                         voiceLockByDefault: data.voiceLockByDefault ?? false,
                         voiceAutoDeleteEmpty: data.voiceAutoDeleteEmpty ?? true,
                         activeSessions: data.activeSessions ?? 0,
+                        // New customization settings
+                        panelImageUrl: data.panelImageUrl ?? null,
+                        panelLayout: data.panelLayout ?? 'compact',
+                        autoLockTimeout: data.autoLockTimeout ?? 0,
+                        idleKickEnabled: data.idleKickEnabled ?? false,
+                        idleKickTimeout: data.idleKickTimeout ?? 30,
+                        buttonColor: data.buttonColor ?? '#3b82f6',
+                        customIconUrl: data.customIconUrl ?? null,
                     });
                 }
             }
@@ -136,27 +164,25 @@ export default function VoicePage() {
         fetchSettings();
     }, [fetchSettings]);
 
-    const handleSave = async () => {
-        if (!selectedGuildId) return;
-        setSaving(true);
-
-        try {
-            const res = await fetch(`/api/guilds/${selectedGuildId}/voice`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings),
-            });
-
-            if (res.ok) {
-                toast.success('Voice settings saved!');
-            } else {
-                toast.error('Failed to save settings');
-            }
-        } catch {
-            toast.error('Failed to save settings');
-        } finally {
-            setSaving(false);
-        }
+    const handleSave = () => {
+        updateVoice.mutate({
+            tempVoiceEnabled: settings.tempVoiceEnabled,
+            tempVoiceCreatorId: settings.tempVoiceCreatorId,
+            tempVoiceCategoryId: settings.tempVoiceCategoryId,
+            voiceDefaultLimit: settings.voiceDefaultLimit,
+            voiceDefaultBitrate: settings.voiceDefaultBitrate,
+            voiceDefaultRegion: settings.voiceDefaultRegion,
+            voiceLockByDefault: settings.voiceLockByDefault,
+            voiceAutoDeleteEmpty: settings.voiceAutoDeleteEmpty,
+            // New customization settings
+            panelImageUrl: settings.panelImageUrl,
+            panelLayout: settings.panelLayout,
+            autoLockTimeout: settings.autoLockTimeout,
+            idleKickEnabled: settings.idleKickEnabled,
+            idleKickTimeout: settings.idleKickTimeout,
+            buttonColor: settings.buttonColor,
+            customIconUrl: settings.customIconUrl,
+        });
     };
 
     if (guildsLoading || loading) {
@@ -195,10 +221,10 @@ export default function VoicePage() {
                 <div className="flex items-center gap-3">
                     <Button
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={updateVoice.isPending}
                         className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold"
                     >
-                        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {updateVoice.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         <Save className="mr-2 h-4 w-4" />
                         Save Changes
                     </Button>
@@ -327,7 +353,6 @@ export default function VoicePage() {
                                         <div className="space-y-2">
                                             <Label className="text-gray-300">Join-to-Create Channel</Label>
                                             <ChannelSelector
-                                                guildId={selectedGuildId || ''}
                                                 value={settings.tempVoiceCreatorId || ''}
                                                 onChange={(value) => setSettings(s => ({ ...s, tempVoiceCreatorId: value }))}
                                                 types={['voice']}
@@ -338,11 +363,9 @@ export default function VoicePage() {
 
                                         <div className="space-y-2">
                                             <Label className="text-gray-300">Category for Temp Channels</Label>
-                                            <ChannelSelector
-                                                guildId={selectedGuildId || ''}
+                                            <CategorySelector
                                                 value={settings.tempVoiceCategoryId || ''}
                                                 onChange={(value) => setSettings(s => ({ ...s, tempVoiceCategoryId: value }))}
-                                                types={['category']}
                                                 placeholder="Select category..."
                                             />
                                         </div>
@@ -442,6 +465,117 @@ export default function VoicePage() {
                             </CardContent>
                         </Card>
                     </div>
+
+                    {/* Panel Customization */}
+                    <div className="grid lg:grid-cols-2 gap-6">
+                        <Card className="surface-card overflow-hidden">
+                            <CardHeader className="bg-gradient-to-r from-purple-500/10 to-transparent border-b border-white/5 pb-4">
+                                <div className="flex items-center gap-3">
+                                    <Mic className="w-5 h-5 text-purple-400" />
+                                    <div>
+                                        <CardTitle className="text-white">Panel Customization</CardTitle>
+                                        <CardDescription className="text-gray-400">Customize control panel appearance</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4 pt-6">
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Panel Image</Label>
+                                    <ImageUploader
+                                        value={settings.panelImageUrl || undefined}
+                                        onChange={(url) => setSettings(s => ({ ...s, panelImageUrl: url }))}
+                                    />
+                                    <p className="text-xs text-gray-500">Custom image for voice control panel embed</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Panel Layout</Label>
+                                    <VoicePanelLayoutSelector
+                                        value={settings.panelLayout}
+                                        onChange={(layout) => setSettings(s => ({ ...s, panelLayout: layout }))}
+                                        className="bg-[#1a1d26] border-white/10 text-white"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Button Color</Label>
+                                    <ColorPicker
+                                        value={settings.buttonColor}
+                                        onChange={(color) => setSettings(s => ({ ...s, buttonColor: color }))}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Custom Icon URL (Optional)</Label>
+                                    <Input
+                                        type="url"
+                                        value={settings.customIconUrl || ''}
+                                        onChange={e => setSettings(s => ({ ...s, customIconUrl: e.target.value || null }))}
+                                        placeholder="https://example.com/icon.png"
+                                        className="bg-[#1a1d26] border-white/10 text-white"
+                                    />
+                                    <p className="text-xs text-gray-500">Custom icon for voice control buttons</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Behavior Settings */}
+                        <Card className="surface-card overflow-hidden">
+                            <CardHeader className="bg-gradient-to-r from-amber-500/10 to-transparent border-b border-white/5 pb-4">
+                                <div className="flex items-center gap-3">
+                                    <Clock className="w-5 h-5 text-amber-400" />
+                                    <div>
+                                        <CardTitle className="text-white">Behavior Settings</CardTitle>
+                                        <CardDescription className="text-gray-400">Auto-lock and idle management</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4 pt-6">
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Auto-Lock Timeout (minutes)</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        max={1440}
+                                        value={settings.autoLockTimeout}
+                                        onChange={e => setSettings(s => ({ ...s, autoLockTimeout: parseInt(e.target.value) || 0 }))}
+                                        className="bg-[#1a1d26] border-white/10 text-white"
+                                    />
+                                    <p className="text-xs text-gray-500">0 = disabled, auto-lock channel after timeout</p>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <UserMinus className="h-5 w-5 text-amber-400" />
+                                        <div>
+                                            <p className="text-white font-medium">Idle Kick</p>
+                                            <p className="text-gray-400 text-sm">Kick idle users automatically</p>
+                                        </div>
+                                    </div>
+                                    <Switch
+                                        checked={settings.idleKickEnabled}
+                                        onCheckedChange={(checked) => setSettings(s => ({ ...s, idleKickEnabled: checked }))}
+                                    />
+                                </div>
+
+                                {settings.idleKickEnabled && (
+                                    <div className="space-y-2">
+                                        <Label className="text-gray-300">Idle Kick Timeout (minutes)</Label>
+                                        <Input
+                                            type="number"
+                                            min={1}
+                                            max={1440}
+                                            value={settings.idleKickTimeout}
+                                            onChange={e => setSettings(s => ({ ...s, idleKickTimeout: parseInt(e.target.value) || 30 }))}
+                                            className="bg-[#1a1d26] border-white/10 text-white"
+                                        />
+                                        <p className="text-xs text-gray-500">Kick users idle for this duration</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
                 </TabsContent>
 
                 {/* Commands Tab */}

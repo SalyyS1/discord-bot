@@ -16,6 +16,7 @@ import { GiveawaySelector } from './selector.js';
 import { logger } from '../../utils/logger.js';
 import { client } from '../../lib/client.js';
 import { parseTemplate, TemplateContext } from '../../lib/template.js';
+import { redisPublisher } from '../../services/bot-redis-event-publisher.js';
 
 interface CreateGiveawayOptions {
   channelId: string;
@@ -107,6 +108,16 @@ export class GiveawayModule {
       'end',
       { giveawayId: giveaway.id },
       { delay: options.duration }
+    );
+
+    // Publish event to dashboard via Redis
+    await redisPublisher.publishGiveawayStart(
+      guild.id,
+      giveaway.id,
+      options.prize,
+      endsAt.toISOString(),
+      options.winnerCount,
+      options.hostId
     );
 
     logger.info(`Giveaway created: ${giveaway.id}`);
@@ -267,6 +278,14 @@ export class GiveawayModule {
 
     // DM winners
     await this.notifyWinners({ ...giveaway, guildId: giveaway.guildId }, winnerIds);
+
+    // Publish event to dashboard via Redis
+    await redisPublisher.publishGiveawayEnd(
+      giveaway.guildId,
+      giveawayId,
+      giveaway.prize,
+      winnerIds
+    );
 
     logger.info(`Giveaway ${giveawayId} ended with ${winnerIds.length} winners`);
     return winnerIds;

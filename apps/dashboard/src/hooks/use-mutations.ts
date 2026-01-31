@@ -4,11 +4,20 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { queryKeys } from '@/lib/query-keys';
 
-type ApiEndpoint = 'settings' | 'welcome' | 'leveling' | 'moderation' | 'tickets';
+type ApiEndpoint =
+  | 'settings'
+  | 'welcome'
+  | 'leveling'
+  | 'moderation'
+  | 'tickets'
+  | 'voice'
+  | 'music'
+  | 'giveaways/settings';
 
 interface MutationConfig {
   endpoint: ApiEndpoint;
   successMessage: string;
+  queryKeyFn?: (guildId: string) => readonly unknown[];
 }
 
 /**
@@ -27,35 +36,47 @@ function createGuildMutation(guildId: string | null, config: MutationConfig) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Failed to update');
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || 'Failed to update');
+      }
+
       return res.json();
     },
     onMutate: async (newData) => {
       if (!guildId) return;
 
-      const queryKey = queryKeys.guildSettings(guildId);
+      // Use module-specific query key if provided, otherwise fall back to settings
+      const queryKey = config.queryKeyFn
+        ? config.queryKeyFn(guildId)
+        : queryKeys.guildSettings(guildId);
+
       await queryClient.cancelQueries({ queryKey });
 
-      const previousSettings = queryClient.getQueryData(queryKey);
+      const previousData = queryClient.getQueryData(queryKey);
       queryClient.setQueryData(queryKey, (old: Record<string, unknown> | undefined) => ({
         ...old,
         ...newData,
       }));
 
-      return { previousSettings };
+      return { previousData, queryKey };
     },
     onSuccess: () => {
       toast.success(config.successMessage);
     },
     onError: (_err, _newData, context) => {
-      if (guildId && context?.previousSettings) {
-        queryClient.setQueryData(queryKeys.guildSettings(guildId), context.previousSettings);
+      if (context?.queryKey && context?.previousData) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
       }
       toast.error('Failed to save settings');
     },
     onSettled: () => {
       if (guildId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.guildSettings(guildId) });
+        const queryKey = config.queryKeyFn
+          ? config.queryKeyFn(guildId)
+          : queryKeys.guildSettings(guildId);
+        queryClient.invalidateQueries({ queryKey });
       }
     },
   });
@@ -94,5 +115,33 @@ export function useUpdateTickets(guildId: string | null) {
   return createGuildMutation(guildId, {
     endpoint: 'tickets',
     successMessage: 'Ticket settings saved!',
+  });
+}
+
+// ═══════════════════════════════════════════════
+// NEW Module-Specific Mutation Hooks
+// ═══════════════════════════════════════════════
+
+export function useUpdateVoice(guildId: string | null) {
+  return createGuildMutation(guildId, {
+    endpoint: 'voice',
+    successMessage: 'Voice settings saved!',
+    queryKeyFn: queryKeys.guildVoice,
+  });
+}
+
+export function useUpdateMusic(guildId: string | null) {
+  return createGuildMutation(guildId, {
+    endpoint: 'music',
+    successMessage: 'Music settings saved!',
+    queryKeyFn: queryKeys.guildMusic,
+  });
+}
+
+export function useUpdateGiveawaySettings(guildId: string | null) {
+  return createGuildMutation(guildId, {
+    endpoint: 'giveaways/settings',
+    successMessage: 'Giveaway settings saved!',
+    queryKeyFn: queryKeys.guildGiveawaySettings,
   });
 }

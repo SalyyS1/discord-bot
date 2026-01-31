@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Hash, Volume2, Speaker, MessageSquare, Search, Loader2 } from 'lucide-react';
 import {
   Select,
@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { useGuildDataOptional } from '@/context/guild-data-provider';
 
 // ═══════════════════════════════════════════════
 // Types
@@ -30,7 +31,6 @@ interface ChannelSelectorProps {
   onChange?: (value: string) => void;
   onValueChange?: (value: string) => void; // Alias for onChange
   channels?: Channel[];
-  guildId?: string; // If provided, fetch channels automatically
   types?: Channel['type'][];
   placeholder?: string;
   disabled?: boolean;
@@ -65,36 +65,19 @@ export function ChannelSelector({
   onChange,
   onValueChange,
   channels: propChannels,
-  guildId,
   types = ['text'],
   placeholder = 'Select channel',
   disabled = false,
 }: ChannelSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [fetchedChannels, setFetchedChannels] = useState<Channel[]>([]);
-  const [loading, setLoading] = useState(false);
+  const guildData = useGuildDataOptional();
 
   // Use onChange or onValueChange (alias support)
   const handleChange = onChange || onValueChange;
 
-  // Fetch channels if guildId is provided
-  useEffect(() => {
-    if (guildId && !propChannels) {
-      setLoading(true);
-      fetch(`/api/guilds/${guildId}/channels`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.data) {
-            setFetchedChannels(data.data);
-          }
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }
-  }, [guildId, propChannels]);
-
-  // Use provided channels or fetched channels
-  const channels = propChannels || fetchedChannels;
+  // Use provided channels, context channels, or empty array
+  const channels = propChannels ?? guildData?.channels ?? [];
+  const loading = !propChannels && guildData?.isLoading;
 
   // Filter channels by type and group by category
   const { filtered, grouped } = useMemo(() => {

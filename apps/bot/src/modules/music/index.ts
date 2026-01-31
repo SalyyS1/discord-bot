@@ -7,6 +7,7 @@ import { Player, GuildQueue, Track, useMainPlayer } from 'discord-player';
 import { Client, EmbedBuilder, TextChannel, VoiceChannel, User } from 'discord.js';
 import { prisma } from '../../lib/prisma.js';
 import { logger } from '../../utils/logger.js';
+import { generateMusicEmbed } from '../../services/music-embed-generator.js';
 
 // Define metadata interface for type safety
 interface QueueMetadata {
@@ -32,7 +33,8 @@ export async function initMusicPlayer(client: Client): Promise<Player> {
         const settings = await getMusicSettings(queue.guild.id);
         if (!settings?.announceTrackChange) return;
 
-        const embed = createNowPlayingEmbed(track, queue);
+        // Use platform-specific embed
+        const embed = generateMusicEmbed(track, queue);
         const channel = (queue.metadata as QueueMetadata)?.channel;
 
         if (channel) {

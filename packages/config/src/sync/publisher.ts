@@ -78,4 +78,37 @@ export class ConfigPublisher {
   ): Promise<void> {
     await this.publish(guildId, 'TEMPVOICE', action, data);
   }
+
+  /**
+   * Publish giveaway config update
+   */
+  async publishGiveaway(
+    guildId: string,
+    action: 'update' | 'delete' | 'create' = 'update',
+    data?: Record<string, unknown>
+  ): Promise<void> {
+    await this.publish(guildId, 'GIVEAWAY', action, data);
+  }
+
+  /**
+   * Publish tickets config update
+   */
+  async publishTickets(
+    guildId: string,
+    action: 'update' | 'delete' | 'create' = 'update',
+    data?: Record<string, unknown>
+  ): Promise<void> {
+    await this.publish(guildId, 'TICKETS', action, data);
+  }
+
+  /**
+   * Publish music config update
+   */
+  async publishMusic(
+    guildId: string,
+    action: 'update' | 'delete' = 'update',
+    data?: Record<string, unknown>
+  ): Promise<void> {
+    await this.publish(guildId, 'MUSIC', action, data);
+  }
 }

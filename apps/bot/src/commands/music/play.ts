@@ -7,6 +7,7 @@ import { useMainPlayer, QueryType } from 'discord-player';
 import { Command } from '../../structures/Command.js';
 import { hasDJRole, getMusicSettings } from '../../modules/music/index.js';
 import { logger } from '../../utils/logger.js';
+import { detectPlatform, MusicPlatform } from '../../services/music-embed-generator.js';
 
 export default new Command({
     data: new SlashCommandBuilder()
@@ -74,8 +75,27 @@ export default new Command({
                 },
             });
 
+            // Detect platform and use appropriate color
+            const platform = detectPlatform(track);
+            let embedColor = 0x5865f2; // Default Discord blurple
+
+            switch (platform) {
+                case MusicPlatform.YOUTUBE:
+                    embedColor = 0xFF0000; // YouTube red
+                    break;
+                case MusicPlatform.SPOTIFY:
+                    embedColor = 0x1DB954; // Spotify green
+                    break;
+                case MusicPlatform.APPLE_MUSIC:
+                    embedColor = 0xFC3C44; // Apple Music pink
+                    break;
+                case MusicPlatform.SOUNDCLOUD:
+                    embedColor = 0xFF7700; // SoundCloud orange
+                    break;
+            }
+
             const embed = new EmbedBuilder()
-                .setColor(0x5865f2)
+                .setColor(embedColor)
                 .setThumbnail(track.thumbnail)
                 .setFooter({ text: `Duration: ${track.duration}` });
 

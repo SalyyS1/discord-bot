@@ -16,6 +16,14 @@ const voiceSettingsSchema = z.object({
   voiceLockByDefault: z.boolean().optional(),
   voiceAutoDeleteEmpty: z.boolean().optional(),
   voiceControlPanelConfig: z.any().nullable().optional(),
+  // New customization settings
+  panelImageUrl: z.string().nullable().optional(),
+  panelLayout: z.enum(['compact', 'expanded', 'minimal']).optional(),
+  autoLockTimeout: z.number().int().min(0).max(1440).optional(),
+  idleKickEnabled: z.boolean().optional(),
+  idleKickTimeout: z.number().int().min(1).max(1440).optional(),
+  buttonColor: z.string().optional(),
+  customIconUrl: z.string().nullable().optional(),
 });
 
 /**
@@ -47,6 +55,14 @@ export async function GET(
         voiceLockByDefault: true,
         voiceAutoDeleteEmpty: true,
         voiceControlPanelConfig: true,
+        // New customization fields
+        panelImageUrl: true,
+        panelLayout: true,
+        autoLockTimeout: true,
+        idleKickEnabled: true,
+        idleKickTimeout: true,
+        buttonColor: true,
+        customIconUrl: true,
       },
     });
 
@@ -103,6 +119,14 @@ export async function PATCH(
         voiceDefaultRegion: true,
         voiceLockByDefault: true,
         voiceAutoDeleteEmpty: true,
+        // New customization fields
+        panelImageUrl: true,
+        panelLayout: true,
+        autoLockTimeout: true,
+        idleKickEnabled: true,
+        idleKickTimeout: true,
+        buttonColor: true,
+        customIconUrl: true,
       },
     });
 
@@ -137,7 +161,11 @@ export async function PATCH(
     }
 
     // Notify bot to invalidate cache
-    await publishTempVoiceUpdate(guildId, 'update');
+    try {
+      await publishTempVoiceUpdate(guildId, 'update');
+    } catch (publishError) {
+      logger.error(`Failed to publish voice update: ${publishError}`);
+    }
 
     return ApiResponse.success(settings);
   } catch (error) {

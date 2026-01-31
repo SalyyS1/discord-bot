@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { z } from 'zod';
 import { validateGuildAccess, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { publishGiveawayUpdate } from '@/lib/configSync';
 
 const settingsSchema = z.object({
     giveawayButtonText: z.string().max(80).optional(),
@@ -69,6 +70,13 @@ export async function PATCH(
                 giveawayImageUrl,
             },
         });
+
+        // Notify bot of giveaway settings change
+        try {
+            await publishGiveawayUpdate(guildId);
+        } catch (publishError) {
+            logger.error(`Failed to publish giveaway update: ${publishError}`);
+        }
 
         return ApiResponse.success(updated);
     } catch (error) {

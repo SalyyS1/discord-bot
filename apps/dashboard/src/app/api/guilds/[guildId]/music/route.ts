@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { z } from 'zod';
 import { validateGuildAccess, ensureGuildExists, ApiResponse } from '@/lib/session';
 import { logger } from '@/lib/logger';
+import { publishMusicUpdate } from '@/lib/configSync';
 
 const musicSettingsSchema = z.object({
     enabled: z.boolean().optional(),
@@ -95,6 +96,13 @@ export async function PATCH(
                 ...validated,
             },
         });
+
+        // Notify bot of music settings change
+        try {
+            await publishMusicUpdate(guildId);
+        } catch (publishError) {
+            logger.error(`Failed to publish music update: ${publishError}`);
+        }
 
         return ApiResponse.success(settings);
     } catch (error) {
