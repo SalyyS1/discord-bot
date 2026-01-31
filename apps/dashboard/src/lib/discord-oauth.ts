@@ -224,7 +224,7 @@ export interface DiscordRole {
 }
 
 // Bot token for API calls that require bot permissions
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || '';
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN || '';
 
 /**
  * Fetch guild roles using bot token

@@ -50,7 +50,13 @@ export type Env = z.infer<typeof envSchema>;
  * Validate and parse environment variables
  */
 export function loadEnv(): Env {
-  const result = envSchema.safeParse(process.env);
+  // Accept both DISCORD_TOKEN (canonical) and DISCORD_BOT_TOKEN (legacy/alt) to avoid production env drift.
+  const mergedEnv = {
+    ...process.env,
+    DISCORD_TOKEN: process.env.DISCORD_TOKEN ?? process.env.DISCORD_BOT_TOKEN,
+  };
+
+  const result = envSchema.safeParse(mergedEnv);
 
   if (!result.success) {
     console.error('❌ Invalid environment variables:');

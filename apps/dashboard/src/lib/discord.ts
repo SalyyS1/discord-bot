@@ -6,7 +6,7 @@
  */
 
 const DISCORD_API_URL = 'https://discord.com/api/v10';
-const DEFAULT_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const DEFAULT_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN;
 
 /**
  * Custom error class for Discord API errors.
