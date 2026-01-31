@@ -1,10 +1,29 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+import { AnimatePresence } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
+import { PageTransition } from '@/components/motion';
+
 interface AnimatedContentProps {
   children: React.ReactNode;
 }
 
-// Simplified - no animations for faster page loads
+/**
+ * Wraps page content with smooth page transitions
+ * Respects prefers-reduced-motion preference
+ */
 export function AnimatedContent({ children }: AnimatedContentProps) {
-  return <div className="animate-slide-in">{children}</div>;
+  const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return <div>{children}</div>;
+  }
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <PageTransition key={pathname}>{children}</PageTransition>
+    </AnimatePresence>
+  );
 }

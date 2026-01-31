@@ -19,12 +19,14 @@ import {
   Clock,
   BarChart3,
   Loader2,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useSelectedGuild } from '@/hooks/use-selected-guild';
 import { GrowthChart } from '@/components/analytics/growth-chart';
+import { FadeIn, AnimatedCardGrid, AnimatedCardItem } from '@/components/motion';
 
 interface GuildStats {
   guild: {
@@ -164,13 +166,15 @@ export default function DashboardPage() {
 
   if (!guildId) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <FadeIn className="flex items-center justify-center h-96">
         <div className="text-center">
-          <Bot className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+          <div className="icon-badge icon-badge-aqua mx-auto mb-4">
+            <Bot className="h-8 w-8 text-cyan-400" />
+          </div>
           <h3 className="text-xl font-semibold text-white mb-2">No Server Selected</h3>
           <p className="text-gray-400">Select a server from the sidebar to view statistics.</p>
         </div>
-      </div>
+      </FadeIn>
     );
   }
 
@@ -184,234 +188,265 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-            {guild?.name || 'Dashboard'}
-            <Badge variant="outline" className="text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
-              Online
-            </Badge>
-          </h2>
-          <p className="text-gray-400 mt-1">
-            Real-time statistics and analytics for your server
-          </p>
+      <FadeIn>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="icon-badge icon-badge-aqua">
+              <LayoutDashboard className="h-7 w-7 text-cyan-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                {guild?.name || 'Dashboard'}
+                <Badge variant="glowGreen">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2" />
+                  Online
+                </Badge>
+              </h1>
+              <p className="text-gray-400 mt-1">
+                Real-time statistics and analytics for your server
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Clock className="h-4 w-4" />
+            Last updated: Just now
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <Clock className="h-4 w-4" />
-          Last updated: Just now
-        </div>
-      </div>
+      </FadeIn>
 
       {/* Main Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Tracked Members"
-          value={stats?.stats.members?.toLocaleString() || '0'}
-          icon={Users}
-          color="cyan"
-          description="Members with XP activity"
-        />
-        <StatCard
-          title="Messages Sent"
-          value={stats?.stats.messages?.toLocaleString() || '0'}
-          icon={MessageSquare}
-          color="purple"
-          description="Total messages tracked"
-        />
-        <StatCard
-          title="Open Tickets"
-          value={`${stats?.stats.tickets.open || 0}/${stats?.stats.tickets.total || 0}`}
-          icon={Ticket}
-          color="blue"
-          description="Active support tickets"
-        />
-        <StatCard
-          title="Active Giveaways"
-          value={stats?.stats.giveaways.active || 0}
-          icon={Gift}
-          color="pink"
-          description={`${stats?.stats.giveaways.total || 0} total hosted`}
-        />
-      </div>
+      <AnimatedCardGrid className="md:grid-cols-2 lg:grid-cols-4">
+        <AnimatedCardItem>
+          <StatCard
+            title="Tracked Members"
+            value={stats?.stats.members?.toLocaleString() || '0'}
+            icon={Users}
+            color="cyan"
+            description="Members with XP activity"
+          />
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <StatCard
+            title="Messages Sent"
+            value={stats?.stats.messages?.toLocaleString() || '0'}
+            icon={MessageSquare}
+            color="purple"
+            description="Total messages tracked"
+          />
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <StatCard
+            title="Open Tickets"
+            value={`${stats?.stats.tickets.open || 0}/${stats?.stats.tickets.total || 0}`}
+            icon={Ticket}
+            color="blue"
+            description="Active support tickets"
+          />
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <StatCard
+            title="Active Giveaways"
+            value={stats?.stats.giveaways.active || 0}
+            icon={Gift}
+            color="pink"
+            description={`${stats?.stats.giveaways.total || 0} total hosted`}
+          />
+        </AnimatedCardItem>
+      </AnimatedCardGrid>
 
       {/* Secondary Stats */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-        <StatCard
-          title="Warnings"
-          value={stats?.stats.warnings || 0}
-          icon={AlertTriangle}
-          color="yellow"
-        />
-        <StatCard
-          title="Auto Responders"
-          value={stats?.stats.autoresponders || 0}
-          icon={Bot}
-          color="emerald"
-        />
-        <StatCard
-          title="Level Roles"
-          value={stats?.stats.levelRoles || 0}
-          icon={Award}
-          color="purple"
-        />
-        <Card className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-400">Leveling</p>
-                <p className="text-lg font-semibold text-white">
-                  {stats?.features.levelingEnabled ? 'Enabled' : 'Disabled'}
-                </p>
+      <AnimatedCardGrid className="md:grid-cols-3 lg:grid-cols-6">
+        <AnimatedCardItem>
+          <StatCard
+            title="Warnings"
+            value={stats?.stats.warnings || 0}
+            icon={AlertTriangle}
+            color="yellow"
+          />
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <StatCard
+            title="Auto Responders"
+            value={stats?.stats.autoresponders || 0}
+            icon={Bot}
+            color="emerald"
+          />
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <StatCard
+            title="Level Roles"
+            value={stats?.stats.levelRoles || 0}
+            icon={Award}
+            color="purple"
+          />
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <Card variant="liftHover" className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400">Leveling</p>
+                  <p className="text-lg font-semibold text-white">
+                    {stats?.features.levelingEnabled ? 'Enabled' : 'Disabled'}
+                  </p>
+                </div>
+                <Zap className={`h-5 w-5 ${stats?.features.levelingEnabled ? 'text-cyan-400' : 'text-gray-500'}`} />
               </div>
-              <Zap className={`h-5 w-5 ${stats?.features.levelingEnabled ? 'text-cyan-400' : 'text-gray-500'}`} />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-400">Anti-Spam</p>
-                <p className="text-lg font-semibold text-white">
-                  {stats?.features.antiSpamEnabled ? 'Active' : 'Off'}
-                </p>
+            </CardContent>
+          </Card>
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <Card variant="liftHover" className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400">Anti-Spam</p>
+                  <p className="text-lg font-semibold text-white">
+                    {stats?.features.antiSpamEnabled ? 'Active' : 'Off'}
+                  </p>
+                </div>
+                <Shield className={`h-5 w-5 ${stats?.features.antiSpamEnabled ? 'text-red-400' : 'text-gray-500'}`} />
               </div>
-              <Shield className={`h-5 w-5 ${stats?.features.antiSpamEnabled ? 'text-red-400' : 'text-gray-500'}`} />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-400">Anti-Link</p>
-                <p className="text-lg font-semibold text-white">
-                  {stats?.features.antiLinkEnabled ? 'Active' : 'Off'}
-                </p>
+            </CardContent>
+          </Card>
+        </AnimatedCardItem>
+        <AnimatedCardItem>
+          <Card variant="liftHover" className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400">Anti-Link</p>
+                  <p className="text-lg font-semibold text-white">
+                    {stats?.features.antiLinkEnabled ? 'Active' : 'Off'}
+                  </p>
+                </div>
+                <Hash className={`h-5 w-5 ${stats?.features.antiLinkEnabled ? 'text-blue-400' : 'text-gray-500'}`} />
               </div>
-              <Hash className={`h-5 w-5 ${stats?.features.antiLinkEnabled ? 'text-blue-400' : 'text-gray-500'}`} />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </AnimatedCardItem>
+      </AnimatedCardGrid>
 
       {/* Charts and Activity */}
-      <div className="grid gap-6 lg:grid-cols-7">
-        {/* Growth Chart */}
-        <Card className="lg:col-span-4 bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <ArrowUpRight className="h-5 w-5 text-cyan-400" />
-              Growth Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <GrowthChart data={displayChartData} />
-          </CardContent>
-        </Card>
+      <FadeIn delay={0.2}>
+        <div className="grid gap-6 lg:grid-cols-7">
+          {/* Growth Chart */}
+          <Card variant="glowHover" className="lg:col-span-4 bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <ArrowUpRight className="h-5 w-5 text-cyan-400" />
+                Growth Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GrowthChart data={displayChartData} />
+            </CardContent>
+          </Card>
 
-        {/* Leaderboard */}
-        <Card className="lg:col-span-3 bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Crown className="h-5 w-5 text-yellow-400" />
-              Top Members
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats?.leaderboard?.slice(0, 5).map((member, index) => (
-                <div key={index} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                      index === 1 ? 'bg-gray-400/20 text-gray-300' :
-                        index === 2 ? 'bg-amber-600/20 text-amber-500' :
-                          'bg-white/10 text-gray-400'
-                    }`}>
-                    {index + 1}
+          {/* Leaderboard */}
+          <Card variant="glowHover" className="lg:col-span-3 bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Crown className="h-5 w-5 text-yellow-400" />
+                Top Members
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {stats?.leaderboard?.slice(0, 5).map((member, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                        index === 1 ? 'bg-gray-400/20 text-gray-300' :
+                          index === 2 ? 'bg-amber-600/20 text-amber-500' :
+                            'bg-white/10 text-gray-400'
+                      }`}>
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {member.nodeName || 'Unknown'}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Level {member.level} · {member.xp.toLocaleString()} XP
+                      </p>
+                    </div>
+                    <Badge variant="glowAqua">
+                      Lv.{member.level}
+                    </Badge>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
-                      {member.nodeName || 'Unknown'}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Level {member.level} · {member.xp.toLocaleString()} XP
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="text-cyan-400 border-cyan-500/30">
-                    Lv.{member.level}
-                  </Badge>
-                </div>
-              )) || (
-                  <p className="text-gray-400 text-center py-8">No members yet</p>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                )) || (
+                    <p className="text-gray-400 text-center py-8">No members yet</p>
+                  )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </FadeIn>
 
       {/* Level Distribution & Recent Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Level Distribution */}
-        <Card className="bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-purple-400" />
-              Level Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats?.levelDistribution?.slice(0, 5).map((level) => (
-                <div key={level.level} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Level {level.level}</span>
-                    <span className="text-white font-medium">{level.count} members</span>
+      <FadeIn delay={0.3}>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Level Distribution */}
+          <Card variant="glowHover" className="bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-purple-400" />
+                Level Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {stats?.levelDistribution?.slice(0, 5).map((level) => (
+                  <div key={level.level} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Level {level.level}</span>
+                      <span className="text-white font-medium">{level.count} members</span>
+                    </div>
+                    <Progress
+                      value={(level.count / (stats?.stats.members || 1)) * 100}
+                      className="h-2 bg-white/10"
+                    />
                   </div>
-                  <Progress
-                    value={(level.count / (stats?.stats.members || 1)) * 100}
-                    className="h-2 bg-white/10"
-                  />
-                </div>
-              )) || (
-                  <p className="text-gray-400 text-center py-8">No level data</p>
-                )}
-            </div>
-          </CardContent>
-        </Card>
+                )) || (
+                    <p className="text-gray-400 text-center py-8">No level data</p>
+                  )}
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Recent Activity */}
-        <Card className="bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Activity className="h-5 w-5 text-emerald-400" />
-              Recent Moderation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats?.recentActivity?.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg bg-white/5">
-                  <div className="w-2 h-2 rounded-full bg-cyan-500 mt-2" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white">
-                      {activity.action.replace('_', ' ')}
-                    </p>
-                    <p className="text-xs text-gray-400 truncate">
-                      {activity.reason || 'No reason provided'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(activity.time).toLocaleString()}
-                    </p>
+          {/* Recent Activity */}
+          <Card variant="glowHover" className="bg-[hsl(200_22%_16%)] border-[hsl(200_20%_25%)]">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Activity className="h-5 w-5 text-emerald-400" />
+                Recent Moderation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {stats?.recentActivity?.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div className="w-2 h-2 rounded-full bg-cyan-500 mt-2" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white">
+                        {activity.action.replace('_', ' ')}
+                      </p>
+                      <p className="text-xs text-gray-400 truncate">
+                        {activity.reason || 'No reason provided'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(activity.time).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )) || (
-                  <p className="text-gray-400 text-center py-8">No recent activity</p>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                )) || (
+                    <p className="text-gray-400 text-center py-8">No recent activity</p>
+                  )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </FadeIn>
     </div>
   );
 }

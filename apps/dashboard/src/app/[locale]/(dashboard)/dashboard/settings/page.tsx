@@ -52,6 +52,7 @@ import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { useUserPreferences, useUpdatePreferences } from '@/hooks/use-user-preferences';
 import { SettingsSkeleton } from '@/components/skeletons';
+import { FadeIn } from '@/components/motion';
 
 interface BotStats {
   guilds: number;
@@ -132,21 +133,24 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       {/* Page Header */}
-      <div className="flex items-center gap-4">
-        <div className="icon-badge" style={{ background: 'linear-gradient(135deg, rgba(107, 114, 128, 0.15), rgba(107, 114, 128, 0.05))', border: '1px solid rgba(107, 114, 128, 0.3)' }}>
-          <Settings className="h-7 w-7 text-gray-400" />
+      <FadeIn>
+        <div className="flex items-center gap-4">
+          <div className="icon-badge icon-badge-aqua">
+            <Settings className="h-7 w-7 text-cyan-400" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white dark:text-white">Settings</h1>
+            <p className="text-gray-400 mt-1">Dashboard and bot configuration</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-white dark:text-white">Settings</h1>
-          <p className="text-gray-400 mt-1">Dashboard and bot configuration</p>
-        </div>
-      </div>
+      </FadeIn>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Bot Status */}
-          <Card className="surface-card overflow-hidden">
+      <FadeIn delay={0.1}>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Bot Status */}
+            <Card variant="glowHover" className="surface-card overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-[hsl(174_72%_50%/0.1)] to-transparent border-b border-[hsl(200_20%_22%)] pb-4">
               <div className="flex items-center gap-3">
                 <Bot className="h-5 w-5 text-[hsl(174_72%_55%)]" />
@@ -196,7 +200,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Database Status */}
-          <Card className="surface-card overflow-hidden">
+          <Card variant="glowHover" className="surface-card overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-blue-500/10 to-transparent border-b border-white/5 pb-4">
               <div className="flex items-center gap-3">
                 <Database className="h-5 w-5 text-blue-400" />
@@ -236,7 +240,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Language Settings */}
-          <Card className="surface-card overflow-hidden">
+          <Card variant="glowHover" className="surface-card overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-purple-500/10 to-transparent border-b border-white/5 pb-4">
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-purple-400" />
@@ -273,7 +277,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Notifications */}
-          <Card className="surface-card overflow-hidden">
+          <Card variant="glowHover" className="surface-card overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-orange-500/10 to-transparent border-b border-white/5 pb-4">
               <div className="flex items-center gap-3">
                 <Bell className="h-5 w-5 text-orange-400" />
@@ -365,7 +369,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Version Info */}
-          <Card className="surface-card">
+          <Card variant="glowHover" className="surface-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-gray-400 text-sm">Version Info</CardTitle>
             </CardHeader>
@@ -392,7 +396,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Theme */}
-          <Card className="surface-card">
+          <Card variant="glowHover" className="surface-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-gray-400 text-sm flex items-center gap-2">
                 <Palette className="h-4 w-4" />
@@ -500,6 +504,7 @@ export default function SettingsPage() {
           </Card>
         </div>
       </div>
+      </FadeIn>
     </div>
   );
 }

@@ -12,6 +12,10 @@ const cardVariants = cva('rounded-lg border text-card-foreground', {
         'bg-black/40 border-white/10 backdrop-blur-xl transition-all hover:border-white/20 hover:shadow-lg hover:-translate-y-0.5',
       glassActive:
         'bg-black/50 border-aqua-500/30 backdrop-blur-xl shadow-[0_0_15px_rgba(20,184,166,0.15)]',
+      glowHover:
+        'bg-card shadow-sm transition-all duration-200 hover:shadow-[0_0_20px_rgba(20,184,166,0.15)] hover:border-aqua-500/30',
+      liftHover:
+        'bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg',
     },
   },
   defaultVariants: {
