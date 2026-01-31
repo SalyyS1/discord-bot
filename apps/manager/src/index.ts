@@ -5,7 +5,11 @@
  * Handles spawning, monitoring, and lifecycle management.
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load .env from monorepo root (two levels up from apps/manager)
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 import { BotSpawner } from './spawner.js';
 import { HealthMonitor } from './health.js';
 import { createApi } from './api.js';
