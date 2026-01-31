@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { prisma } from '@repo/database';
 import { z } from 'zod';
 
 /**
@@ -26,9 +26,10 @@ async function isAdmin(userId: string): Promise<boolean> {
  */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -52,10 +53,9 @@ export async function PUT(
     }
 
     const { status } = validation.data;
-    const { id } = params;
 
     // Check if review exists
-    const existingReview = await db.review.findUnique({
+    const existingReview = await prisma.review.findUnique({
       where: { id },
     });
 
@@ -64,7 +64,7 @@ export async function PUT(
     }
 
     // Update review
-    const review = await db.review.update({
+    const review = await prisma.review.update({
       where: { id },
       data: {
         status,
@@ -98,9 +98,10 @@ export async function PUT(
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -113,10 +114,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 });
     }
 
-    const { id } = params;
-
     // Check if review exists
-    const existingReview = await db.review.findUnique({
+    const existingReview = await prisma.review.findUnique({
       where: { id },
     });
 
@@ -125,7 +124,7 @@ export async function DELETE(
     }
 
     // Delete review
-    await db.review.delete({
+    await prisma.review.delete({
       where: { id },
     });
 

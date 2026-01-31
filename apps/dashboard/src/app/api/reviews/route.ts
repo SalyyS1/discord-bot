@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { prisma } from '@repo/database';
 import { z } from 'zod';
 
 /**
@@ -20,7 +20,7 @@ const createReviewSchema = z.object({
  */
 export async function GET() {
   try {
-    const reviews = await db.review.findMany({
+    const reviews = await prisma.review.findMany({
       where: {
         status: 'APPROVED',
       },
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const recentReview = await db.review.findFirst({
+    const recentReview = await prisma.review.findFirst({
       where: {
         userId: session.user.id,
         createdAt: {
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
       .trim();
 
     // Create review with PENDING status
-    const review = await db.review.create({
+    const review = await prisma.review.create({
       data: {
         userId: session.user.id,
         rating,

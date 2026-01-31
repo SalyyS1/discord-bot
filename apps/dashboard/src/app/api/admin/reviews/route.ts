@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { prisma } from '@repo/database';
 
 /**
  * Admin Reviews API Route
@@ -33,7 +33,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 });
     }
 
-    const reviews = await db.review.findMany({
+    const reviews = await prisma.review.findMany({
       include: {
         user: {
           select: {
