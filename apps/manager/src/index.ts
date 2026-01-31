@@ -5,6 +5,7 @@
  * Handles spawning, monitoring, and lifecycle management.
  */
 
+import 'dotenv/config';
 import { BotSpawner } from './spawner.js';
 import { HealthMonitor } from './health.js';
 import { createApi } from './api.js';
